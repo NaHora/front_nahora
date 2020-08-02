@@ -26,6 +26,9 @@ export const Container = styled(animated.div)<ContainerProps>`
   padding: 16px 30px 16px 16px;
   border-radius: 10px;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+  @media (max-width: 600px) {
+    width: 100%;
+  }
 
   display: flex;
 

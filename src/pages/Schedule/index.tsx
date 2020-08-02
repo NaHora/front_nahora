@@ -59,115 +59,29 @@ const Enterprises: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [enterprises, setEnterprises] = useState<MyEnterprise[]>([]);
+  const [myAppointments, setMyAppointments] = useState<MyEnterprise[]>([]);
 
-  const searchAllEnterprisesByName = useCallback(
-    async (search: string) => {
-      setLoading(true);
-      try {
-        const response = await api.get(`/enterprises/${search}/search`);
-
-        const searchEnterprisesByname: SearchEnterprise[] = [];
-
-        response.data.map((searchEnterprise: SearchEnterprise) =>
-          enterprises.map((myenteprises) => {
-            if (myenteprises.enterprise.id === searchEnterprise.id) {
-              return searchEnterprisesByname.push({
-                ...searchEnterprise,
-                friends: true,
-              });
-            }
-            return searchEnterprisesByname.push({
-              ...searchEnterprise,
-              friends: false,
-            });
-          }),
-        );
-
-        setSearchEnterprises(searchEnterprisesByname);
-      } catch (err) {
-      } finally {
-        setLoading(false);
-      }
-    },
-    [toast],
-  );
-
-  const inviteEnterprise = useCallback(
-    async (enterprise_id: string) => {
-      try {
-        const body = {
-          user_id: user.id,
-          enterprise_id,
-        };
-
-        await api.post(`/invites`, body);
-
-        toast.addToast({
-          type: 'success',
-          title: 'Boa, agora é só esperar!',
-          description:
-            'Você enviou um convite para acessar os horários desta empresa',
-        });
-      } catch (err) {
-        if (err.response) {
-          toast.addToast({
-            type: 'error',
-            title: 'Ops! algo deu errado,',
-            description: err.response.data.message || 'Erro interno',
-          });
-        } else {
-          toast.addToast({
-            type: 'error',
-            title: 'Vishi',
-            description:
-              'Ocorreu um erro ao procurar empresas, tente novamente',
-          });
-        }
-      }
-    },
-    [toast, user.id],
-  );
-
-  const getInviteEnterprise = useCallback(async () => {
+  const listMyAppointments = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await api.get(`/invites`);
+      const response = await api.get(`/appointments/me`);
 
-      setEnterprises(response.data);
+      setMyAppointments(response.data);
     } catch (err) {
-      if (err.response) {
-        toast.addToast({
-          type: 'error',
-          title: 'Ops! algo deu errado,',
-          description:
-            err.response.data.message ||
-            'Não foi possível carregar suas empresas',
-        });
-      } else {
-        toast.addToast({
-          type: 'error',
-          title: 'Vishi',
-          description: 'Ocorreu um erro ao procurar empresas, tente novamente',
-        });
-      }
+    } finally {
+      setLoading(false);
     }
   }, [toast]);
 
   useEffect(() => {
-    getInviteEnterprise();
+    listMyAppointments();
   }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
-      searchAllEnterprisesByName(searchValue);
-    }, 500);
-  }, [searchValue]);
 
   return (
     <Container>
       <HeaderMenu />
       <Content>
-        <SearchContent>
+        {/* <SearchContent>
           <InputDefault
             icon={FiSearch}
             name="search"
@@ -201,10 +115,7 @@ const Enterprises: React.FC = () => {
                       <Text>{enterprise.area}</Text>
                     </div>
                   </div>
-                  <CadastraButton
-                    disabled={enterprise.friends}
-                    onClick={() => inviteEnterprise(enterprise.id)}
-                  >
+                  <CadastraButton disabled={enterprise.friends}>
                     {enterprise.friends ? 'Enviado' : 'Me cadastrar'}
                   </CadastraButton>
                 </Card>
@@ -266,7 +177,7 @@ const Enterprises: React.FC = () => {
               aceitaram.
             </>
           )}
-        </MyEnterprises>
+        </MyEnterprises> */}
       </Content>
     </Container>
   );

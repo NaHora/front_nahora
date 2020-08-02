@@ -1,11 +1,151 @@
 import styled from 'styled-components';
-import { shade } from 'polished';
+import { shade, darken, lighten } from 'polished';
+import TinyColor from 'tinycolor2';
 
-export const Container = styled.div``;
+interface PageColor {
+  primaryColor: string;
+  secondaryColor: string;
+  disabled?: boolean;
+  currentSelected?: boolean;
+}
+
+export const Container = styled.div<PageColor>`
+  background: ${(props) => lighten(0.03, props.primaryColor)};
+  min-height: 100vh;
+  width: 100%;
+
+  > header {
+    padding: 15px 20px;
+    height: 144px;
+    background: ${(props) => props.primaryColor};
+
+    display: flex;
+    align-items: center;
+
+    div {
+      max-width: 1120px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      > span {
+        font-size: 40px;
+        font-weight: bold;
+        color: ${(props) =>
+          TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+
+        @media (max-width: 600px) {
+          display: none;
+        }
+      }
+
+      > img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50px;
+        border: 2px solid ${(props) => props.secondaryColor};
+      }
+
+      svg {
+        color: ${(props) =>
+          TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+`;
+
+export const Category = styled.main<PageColor>`
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 15px 20px;
+  max-width: 1120px;
+  margin: 12px auto;
+
+  > span {
+    color: ${(props) =>
+      TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+    margin-bottom: 16px;
+    font-size: 36px;
+  }
+
+  > div {
+    display: flex;
+    overflow-x: scroll;
+    width: 100%;
+    padding: 0 0 10px;
+
+    ::-webkit-scrollbar-track {
+      background-color: ${(props) => lighten(0.1, props.secondaryColor)};
+      border-radius: 20px;
+      width: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 2px;
+      border-radius: 20px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: ${(props) => props.secondaryColor};
+      border-radius: 20px;
+    }
+
+    @media (max-width: 600px) {
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
+`;
+
+export const DivCategory = styled.div<PageColor>`
+  margin-right: 16px;
+  border-radius: 5px;
+  min-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  padding: 8px 15px;
+  font-size: 20px;
+  background: ${(props) =>
+    props.currentSelected
+      ? darken(0.1, props.secondaryColor)
+      : lighten(0.1, props.secondaryColor)};};
+  color: ${(props) =>
+    TinyColor(
+      props.currentSelected
+        ? props.secondaryColor
+        : lighten(0.1, props.secondaryColor),
+    ).isLight()
+      ? '#3e3b47'
+      : '#f4ede8'};
+  max-width: 25ch;
+  cursor: pointer;
+`;
+
+export const ButtonContainer = styled.main`
+  width: 300px;
+  margin: 0 auto;
+  padding-bottom: 30px;
+
+  @media (max-width: 600px) {
+    width: 100%;
+    padding: 15px;
+  }
+`;
 
 export const Content = styled.main`
+  padding: 15px 20px;
+
   max-width: 1120px;
-  margin: 64px auto;
+  margin: 32px auto 0;
   display: flex;
 
   @media (max-width: 600px) {
@@ -13,13 +153,19 @@ export const Content = styled.main`
   }
 `;
 
-export const Schedule = styled.div`
+export const Schedule = styled.div<PageColor>`
   flex: 1;
   margin-right: 120px;
+  max-width: 50%;
   align-self: center;
+  color: ${(props) =>
+    TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+
   @media (max-width: 600px) {
     margin-right: 0;
     margin-top: 40px;
+    width: 100%;
+    max-width: 100%;
   }
   h1 {
     font-size: 36px;
@@ -27,7 +173,7 @@ export const Schedule = styled.div`
 
   p {
     margin-top: 8px;
-    color: #ff9000;
+    color: ${(props) => props.secondaryColor};
     display: flex;
     align-items: center;
     font-weight: 500;
@@ -41,70 +187,53 @@ export const Schedule = styled.div`
       content: '';
       width: 1px;
       height: 12px;
-      background: #ff9000;
+      background: ${(props) => props.secondaryColor};
       margin: 0 8px;
     }
   }
 `;
 
-export const NextAppointment = styled.aside`
-  margin-top: 64px;
+export const Section = styled.aside<PageColor>`
+  margin-top: 48px;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 15px 20px;
 
-  strong {
-    color: #999591;
-    font-size: 20px;
-    font-weight: 400;
-  }
+  margin: 12px auto;
 
-  div {
-    background: #3e3b47;
+  > div {
+    padding: 0 0 10px;
     display: flex;
-    align-items: center;
-    padding: 16px 24px;
-    border-radius: 10px;
-    margin-top: 24px;
-    position: relative;
-
-    &::before {
-      position: absolute;
-      height: 80%;
-      width: 1px;
-      left: 0;
-      top: 10%;
-      content: '';
-      background: #ff9000;
+    overflow-x: scroll;
+    width: 100%;
+    ::-webkit-scrollbar-track {
+      background-color: ${(props) => lighten(0.1, props.secondaryColor)};
+      border-radius: 20px;
+      width: 2px;
     }
 
-    img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+    ::-webkit-scrollbar {
+      width: 2px;
+      border-radius: 20px;
     }
 
-    strong {
-      margin-left: 24px;
-      color: #fff;
+    ::-webkit-scrollbar-thumb {
+      background-color: ${(props) => props.secondaryColor};
+      border-radius: 20px;
     }
 
-    span {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      color: #999591;
-
-      svg {
-        color: #ff9000;
-        margin-right: 8px;
+    @media (max-width: 600px) {
+      ::-webkit-scrollbar {
+        display: none;
       }
     }
   }
-`;
-
-export const Section = styled.aside`
-  margin-top: 48px;
 
   > strong {
-    color: #999591;
+    color: ${(props) =>
+      TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
     font-size: 20px;
     line-height: 26px;
     border-bottom: 1px solid #3e3b47;
@@ -114,64 +243,53 @@ export const Section = styled.aside`
   }
 
   > p {
-    color: #999591;
+    color: ${(props) =>
+      TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
   }
 `;
 
-export const Appointment = styled.aside`
+export const Appointment = styled.aside<PageColor>`
   display: flex;
   align-items: center;
-
-  & + div {
-    margin-top: 16px;
-  }
+  background: ${(props) =>
+    props.disabled
+      ? lighten(0.3, props.secondaryColor)
+      : props.currentSelected
+      ? darken(0.1, props.secondaryColor)
+      : lighten(0.1, props.secondaryColor)};
+  padding: 8px;
+  border-radius: 5px;
+  justify-content: space-between;
+  margin-right: 16px;
+  cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
 
   span {
-    margin-left: auto;
     display: flex;
     align-items: center;
-    color: #f4ede8;
-    width: 70px;
+    color: ${(props) =>
+      TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
 
     svg {
-      color: #ff9000;
+      color: ${(props) =>
+        TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+
       margin-right: 8px;
     }
   }
-
-  div {
-    flex: 1;
-    background: #3e3b47;
-    display: flex;
-    align-items: center;
-    padding: 16px 24px;
-    border-radius: 10px;
-    margin-left: 24px;
-
-    img {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-    }
-
-    strong {
-      margin-left: 24px;
-      color: #fff;
-      font-size: 20px;
-    }
-  }
 `;
 
-export const Calendar = styled.aside`
+export const Calendar = styled.aside<PageColor>`
   width: 380px;
   align-self: center;
+  color: ${(props) =>
+    TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
 
   @media (max-width: 600px) {
-    width: 90%;
+    width: 100%;
   }
 
   .DayPicker {
-    background: #28262e;
+    background: ${(props) => props.primaryColor};
     border-radius: 10px;
   }
 
@@ -188,22 +306,33 @@ export const Calendar = styled.aside`
     border-collapse: separate;
     border-spacing: 8px;
     margin: 16px;
+    @media (max-width: 600px) {
+      margin: 8px;
+      border-spacing: 6px;
+    }
   }
 
   .DayPicker-Day {
     width: 40px;
     height: 40px;
+
+    @media (max-width: 600px) {
+      width: 30px;
+      height: 30px;
+      padding: 0.4em;
+    }
   }
 
   .DayPicker-Day--available:not(.DayPicker-Day--outside) {
-    background: #3e3b47;
+    background: ${(props) => lighten(0.03, props.primaryColor)};
     border-radius: 10px;
-    color: #fff;
+    color: ${(props) =>
+      TinyColor(props.primaryColor).isLight() ? '#000' : '#fff'};
   }
 
   .DayPicker:not(.DayPicker--interactionDisabled)
     .DayPicker-Day:not(.DayPicker-Day--disabled):not(.DayPicker-Day--selected):not(.DayPicker-Day--outside):hover {
-    background: ${shade(0.2, '#3e3b47')};
+    background: ${(props) => shade(0.2, lighten(0.03, props.secondaryColor))};
   }
 
   .DayPicker-Day--today {
@@ -211,13 +340,107 @@ export const Calendar = styled.aside`
   }
 
   .DayPicker-Day--disabled {
-    color: #666360 !important;
+    color: ${(props) =>
+      TinyColor(props.primaryColor).isLight()
+        ? '#3e3b47'
+        : '#f4ede8'} !important;
     background: transparent !important;
   }
 
+  .DayPicker-Weekday {
+    color: ${(props) =>
+      TinyColor(props.primaryColor).isLight()
+        ? '#3e3b47'
+        : '#f4ede8'} !important;
+  }
+
+  .DayPicker-NavBar {
+    color: ${(props) =>
+      TinyColor(props.primaryColor).isLight()
+        ? '#3e3b47'
+        : '#f4ede8'} !important;
+  }
+
   .DayPicker-Day--selected {
-    background: #ff9000 !important;
+    background: ${(props) => lighten(0.03, props.secondaryColor)} !important;
     border-radius: 10px;
-    color: #232129 !important;
+    color: ${(props) => props.primaryColor} !important;
+  }
+`;
+
+export const ModalUsers = styled.div<PageColor>`
+  border: 3px solid
+    ${(props) =>
+      TinyColor(props.secondaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+
+  position: fixed;
+  top: 30%;
+  bottom: 30%;
+  right: 35%;
+  left: 35%;
+  border-radius: 5px;
+  z-index: 999;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  flex-direction: column;
+  background: ${(props) => lighten(0.03, props.secondaryColor)};
+  color: ${(props) =>
+    TinyColor(props.secondaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+  padding: 20px;
+
+  @media (max-width: 600px) {
+    top: 10%;
+    bottom: 10%;
+    right: 5%;
+    left: 5%;
+  }
+
+  img {
+    border-radius: 50%;
+    height: 30px;
+    width: 30px;
+    margin-right: 8px;
+  }
+
+  > div {
+    overflow-y: scroll;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+
+    ::-webkit-scrollbar-track {
+      background-color: ${(props) => lighten(0.1, props.secondaryColor)};
+      border-radius: 20px;
+      width: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 2px;
+      border-radius: 20px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: ${(props) => props.secondaryColor};
+      border-radius: 20px;
+    }
+
+    @media (max-width: 600px) {
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
+
+  svg {
+    margin-right: 8px;
+  }
+
+  span {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
   }
 `;

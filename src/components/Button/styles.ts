@@ -1,19 +1,34 @@
 import styled from 'styled-components';
 import { shade } from 'polished';
+import TinyColor from 'tinycolor2';
 
-export const Container = styled.button`
-  background: #ff9000;
+interface PageColor {
+  primaryColor: string;
+  secondaryColor: string;
+}
+
+export const Container = styled.button<PageColor>`
+  background: ${(props) =>
+    props.secondaryColor ? props.secondaryColor : '#ff9000'};
   height: 56px;
   border-radius: 10px;
   border: 0;
   padding: 0 16px;
   width: 100%;
-  color: #312e38;
+  color: ${(props) =>
+    TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#999591'};
   font-weight: 500px;
   margin-top: 16px;
   transition: background-color 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  svg {
+    margin-right: 8px;
+  }
 
   &:hover {
-    background: ${shade(0.2, '#ff9000')};
+    background: ${(props) =>
+      shade(0.2, props.secondaryColor ? props.secondaryColor : '#ff9000')};
   }
 `;

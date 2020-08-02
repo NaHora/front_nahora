@@ -9,6 +9,7 @@ import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
 import Profile from '../pages/Profile';
 import Enterprises from '../pages/Enterprises';
+import Schedule from '../pages/Schedule';
 
 export const routes = {
   dashboard: '/dashboard',
@@ -17,6 +18,7 @@ export const routes = {
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
   enterprise: '/enterprise',
+  schedule: '/schedule',
   signin: '/',
 };
 
@@ -24,6 +26,7 @@ const Routes: React.FC = () => (
   <Switch>
     <Route path={routes.dashboard} component={Dashboard} isPrivate />
     <Route path={routes.enterprise} component={Enterprises} isPrivate />
+    <Route path={routes.schedule} component={Schedule} isPrivate />
     <Route path={routes.profile} component={Profile} isPrivate />
     <Route path={routes.signup} component={SignUp} />
     <Route path={routes.forgotPassword} component={ForgotPassword} />

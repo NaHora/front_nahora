@@ -1,103 +1,180 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { FiClock } from 'react-icons/fi';
+import {
+  FiClock,
+  FiArrowLeft,
+  FiUsers,
+  FiHome,
+  FiX,
+  FiCheckCircle,
+} from 'react-icons/fi';
+import { GoLocation } from 'react-icons/go';
 import DayPicker, { DayModifiers } from 'react-day-picker';
-import { isToday, format, parseISO, isAfter } from 'date-fns';
+import { isToday, format, getDay } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
+import { Link } from 'react-router-dom';
 import {
   Container,
   Content,
   Schedule,
-  NextAppointment,
   Section,
   Appointment,
   Calendar,
+  Category,
+  ButtonContainer,
+  DivCategory,
+  ModalUsers,
 } from './styles';
-import { useAuth } from '../../hooks/auth';
 import 'react-day-picker/lib/style.css';
 import api from '../../services/api';
-import Header from '../../components/Header';
+import { routes } from '../../routes';
+import { useToast } from '../../hooks/toast';
+import Button from '../../components/Button';
+import { useAuth } from '../../hooks/auth';
 
-interface MonthAvailabilityItem {
-  day: number;
-  available: boolean;
+interface User {
+  id: string;
+  avatar_url: string;
+  name: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
 }
 
 interface Appointment {
   id: string;
-  date: string;
-  hourFormatted: string;
-  user: {
-    name: string;
-    avatar_url: string;
+  user: User;
+  date: Date;
+}
+
+interface Service {
+  id: string;
+  disabled: boolean;
+  start_hour: string;
+  capacity: number;
+  appointments: Appointment[];
+  description: {
+    title: string;
+    description: string;
   };
 }
 
 const Dashboard: React.FC = () => {
-  const { signOut, user } = useAuth();
+  const toast = useToast();
+  const { user } = useAuth();
 
+  const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  const [monthAvailability, setMonthAvailability] = useState<
-    MonthAvailabilityItem[]
-  >([]);
-
+  const [currentWeekDay, setCurrentWeekDay] = useState(getDay(new Date()));
+  const [openModal, setOpeModal] = useState(false);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [selectectedService, setSelectectedService] = useState<Service | null>(
+    null,
+  );
+  const [
+    selectectedCategory,
+    setSelectectedCategory,
+  ] = useState<Category | null>(null);
+  const [primaryColor, setPrimaryColor] = useState<string | null>('#28262e');
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [secondaryColor, setSecondaryColor] = useState<string | null>(
+    '#ff9000',
+  );
+
+  useEffect(() => {
+    setPrimaryColor(thisEnterprise.primary_color);
+    setSecondaryColor(thisEnterprise.secondary_color);
+  }, []);
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
     if (modifiers.available && !modifiers.disabled) {
       setSelectedDate(day);
+      setCurrentWeekDay(getDay(day));
     }
   }, []);
 
-  const handleMonthChange = useCallback((month: Date) => {
-    setCurrentMonth(month);
-  }, []);
-
   useEffect(() => {
-    api
-      .get(`/provider/${user.id}/month-availability`, {
-        params: {
-          year: currentMonth.getFullYear(),
-          month: currentMonth.getMonth() + 1,
-        },
-      })
-      .then((response) => {
-        setMonthAvailability(response.data);
-      });
-  }, [currentMonth, user.id]);
+    api.get(`/services/category/${thisEnterprise.id}`).then((response) => {
+      setSelectectedCategory(response.data[0]);
+      setCategories(response.data);
+    });
+  }, [thisEnterprise.id]);
 
-  useEffect(() => {
-    api
-      .get<Appointment[]>(`/appointments/me`, {
-        params: {
-          year: selectedDate.getFullYear(),
-          month: selectedDate.getMonth() + 1,
-          day: selectedDate.getDate(),
-        },
-      })
-      .then((response) => {
-        const appointmentsFormatted = response.data.map((appointment) => {
-          return {
-            ...appointment,
-            hourFormatted: format(parseISO(appointment.date), 'HH:mm'),
-          };
+  const handleServices = useCallback(async () => {
+    try {
+      const response = await api.get(
+        `/services/enterprise/${thisEnterprise.id}/day/${currentWeekDay}/category/${selectectedCategory?.id}`,
+      );
+      setServices(response.data);
+    } catch (err) {
+      if (err.response) {
+        toast.addToast({
+          type: 'error',
+          title: 'Vishi',
+          description:
+            err.response.data.message ||
+            'Ocorreu um erro ao procurar empresas, tente novamente',
         });
-        setAppointments(appointmentsFormatted);
-      });
-  }, [selectedDate, user.id]);
+      } else {
+        toast.addToast({
+          type: 'error',
+          title: 'Vishi',
+          description:
+            'Ocorreu um erro ao procurar os serviços, tente novamente',
+        });
+      }
+    }
+  }, [thisEnterprise.id, currentWeekDay, toast, selectectedCategory]);
 
-  const disabledDays = useMemo(() => {
-    const dates = monthAvailability
-      .filter((monthDay) => monthDay.available === false)
-      .map((monthDay) => {
-        const year = currentMonth.getFullYear();
-        const month = currentMonth.getMonth();
-        return new Date(year, month, monthDay.day);
-      });
+  const handleAppointment = useCallback(
+    async (service_id) => {
+      setLoading(true);
+      try {
+        const body = {
+          service_id,
+          enterprise_id: thisEnterprise.id,
+        };
+        await api.post(`/appointments`, body);
 
-    return dates;
-  }, [monthAvailability, currentMonth]);
+        await handleServices();
+
+        toast.addToast({
+          type: 'success',
+          title: 'Boa!',
+          description: 'Agendamento realizado com sucesso.',
+        });
+      } catch (err) {
+        if (err.response) {
+          toast.addToast({
+            type: 'error',
+            title: 'Vishi',
+            description:
+              err.response.data.message ||
+              'Ocorreu um erro ao agendar este horário, tente novamente',
+          });
+        } else {
+          toast.addToast({
+            type: 'error',
+            title: 'Vishi',
+            description:
+              'Ocorreu um erro ao agendar este horário, tente novamente',
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [thisEnterprise.id, toast],
+  );
+
+  useEffect(() => {
+    if ((thisEnterprise.id, currentWeekDay, selectectedCategory)) {
+      handleServices();
+    }
+  }, [thisEnterprise.id, currentWeekDay, selectectedCategory]);
 
   const selectedDateAsText = useMemo(() => {
     return format(selectedDate, "'Dia' dd 'de' MMMM", {
@@ -111,106 +188,295 @@ const Dashboard: React.FC = () => {
     });
   }, [selectedDate]);
 
-  const morningAppointments = useMemo(() => {
-    return appointments.filter((appointment) => {
-      return parseISO(appointment.date).getHours() < 12;
+  const morningServices = useMemo(() => {
+    return services.filter((service) => {
+      return Number(service.start_hour.replace(':', '')) < 1200;
     });
-  }, [appointments]);
+  }, [services]);
 
-  const afternoonAppointments = useMemo(() => {
-    return appointments.filter((appointment) => {
-      return parseISO(appointment.date).getHours() >= 12;
+  const afternoonServices = useMemo(() => {
+    return services.filter((service) => {
+      return (
+        Number(service.start_hour.replace(':', '')) >= 1200 &&
+        Number(service.start_hour.replace(':', '')) < 1800
+      );
     });
-  }, [appointments]);
+  }, [services]);
 
-  const nextAppointment = useMemo(() => {
-    return appointments.find((appointment) => {
-      return isAfter(parseISO(appointment.date), new Date());
+  const nightServices = useMemo(() => {
+    return services.filter((service) => {
+      return Number(service.start_hour.replace(':', '')) >= 1800;
     });
-  }, [appointments]);
+  }, [services]);
 
   return (
-    <Container>
-      <Header />
+    <Container
+      primaryColor={primaryColor || '#28262e'}
+      secondaryColor={secondaryColor || '#ff9000'}
+    >
+      {openModal && (
+        <ModalUsers
+          primaryColor={primaryColor || '#28262e'}
+          secondaryColor={secondaryColor || '#ff9000'}
+        >
+          <FiX
+            onClick={() => setOpeModal(false)}
+            cursor="pointer"
+            color={primaryColor || '#28262e'}
+            style={{ alignSelf: 'flex-end' }}
+          />
+          <span>
+            <FiHome />
+            {thisEnterprise.name}
+          </span>
+          <span>
+            <GoLocation />
+            {thisEnterprise.address}
+          </span>
+          <span>
+            <FiClock />
+            {selectedDateAsText}
+          </span>
+          <br />
+          <span>
+            <FiUsers />
+            Usuários que marcaram horário:
+          </span>
+          <div>
+            {appointments.map((appointment) => (
+              <span key={appointment.id}>
+                <img
+                  src={
+                    appointment.user.avatar_url ||
+                    `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                  }
+                  alt=""
+                />
+                {appointment.user.name}
+              </span>
+            ))}
+            <span>
+              <img
+                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
+                alt=""
+              />
+              {user.name}
+            </span>
+            <span>
+              <img
+                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
+                alt=""
+              />
+              {user.name}
+            </span>
+            <span>
+              <img
+                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
+                alt=""
+              />
+              {user.name}
+            </span>
+            <span>
+              <img
+                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
+                alt=""
+              />
+              {user.name}
+            </span>
+            <span>
+              <img
+                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
+                alt=""
+              />
+              {user.name}
+            </span>
+          </div>
+          <Button
+            style={{ marginTop: 'auto' }}
+            primaryColor={secondaryColor || '#ff9000'}
+            secondaryColor={primaryColor || '#28262e'}
+            onClick={() => handleAppointment(selectectedService?.id)}
+            loading={loading}
+          >
+            <FiCheckCircle />
+            Confirmar
+          </Button>
+        </ModalUsers>
+      )}
+      <header>
+        <div>
+          <Link to={routes.enterprise}>
+            <FiArrowLeft />
+          </Link>
+          <span
+            onClick={() => {
+              if (user.id === thisEnterprise.owner_id) {
+                setPrimaryColor(secondaryColor);
+                setSecondaryColor(primaryColor);
+              }
+            }}
+          >
+            {thisEnterprise && thisEnterprise.name}
+          </span>
+          <img
+            src={
+              thisEnterprise.logo_url ||
+              `https://api.adorable.io/avatars/285/${thisEnterprise.id}.png`
+            }
+            alt="GoBarber"
+          />
+        </div>
+      </header>
+      <Category
+        primaryColor={primaryColor || '#28262e'}
+        secondaryColor={secondaryColor || '#ff9000'}
+      >
+        <span>Serviços: </span>
+        <div>
+          {categories && categories.length > 0 ? (
+            categories.map((category) => (
+              <DivCategory
+                primaryColor={primaryColor || '#28262e'}
+                secondaryColor={secondaryColor || '#ff9000'}
+                currentSelected={selectectedCategory?.id === category.id}
+                key={category.id}
+                onClick={() => setSelectectedCategory(category)}
+              >
+                <span>{category.name}</span>
+              </DivCategory>
+            ))
+          ) : (
+            <span>Empresa sem serviços</span>
+          )}
+        </div>
+      </Category>
       <Content>
-        <Schedule>
+        <Schedule
+          primaryColor={primaryColor || '#28262e'}
+          secondaryColor={secondaryColor || '#ff9000'}
+        >
           <h1>Horários</h1>
           <p>
             {isToday(selectedDate) && <span> Hoje</span>}
             <span>{selectedDateAsText}</span>
             <span>{selectedWeekDay}</span>
           </p>
-          {isToday(selectedDate) && nextAppointment && (
-            <NextAppointment>
-              <strong>Agendamento a seguir</strong>
-              <div>
-                <img
-                  src={nextAppointment.user.avatar_url}
-                  alt={nextAppointment.user.name}
-                />
-                <strong>{nextAppointment.user.name}</strong>
-                <span>
-                  <FiClock /> {nextAppointment.hourFormatted}
-                </span>
-              </div>
-            </NextAppointment>
-          )}
-          <Section>
+
+          <Section
+            primaryColor={primaryColor || '#28262e'}
+            secondaryColor={secondaryColor || '#ff9000'}
+          >
             <strong>Manhã</strong>
 
-            {morningAppointments.length === 0 && (
-              <p>Nenhum agendamento neste período</p>
+            {morningServices.length === 0 && (
+              <p>Nenhum serviço neste período</p>
             )}
-
-            {morningAppointments.map((appointment) => (
-              <Appointment key={appointment.id}>
-                <span>
-                  <FiClock /> {appointment.hourFormatted}
-                </span>
-                <div>
-                  <img
-                    src={appointment.user.avatar_url}
-                    alt={appointment.user.name}
-                  />
-                  <strong>{appointment.user.name}</strong>
-                </div>
-              </Appointment>
-            ))}
+            <div>
+              {morningServices.map((service) => (
+                <Appointment
+                  disabled={service.disabled}
+                  onClick={() => {
+                    setOpeModal(true);
+                    setAppointments(service.appointments);
+                    setSelectectedService(service);
+                  }}
+                  primaryColor={primaryColor || '#28262e'}
+                  secondaryColor={secondaryColor || '#ff9000'}
+                  key={service.id}
+                  currentSelected={selectectedService?.id === service.id}
+                >
+                  <span style={{ marginRight: '16px' }}>
+                    <FiClock /> {service.start_hour}
+                  </span>
+                  <span>
+                    <FiUsers /> {service.appointments.length}/{service.capacity}
+                  </span>
+                </Appointment>
+              ))}
+            </div>
           </Section>
-          <Section>
+          <Section
+            primaryColor={primaryColor || '#28262e'}
+            secondaryColor={secondaryColor || '#ff9000'}
+          >
             <strong>Tarde</strong>
 
-            {afternoonAppointments.length === 0 && (
-              <p>Nenhum agendamento neste período</p>
+            {afternoonServices.length === 0 && (
+              <p>Nenhum serviço neste período</p>
             )}
+            <div>
+              {afternoonServices.map((service) => (
+                <Appointment
+                  onClick={() => {
+                    setOpeModal(true);
+                    setAppointments(service.appointments);
+                    setSelectectedService(service);
+                  }}
+                  primaryColor={primaryColor || '#28262e'}
+                  disabled={service.disabled}
+                  secondaryColor={secondaryColor || '#ff9000'}
+                  key={service.id}
+                  currentSelected={selectectedService?.id === service.id}
+                >
+                  <span style={{ marginRight: '16px' }}>
+                    <FiClock /> {service.start_hour}
+                  </span>
+                  <span>
+                    <FiUsers /> {service.appointments.length}/{service.capacity}
+                  </span>
+                </Appointment>
+              ))}
+            </div>
+          </Section>
+          <Section
+            primaryColor={primaryColor || '#28262e'}
+            secondaryColor={secondaryColor || '#ff9000'}
+          >
+            <strong>Noite</strong>
 
-            {afternoonAppointments.map((appointment) => (
-              <Appointment key={appointment.id}>
-                <span>
-                  <FiClock /> {appointment.hourFormatted}
-                </span>
-                <div>
-                  <img
-                    src={appointment.user.avatar_url}
-                    alt={appointment.user.name}
-                  />
-                  <strong>{appointment.user.name}</strong>
-                </div>
-              </Appointment>
-            ))}
+            {nightServices.length === 0 && <p>Nenhum serviço neste período</p>}
+            <div>
+              {nightServices.map((service) => (
+                <Appointment
+                  onClick={() => {
+                    setOpeModal(true);
+                    setAppointments(service.appointments);
+                    setSelectectedService(service);
+                  }}
+                  primaryColor={primaryColor || '#28262e'}
+                  disabled={service.disabled}
+                  secondaryColor={secondaryColor || '#ff9000'}
+                  key={service.id}
+                  currentSelected={selectectedService?.id === service.id}
+                >
+                  <span style={{ marginRight: '16px' }}>
+                    <FiClock /> {service.start_hour}
+                  </span>
+                  <span>
+                    <FiUsers /> {service.appointments.length}/{service.capacity}
+                  </span>
+                </Appointment>
+              ))}
+            </div>
           </Section>
         </Schedule>
-        <Calendar>
+        <Calendar
+          primaryColor={primaryColor || '#28262e'}
+          secondaryColor={secondaryColor || '#ff9000'}
+        >
           <DayPicker
-            weekdaysShort={['D', 'S', 'T', 'Q', 'Q', 'S', 'S']}
+            weekdaysShort={
+              window.screen.width > 600
+                ? ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']
+                : ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
+            }
             fromMonth={new Date()}
-            disabledDays={[{ daysOfWeek: [0, 6] }, ...disabledDays]}
+            disabledDays={[{ before: new Date() }]}
             modifiers={{
-              available: { daysOfWeek: [1, 2, 3, 4, 5] },
+              available: { daysOfWeek: [0, 1, 2, 3, 4, 5, 6] },
             }}
             selectedDays={selectedDate}
             onDayClick={handleDateChange}
-            onMonthChange={handleMonthChange}
             months={[
               'Janeiro',
               'Fevereiro',
@@ -228,6 +494,17 @@ const Dashboard: React.FC = () => {
           />
         </Calendar>
       </Content>
+      <ButtonContainer>
+        <Button
+          primaryColor={primaryColor || '#28262e'}
+          secondaryColor={secondaryColor || '#ff9000'}
+          onClick={() => handleAppointment(selectectedService?.id)}
+          loading={loading}
+        >
+          <FiCheckCircle />
+          Confirmar
+        </Button>
+      </ButtonContainer>
     </Container>
   );
 };
