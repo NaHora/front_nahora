@@ -158,9 +158,9 @@ const Enterprises: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => {
+    if (searchValue.length >= 3) {
       searchAllEnterprisesByName(searchValue);
-    }, 500);
+    }
   }, [searchValue]);
 
   return (
@@ -214,7 +214,15 @@ const Enterprises: React.FC = () => {
             <>
               <br />
               {loading ? (
-                <Loader type="Watch" color="#ff9000" height={80} width={80} />
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '100%',
+                  }}
+                >
+                  <Loader type="Watch" color="#ff9000" height={40} width={40} />
+                </div>
               ) : (
                 'Nenhuma empresa encontrada com estes dígitos.'
               )}

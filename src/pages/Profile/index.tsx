@@ -1,6 +1,13 @@
 import React, { useCallback, useRef, ChangeEvent } from 'react';
 
-import { FiMail, FiLock, FiUser, FiCamera, FiArrowLeft } from 'react-icons/fi';
+import {
+  FiMail,
+  FiLock,
+  FiUser,
+  FiCamera,
+  FiArrowLeft,
+  FiPower,
+} from 'react-icons/fi';
 import * as Yup from 'yup';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
@@ -26,7 +33,7 @@ const Profile: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const history = useHistory();
   const { addToast } = useToast();
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, signOut } = useAuth();
 
   const handleSubmit = useCallback(
     async (data: ProfileFormData) => {
@@ -129,9 +136,12 @@ const Profile: React.FC = () => {
     <Container>
       <header>
         <div>
-          <Link to={routes.dashboard}>
+          <Link to={routes.enterprise}>
             <FiArrowLeft />
           </Link>
+          <button onClick={signOut} type="button">
+            <FiPower />
+          </button>
         </div>
       </header>
       <Content>

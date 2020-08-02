@@ -1,8 +1,17 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { FiSearch } from 'react-icons/fi';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import {
+  FiSearch,
+  FiArrowDown,
+  FiArrowDownCircle,
+  FiChevronDown,
+  FiChevronUp,
+  FiUsers,
+} from 'react-icons/fi';
 
 import { useHistory } from 'react-router-dom';
 import Loader from 'react-loader-spinner';
+import { format } from 'date-fns';
+import ptBr from 'date-fns/locale/pt-BR';
 import {
   Container,
   Content,
@@ -25,7 +34,11 @@ import { useToast } from '../../hooks/toast';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
 
-interface SearchEnterprise {
+interface OpenModal {
+  [key: string]: boolean;
+}
+
+interface Enterprise {
   id: string;
   name: string;
   address: string;
@@ -38,14 +51,35 @@ interface SearchEnterprise {
   friends: boolean;
 }
 
-interface MyEnterprise {
+interface User {
   id: string;
+  avatar_url: string;
   name: string;
-  address: string;
-  area: string;
-  open_hour: string;
-  close_hour: string;
-  enterprise: SearchEnterprise;
+}
+
+interface Service {
+  id: string;
+  disabled: boolean;
+  start_hour: string;
+  capacity: number;
+  appointments: Appointment[];
+  description: {
+    title: string;
+    description: string;
+  };
+}
+
+interface Appointment {
+  id: string;
+  user: User;
+  date: Date;
+  enterprise: Enterprise;
+  service: Service;
+}
+
+interface ListAppointment {
+  futureAppointments: Appointment[];
+  pastAppointments: Appointment[];
 }
 
 const Enterprises: React.FC = () => {
@@ -53,15 +87,13 @@ const Enterprises: React.FC = () => {
   const history = useHistory();
   const { user } = useAuth();
 
-  const [searchEnterprises, setSearchEnterprises] = useState<
-    SearchEnterprise[]
-  >([]);
+  const [openShedule, setOpenShedule] = useState<OpenModal>({});
 
   const [loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [myAppointments, setMyAppointments] = useState<MyEnterprise[]>([]);
+  const [myAppointments, setMyAppointments] = useState<ListAppointment>();
 
-  const listMyAppointments = useCallback(async () => {
+  const getMyAppointments = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get(`/appointments/me`);
@@ -74,110 +106,216 @@ const Enterprises: React.FC = () => {
   }, [toast]);
 
   useEffect(() => {
-    listMyAppointments();
+    getMyAppointments();
   }, []);
+
+  // const selectedDateAsText = useMemo((selectedDate) => {
+  //   return format(selectedDate, "'Dia' dd 'de' MMMM", {
+  //     locale: ptBr,
+  //   });
+  // }, []);
 
   return (
     <Container>
       <HeaderMenu />
       <Content>
-        {/* <SearchContent>
-          <InputDefault
-            icon={FiSearch}
-            name="search"
-            type="text"
-            value={searchValue}
-            placeholder="Procurar empresas"
-            onChange={(e) => {
-              setSearchValue(e.target.value);
-            }}
-          />
-
-          {searchEnterprises && searchEnterprises.length > 0 ? (
-            searchEnterprises.map((enterprise) => {
+        <div>
+          <span>Próximos Agendamentos:</span>
+          {myAppointments && myAppointments.futureAppointments.length > 0 ? (
+            myAppointments.futureAppointments.map((appointment) => {
               return (
-                <Card key={enterprise.id}>
+                <Card
+                  onClick={() =>
+                    setOpenShedule({
+                      ...openShedule,
+                      [appointment.id]: !openShedule[appointment.id],
+                    })
+                  }
+                >
                   <div>
-                    <img
-                      src={
-                        enterprise.logo_url ||
-                        `https://api.adorable.io/avatars/285/${enterprise.id}.png`
-                      }
-                      alt=""
-                    />
                     <div>
-                      <Title>{enterprise.name}</Title>
-                      <SubTitle>
-                        Aberto de {enterprise.open_hour} até{' '}
-                        {enterprise.close_hour}
-                      </SubTitle>
-                      <Text>{enterprise.address}</Text>
-                      <Text>{enterprise.area}</Text>
+                      <img
+                        src={
+                          appointment.enterprise.logo_url ||
+                          `https://api.adorable.io/avatars/285/${appointment.id}.png`
+                        }
+                        alt="logo empresa"
+                      />
+                      <span>{appointment.enterprise.name}</span>
+                      <span style={{ fontSize: '14px' }}>
+                        {format(
+                          new Date(appointment.date),
+                          "HH:mm'h' dd/MM/yyyy",
+                          {
+                            locale: ptBr,
+                          },
+                        )}
+                      </span>
                     </div>
+                    {!openShedule[appointment.id] ? (
+                      <FiChevronDown
+                        onClick={() =>
+                          setOpenShedule({
+                            ...openShedule,
+                            [appointment.id]: true,
+                          })
+                        }
+                        cursor="pointer"
+                        size={20}
+                        color="#ff9000"
+                      />
+                    ) : (
+                      <FiChevronUp
+                        onClick={() =>
+                          setOpenShedule({
+                            ...openShedule,
+                            [appointment.id]: false,
+                          })
+                        }
+                        cursor="pointer"
+                        size={20}
+                        color="#ff9000"
+                      />
+                    )}
                   </div>
-                  <CadastraButton disabled={enterprise.friends}>
-                    {enterprise.friends ? 'Enviado' : 'Me cadastrar'}
-                  </CadastraButton>
+                  {openShedule[appointment.id] && (
+                    <main>
+                      <hr />
+                      <span>
+                        <FiUsers size={20} color="#ff9000" />
+                        Usuários agendados:
+                        {appointment.service.appointments.length}/
+                        {appointment.service.capacity}
+                      </span>
+                      {appointment.service.appointments &&
+                        appointment.service.appointments.map(
+                          (currentAppointment) => {
+                            return (
+                              <div>
+                                <img
+                                  src={
+                                    currentAppointment.user.avatar_url ||
+                                    `https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png`
+                                  }
+                                  alt="User Logo"
+                                />
+                                <span>{currentAppointment.user.name}</span>
+                              </div>
+                            );
+                          },
+                        )}
+                    </main>
+                  )}
                 </Card>
               );
             })
           ) : (
             <>
               <br />
-              {loading ? (
-                <Loader type="Watch" color="#ff9000" height={80} width={80} />
-              ) : (
-                'Nenhuma empresa encontrada com estes dígitos.'
-              )}
+              <br />
+              Nenhum agendamento futuro.
             </>
           )}
-        </SearchContent>
-        <hr />
-        <MyEnterprises>
-          <span>Minhas Empresas</span>
-          {enterprises && enterprises.length > 0 ? (
-            enterprises.map((enterprise) => {
+        </div>
+        <div>
+          <span>Agendamentos Passados:</span>
+          {myAppointments && myAppointments.pastAppointments.length > 0 ? (
+            myAppointments.pastAppointments.map((appointment) => {
               return (
-                <CardMine
-                  onClick={() => {
-                    localStorage.setItem(
-                      'enterprise',
-                      JSON.stringify(enterprise.enterprise),
-                    );
-
-                    return history.push(routes.dashboard);
-                  }}
-                  key={enterprise.id}
+                <Card
+                  past
+                  onClick={() =>
+                    setOpenShedule({
+                      ...openShedule,
+                      [appointment.id]: !openShedule[appointment.id],
+                    })
+                  }
                 >
                   <div>
-                    <img
-                      src={
-                        enterprise.enterprise.logo_url ||
-                        `https://api.adorable.io/avatars/285/${enterprise.id}.png`
-                      }
-                      alt=""
-                    />
                     <div>
-                      <Title>{enterprise.enterprise.name}</Title>
-                      <SubTitle>
-                        Aberto de {enterprise.enterprise.open_hour} até{' '}
-                        {enterprise.enterprise.close_hour}
-                      </SubTitle>
-                      <Text>{enterprise.enterprise.area}</Text>
-                      <Text>{enterprise.enterprise.address}</Text>
+                      <img
+                        src={
+                          appointment.enterprise.logo_url ||
+                          `https://api.adorable.io/avatars/285/${appointment.id}.png`
+                        }
+                        alt="logo empresa"
+                      />
+                      <span>{appointment.enterprise.name}</span>
+                      <span style={{ fontSize: '14px' }}>
+                        {format(
+                          new Date(appointment.date),
+                          "HH:mm'h' dd/MM/yyyy",
+                          {
+                            locale: ptBr,
+                          },
+                        )}
+                      </span>
                     </div>
+                    {!openShedule[appointment.id] ? (
+                      <FiChevronDown
+                        onClick={() =>
+                          setOpenShedule({
+                            ...openShedule,
+                            [appointment.id]: !openShedule[appointment.id],
+                          })
+                        }
+                        cursor="pointer"
+                        size={20}
+                        color="#ff9000"
+                      />
+                    ) : (
+                      <FiChevronUp
+                        onClick={() =>
+                          setOpenShedule({
+                            ...openShedule,
+                            [appointment.id]: false,
+                          })
+                        }
+                        cursor="pointer"
+                        size={20}
+                        color="#ff9000"
+                      />
+                    )}
                   </div>
-                </CardMine>
+                  {openShedule[appointment.id] && (
+                    <main>
+                      <hr />
+                      <span>
+                        <FiUsers size={20} color="#ff9000" />
+                        Usuários agendados:{' '}
+                        {appointment.service.appointments.length}/
+                        {appointment.service.capacity}
+                      </span>
+                      {appointment.service.appointments &&
+                        appointment.service.appointments.map(
+                          (currentAppointment) => {
+                            return (
+                              <div>
+                                <img
+                                  src={
+                                    currentAppointment.user.avatar_url ||
+                                    `https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png`
+                                  }
+                                  alt="User Logo"
+                                />
+                                <span>{currentAppointment.user.name}</span>
+                              </div>
+                            );
+                          },
+                        )}
+                    </main>
+                  )}
+                </Card>
               );
             })
           ) : (
             <>
               <br />
-              Você ainda não convidou nenhuma empresa, ou elas ainda não te
-              aceitaram.
+              <br />
+              Nenhum agendamento futuro.
             </>
           )}
-        </MyEnterprises> */}
+        </div>
       </Content>
     </Container>
   );

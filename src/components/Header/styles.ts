@@ -27,12 +27,28 @@ export const HeaderContent = styled.div`
     margin-left: auto;
     background: transparent;
     border: 0;
+    display: flex;
+    align-items: center;
+
+    a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    span {
+      color: #999591;
+
+      @media (max-width: 600px) {
+        display: none;
+      }
+    }
   }
 
   svg {
     color: #999591;
-    width: 20px;
-    height: 20px;
+    margin-right: 8px;
+    width: 24px;
+    height: 24px;
   }
 `;
 

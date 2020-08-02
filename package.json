@@ -25,6 +25,7 @@
     "react-spring": "^8.0.27",
     "source-map-explorer": "^2.4.2",
     "styled-components": "^5.1.0",
+    "surge": "^0.21.6",
     "tinycolor2": "^1.4.1",
     "typescript": "~3.7.2",
     "uuidv4": "^6.0.8",

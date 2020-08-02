@@ -1,7 +1,7 @@
 import React from 'react';
-import { FiPower } from 'react-icons/fi';
+import { FiPower, FiList, FiHome } from 'react-icons/fi';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { Header, HeaderContent, Profile } from './styles';
 import logoImg from '../../assets/logo.svg';
 import { useAuth } from '../../hooks/auth';
@@ -9,6 +9,7 @@ import { routes } from '../../routes';
 
 function HeaderMenu() {
   const { signOut, user } = useAuth();
+  const history = useHistory();
 
   return (
     <Header>
@@ -30,9 +31,18 @@ function HeaderMenu() {
             </Link>
           </div>
         </Profile>
-
-        <button onClick={signOut} type="button">
-          <FiPower />
+        <button>
+          {history.location.pathname === routes.enterprise ? (
+            <Link to={routes.schedule}>
+              <FiList />
+              <span>Agendados</span>
+            </Link>
+          ) : (
+            <Link to={routes.enterprise}>
+              <FiHome />
+              <span>Home</span>
+            </Link>
+          )}
         </button>
       </HeaderContent>
     </Header>

@@ -81,7 +81,7 @@ export const Category = styled.main<PageColor>`
     padding: 0 0 10px;
 
     ::-webkit-scrollbar-track {
-      background-color: ${(props) => lighten(0.1, props.secondaryColor)};
+      background-color: transparent;
       border-radius: 20px;
       width: 2px;
     }
@@ -94,6 +94,7 @@ export const Category = styled.main<PageColor>`
     ::-webkit-scrollbar-thumb {
       background-color: ${(props) => props.secondaryColor};
       border-radius: 20px;
+      width: 1px;
     }
 
     @media (max-width: 600px) {
@@ -209,7 +210,7 @@ export const Section = styled.aside<PageColor>`
     overflow-x: scroll;
     width: 100%;
     ::-webkit-scrollbar-track {
-      background-color: ${(props) => lighten(0.1, props.secondaryColor)};
+      background-color: transparent;
       border-radius: 20px;
       width: 2px;
     }
@@ -369,6 +370,8 @@ export const Calendar = styled.aside<PageColor>`
 `;
 
 export const ModalUsers = styled.div<PageColor>`
+  box-shadow: #000 0px 4px 6px;
+
   border: 3px solid
     ${(props) =>
       TinyColor(props.secondaryColor).isLight() ? '#3e3b47' : '#f4ede8'};

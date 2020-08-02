@@ -11,7 +11,7 @@ import { GoLocation } from 'react-icons/go';
 import DayPicker, { DayModifiers } from 'react-day-picker';
 import { isToday, format, getDay } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import {
   Container,
   Content,
@@ -63,6 +63,7 @@ interface Service {
 const Dashboard: React.FC = () => {
   const toast = useToast();
   const { user } = useAuth();
+  const history = useHistory();
 
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -139,7 +140,7 @@ const Dashboard: React.FC = () => {
         };
         await api.post(`/appointments`, body);
 
-        await handleServices();
+        history.push(routes.schedule);
 
         toast.addToast({
           type: 'success',
@@ -255,41 +256,6 @@ const Dashboard: React.FC = () => {
                 {appointment.user.name}
               </span>
             ))}
-            <span>
-              <img
-                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
-                alt=""
-              />
-              {user.name}
-            </span>
-            <span>
-              <img
-                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
-                alt=""
-              />
-              {user.name}
-            </span>
-            <span>
-              <img
-                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
-                alt=""
-              />
-              {user.name}
-            </span>
-            <span>
-              <img
-                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
-                alt=""
-              />
-              {user.name}
-            </span>
-            <span>
-              <img
-                src={`https://api.adorable.io/avatars/285/${user.id}.png`}
-                alt=""
-              />
-              {user.name}
-            </span>
           </div>
           <Button
             style={{ marginTop: 'auto' }}

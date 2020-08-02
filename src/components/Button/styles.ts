@@ -16,7 +16,7 @@ export const Container = styled.button<PageColor>`
   padding: 0 16px;
   width: 100%;
   color: ${(props) =>
-    TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#999591'};
+    TinyColor(props.secondaryColor).isLight() ? '#3e3b47' : '#999591'};
   font-weight: 500px;
   margin-top: 16px;
   transition: background-color 0.2s;

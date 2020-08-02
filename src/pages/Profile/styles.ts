@@ -5,19 +5,30 @@ export const Container = styled.div`
   > header {
     height: 144px;
     background: #28262e;
-
     display: flex;
     align-items: center;
 
+    button {
+      margin-left: auto;
+      background: transparent;
+      border: 0;
+    }
     div {
       width: 100%;
       max-width: 1120px;
       margin: 0 auto;
-
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       svg {
         color: #999591;
         width: 24px;
         height: 24px;
+      }
+
+      @media (max-width: 600px) {
+        padding: 15px;
+        width: 100%;
       }
     }
   }
@@ -32,12 +43,20 @@ export const Content = styled.div`
 
   width: 100%;
 
+  @media (max-width: 600px) {
+    margin: -126px 0 auto;
+  }
+
   form {
     margin: 80px 0;
     width: 340px;
     text-align: center;
     display: flex;
     flex-direction: column;
+    @media (max-width: 600px) {
+      padding: 0 25px;
+      align-self: center;
+    }
 
     h1 {
       margin-bottom: 24px;
