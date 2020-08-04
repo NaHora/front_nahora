@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fi';
 import { GoLocation } from 'react-icons/go';
 import DayPicker, { DayModifiers } from 'react-day-picker';
-import { isToday, format, getDay } from 'date-fns';
+import { isToday, format, getDay, getYear, getMonth, getDate } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { Link, useHistory } from 'react-router-dom';
 import {
@@ -91,10 +91,10 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
-    if (modifiers.available && !modifiers.disabled) {
-      setSelectedDate(day);
-      setCurrentWeekDay(getDay(day));
-    }
+    // if (modifiers.available && !modifiers.disabled) {
+    setSelectedDate(day);
+    setCurrentWeekDay(getDay(day));
+    // }
   }, []);
 
   useEffect(() => {
@@ -107,7 +107,11 @@ const Dashboard: React.FC = () => {
   const handleServices = useCallback(async () => {
     try {
       const response = await api.get(
-        `/services/enterprise/${thisEnterprise.id}/day/${currentWeekDay}/category/${selectectedCategory?.id}`,
+        `/services/enterprise/${
+          thisEnterprise.id
+        }/day/${currentWeekDay}/category/${selectectedCategory?.id}/${getYear(
+          selectedDate,
+        )}/${getMonth(selectedDate)}/${getDate(selectedDate)}`,
       );
       setServices(response.data);
     } catch (err) {
@@ -128,7 +132,25 @@ const Dashboard: React.FC = () => {
         });
       }
     }
-  }, [thisEnterprise.id, currentWeekDay, toast, selectectedCategory]);
+  }, [
+    thisEnterprise.id,
+    currentWeekDay,
+    toast,
+    selectectedCategory,
+    selectedDate,
+  ]);
+
+  // const selectedDateWithHourService = useMemo(() => {
+  //   const [hour, minute] = selectectedService?.start_hour.split(':');
+
+  //   return new Date(
+  //     getYear(new Date(selectedDate)),
+  //     getMonth(new Date(selectedDate)),
+  //     getDate(new Date(selectedDate)),
+  //     Number(hour) || 0,
+  //     Number(minute) || 0,
+  //   );
+  // }, [selectedDate, selectectedService]);
 
   const handleAppointment = useCallback(
     async (service_id) => {
@@ -137,6 +159,7 @@ const Dashboard: React.FC = () => {
         const body = {
           service_id,
           enterprise_id: thisEnterprise.id,
+          service_date: selectedDate,
         };
         await api.post(`/appointments`, body);
 
@@ -168,7 +191,7 @@ const Dashboard: React.FC = () => {
         setLoading(false);
       }
     },
-    [thisEnterprise.id, toast],
+    [thisEnterprise.id, toast, selectedDate, history],
   );
 
   useEffect(() => {
@@ -236,7 +259,7 @@ const Dashboard: React.FC = () => {
           </span>
           <span>
             <FiClock />
-            {selectedDateAsText}
+            {selectedDateAsText} {selectectedService?.start_hour}h
           </span>
           <br />
           <span>
@@ -461,15 +484,17 @@ const Dashboard: React.FC = () => {
         </Calendar>
       </Content>
       <ButtonContainer>
-        <Button
-          primaryColor={primaryColor || '#28262e'}
-          secondaryColor={secondaryColor || '#ff9000'}
-          onClick={() => handleAppointment(selectectedService?.id)}
-          loading={loading}
-        >
-          <FiCheckCircle />
-          Confirmar
-        </Button>
+        {!openModal && (
+          <Button
+            primaryColor={primaryColor || '#28262e'}
+            secondaryColor={secondaryColor || '#ff9000'}
+            onClick={() => handleAppointment(selectectedService?.id)}
+            loading={loading}
+          >
+            <FiCheckCircle />
+            Confirmar
+          </Button>
+        )}
       </ButtonContainer>
     </Container>
   );

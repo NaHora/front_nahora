@@ -45,11 +45,19 @@ export const AnimationContainer = styled.div`
 
   animation: ${appearFromRight} 1s;
 
+  @media (max-width: 600px) {
+    padding: 20px 0;
+    img {
+      margin: 150px 0 0;
+    }
+  }
   form {
     margin: 80px 0;
     width: 340px;
     text-align: center;
-
+    @media (max-width: 600px) {
+      width: 100%;
+    }
     h1 {
       margin-bottom: 24px;
     }

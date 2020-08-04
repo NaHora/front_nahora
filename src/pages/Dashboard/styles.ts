@@ -252,10 +252,9 @@ export const Section = styled.aside<PageColor>`
 export const Appointment = styled.aside<PageColor>`
   display: flex;
   align-items: center;
+  opacity: ${(props) => props.disabled && '0.5'};
   background: ${(props) =>
-    props.disabled
-      ? lighten(0.3, props.secondaryColor)
-      : props.currentSelected
+    props.currentSelected
       ? darken(0.1, props.secondaryColor)
       : lighten(0.1, props.secondaryColor)};
   padding: 8px;

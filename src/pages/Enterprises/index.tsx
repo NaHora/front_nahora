@@ -60,38 +60,110 @@ const Enterprises: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [enterprises, setEnterprises] = useState<MyEnterprise[]>([]);
+  const [allEnterprises, setAllEnterprises] = useState<SearchEnterprise[]>([]);
+  const [myEnterprise, setMyEnterprises] = useState<SearchEnterprise | null>(
+    null,
+  );
 
-  const searchAllEnterprisesByName = useCallback(
-    async (search: string) => {
-      setLoading(true);
+  const getAllEnterprises = useCallback(async () => {
+    try {
+      const response = await api.get(`/enterprises/all`);
+
+      setAllEnterprises(response.data);
+    } catch (err) {
+      if (err.response) {
+        toast.addToast({
+          type: 'error',
+          title: 'Ops! algo deu errado,',
+          description:
+            err.response.data.message ||
+            'Não foi possível carregar suas empresas',
+        });
+      } else {
+        toast.addToast({
+          type: 'error',
+          title: 'Vishi',
+          description: 'Ocorreu um erro ao procurar empresas, tente novamente',
+        });
+      }
+    }
+  }, [toast]);
+
+  const getInviteEnterprise = useCallback(async () => {
+    try {
+      const response = await api.get(`/invites/accepted`);
+
+      setEnterprises(response.data);
+    } catch (err) {
+      if (err.response) {
+        toast.addToast({
+          type: 'error',
+          title: 'Ops! algo deu errado,',
+          description:
+            err.response.data.message ||
+            'Não foi possível carregar suas empresas',
+        });
+      } else {
+        toast.addToast({
+          type: 'error',
+          title: 'Vishi',
+          description: 'Ocorreu um erro ao procurar empresas, tente novamente',
+        });
+      }
+    }
+  }, [toast]);
+
+  const getMyEnterprises = useCallback(async () => {
+    try {
+      const response = await api.get(`/enterprises/mine`);
+
+      setMyEnterprises(response.data);
+    } catch (err) {}
+  }, []);
+
+  const checkPermission = useCallback(
+    async (enterprise: SearchEnterprise) => {
       try {
-        const response = await api.get(`/enterprises/${search}/search`);
+        const response = await api.get(`/invites/active-plan/${enterprise.id}`);
 
-        const searchEnterprisesByname: SearchEnterprise[] = [];
+        if (response.data) {
+          localStorage.setItem('enterprise', JSON.stringify(enterprise));
 
-        response.data.map((searchEnterprise: SearchEnterprise) =>
-          enterprises.map((myenteprises) => {
-            if (myenteprises.enterprise.id === searchEnterprise.id) {
-              return searchEnterprisesByname.push({
-                ...searchEnterprise,
-                friends: true,
-              });
-            }
-            return searchEnterprisesByname.push({
-              ...searchEnterprise,
-              friends: false,
-            });
-          }),
-        );
-
-        setSearchEnterprises(searchEnterprisesByname);
+          return history.push(routes.dashboard);
+        }
       } catch (err) {
-      } finally {
-        setLoading(false);
+        if (err.response) {
+          toast.addToast({
+            type: 'error',
+            title: 'Ops! algo deu errado,',
+            description:
+              err.response.data.message ||
+              'Não foi possível carregar suas empresas',
+          });
+        } else {
+          toast.addToast({
+            type: 'error',
+            title: 'Vishi',
+            description:
+              'Ocorreu um erro ao procurar empresas, tente novamente',
+          });
+        }
       }
     },
-    [toast],
+    [toast, history],
   );
+
+  const searchAllEnterprisesByName = useCallback(async (search: string) => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/enterprises/${search}/search`);
+
+      setSearchEnterprises(response.data);
+    } catch (err) {
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const inviteEnterprise = useCallback(
     async (enterprise_id: string) => {
@@ -103,6 +175,8 @@ const Enterprises: React.FC = () => {
 
         await api.post(`/invites`, body);
 
+        setSearchValue('');
+        getInviteEnterprise();
         toast.addToast({
           type: 'success',
           title: 'Boa, agora é só esperar!',
@@ -126,35 +200,15 @@ const Enterprises: React.FC = () => {
         }
       }
     },
-    [toast, user.id],
+    [toast, user.id, getInviteEnterprise],
   );
 
-  const getInviteEnterprise = useCallback(async () => {
-    try {
-      const response = await api.get(`/invites`);
-
-      setEnterprises(response.data);
-    } catch (err) {
-      if (err.response) {
-        toast.addToast({
-          type: 'error',
-          title: 'Ops! algo deu errado,',
-          description:
-            err.response.data.message ||
-            'Não foi possível carregar suas empresas',
-        });
-      } else {
-        toast.addToast({
-          type: 'error',
-          title: 'Vishi',
-          description: 'Ocorreu um erro ao procurar empresas, tente novamente',
-        });
-      }
-    }
-  }, [toast]);
-
   useEffect(() => {
-    getInviteEnterprise();
+    Promise.all([
+      getInviteEnterprise(),
+      getMyEnterprises(),
+      getAllEnterprises(),
+    ]);
   }, []);
 
   useEffect(() => {
@@ -180,7 +234,59 @@ const Enterprises: React.FC = () => {
           />
 
           {searchEnterprises && searchEnterprises.length > 0 ? (
-            searchEnterprises.map((enterprise) => {
+            <>
+              {searchEnterprises.map((enterprise) => {
+                return (
+                  <Card key={enterprise.id}>
+                    <div>
+                      <img
+                        src={
+                          enterprise.logo_url ||
+                          `https://api.adorable.io/avatars/285/${enterprise.id}.png`
+                        }
+                        alt=""
+                      />
+                      <div>
+                        <Title>{enterprise.name}</Title>
+                        <SubTitle>
+                          Aberto de {enterprise.open_hour} até{' '}
+                          {enterprise.close_hour}
+                        </SubTitle>
+                        <Text>{enterprise.address}</Text>
+                        <Text>{enterprise.area}</Text>
+                      </div>
+                    </div>
+                    <CadastraButton
+                      disabled={enterprise.friends}
+                      onClick={() => inviteEnterprise(enterprise.id)}
+                    >
+                      {enterprise.friends ? 'Enviado' : 'Me associar'}
+                    </CadastraButton>
+                  </Card>
+                );
+              })}
+              <hr />
+            </>
+          ) : (
+            <>
+              <br />
+              {loading ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '100%',
+                  }}
+                >
+                  <Loader type="Watch" color="#ff9000" height={40} width={40} />
+                </div>
+              ) : (
+                'Nenhuma empresa encontrada com estes dígitos.'
+              )}
+            </>
+          )}
+          {allEnterprises && allEnterprises.length > 0 ? (
+            allEnterprises.map((enterprise) => {
               return (
                 <Card key={enterprise.id}>
                   <div>
@@ -205,7 +311,7 @@ const Enterprises: React.FC = () => {
                     disabled={enterprise.friends}
                     onClick={() => inviteEnterprise(enterprise.id)}
                   >
-                    {enterprise.friends ? 'Enviado' : 'Me cadastrar'}
+                    {enterprise.friends ? 'Enviado' : 'Me associar'}
                   </CadastraButton>
                 </Card>
               );
@@ -231,19 +337,40 @@ const Enterprises: React.FC = () => {
         </SearchContent>
         <hr />
         <MyEnterprises>
-          <span>Minhas Empresas</span>
+          {myEnterprise && (
+            <>
+              <span>Minha Empresa</span>
+              <CardMine
+                onClick={() => checkPermission(myEnterprise)}
+                key={myEnterprise.id}
+              >
+                <div>
+                  <img
+                    src={
+                      myEnterprise.logo_url ||
+                      `https://api.adorable.io/avatars/285/${myEnterprise.id}.png`
+                    }
+                    alt=""
+                  />
+                  <div>
+                    <Title>{myEnterprise.name}</Title>
+                    <SubTitle>
+                      Aberto de {myEnterprise.open_hour} até{' '}
+                      {myEnterprise.close_hour}
+                    </SubTitle>
+                    <Text>{myEnterprise.area}</Text>
+                    <Text>{myEnterprise.address}</Text>
+                  </div>
+                </div>
+              </CardMine>
+            </>
+          )}
+          <span>Empresas Associadas</span>
           {enterprises && enterprises.length > 0 ? (
             enterprises.map((enterprise) => {
               return (
                 <CardMine
-                  onClick={() => {
-                    localStorage.setItem(
-                      'enterprise',
-                      JSON.stringify(enterprise.enterprise),
-                    );
-
-                    return history.push(routes.dashboard);
-                  }}
+                  onClick={() => checkPermission(enterprise.enterprise)}
                   key={enterprise.id}
                 >
                   <div>
