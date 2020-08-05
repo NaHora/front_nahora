@@ -1,11 +1,38 @@
 import styled from 'styled-components';
-import { lighten } from 'polished';
+import { lighten, darken } from 'polished';
 
 interface CardAction {
   past?: boolean | undefined;
 }
 
 export const Container = styled.div``;
+
+export const OpenDelete = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50%;
+  background: #28262e;
+  padding: 50px;
+  position: absolute;
+  left: 25%;
+  top: 50%;
+  border-radius: 5px;
+  border: 2px solid #ff9000;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+
+  > div {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    > button {
+      width: 200px;
+      height: 50px;
+    }
+  }
+`;
 
 export const Content = styled.main`
   max-width: 1120px;
@@ -38,11 +65,13 @@ export const Card = styled.div<CardAction>`
   width: 100%;
   border-radius: 5px;
   box-shadow: #000 0px 4px 6px;
-  background: ${(props) => (props.past ? lighten(0.2, '#3e3b47') : '#3e3b47')};
+  background: #3e3b47;
+  opacity: ${(props) => props.past && 0.5};
   padding: 17px 22px 15px 15px;
   display: flex;
   flex-direction: column;
   margin: 25px 0;
+  position: relative;
 
   > main {
     hr {

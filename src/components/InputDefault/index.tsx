@@ -19,7 +19,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ComponentType<IconBaseProps>;
 }
 
-const Input: React.FC<InputProps> = ({
+const InputDefault: React.FC<InputProps> = ({
   containerStyle,
   name,
   error = '',
@@ -27,8 +27,6 @@ const Input: React.FC<InputProps> = ({
   icon: Icon,
   ...rest
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-
   const [isFocused, setFocused] = useState(false);
   const [isFilled, setFilled] = useState(false);
 
@@ -38,8 +36,8 @@ const Input: React.FC<InputProps> = ({
 
   const handleIconColor = useCallback(() => {
     setFocused(false);
-    setFilled(!!inputRef.current?.value);
-  }, []);
+    setFilled(!!value);
+  }, [value]);
 
   return (
     <Container
@@ -66,4 +64,4 @@ const Input: React.FC<InputProps> = ({
   );
 };
 
-export default Input;
+export default InputDefault;

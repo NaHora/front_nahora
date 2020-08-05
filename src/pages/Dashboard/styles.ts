@@ -107,6 +107,7 @@ export const Category = styled.main<PageColor>`
 
 export const DivCategory = styled.div<PageColor>`
   margin-right: 16px;
+  box-shadow: ${(props) => props.currentSelected && '#000 0px 4px 6px'};
   border-radius: 5px;
   min-width: 120px;
   white-space: nowrap;
@@ -115,18 +116,10 @@ export const DivCategory = styled.div<PageColor>`
   text-align: center;
   padding: 8px 15px;
   font-size: 20px;
-  background: ${(props) =>
-    props.currentSelected
-      ? darken(0.1, props.secondaryColor)
-      : lighten(0.1, props.secondaryColor)};};
+  opacity: ${(props) => (props.currentSelected ? '1' : '0.7')};
+  background: ${(props) => props.secondaryColor};
   color: ${(props) =>
-    TinyColor(
-      props.currentSelected
-        ? props.secondaryColor
-        : lighten(0.1, props.secondaryColor),
-    ).isLight()
-      ? '#3e3b47'
-      : '#f4ede8'};
+    TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
   max-width: 25ch;
   cursor: pointer;
 `;
@@ -144,23 +137,24 @@ export const ButtonContainer = styled.main`
 
 export const Content = styled.main`
   padding: 15px 20px;
-
+  width: 100%;
   max-width: 1120px;
   margin: 32px auto 0;
   display: flex;
+  justify-content: space-between;
 
   @media (max-width: 600px) {
-    flex-direction: column-reverse;
+    flex-direction: column;
   }
 `;
 
 export const Schedule = styled.div<PageColor>`
   flex: 1;
-  margin-right: 120px;
+
   max-width: 50%;
   align-self: center;
   color: ${(props) =>
-    TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+    TinyColor(props.primaryColor).isLight() ? '#000' : '#f4ede8'};
 
   @media (max-width: 600px) {
     margin-right: 0;
@@ -251,12 +245,11 @@ export const Section = styled.aside<PageColor>`
 
 export const Appointment = styled.aside<PageColor>`
   display: flex;
+  box-shadow: ${(props) => props.currentSelected && '#000 0px 4px 6px'};
   align-items: center;
-  opacity: ${(props) => props.disabled && '0.5'};
-  background: ${(props) =>
-    props.currentSelected
-      ? darken(0.1, props.secondaryColor)
-      : lighten(0.1, props.secondaryColor)};
+  opacity: ${(props) =>
+    props.disabled ? '0.3' : props.currentSelected ? '1' : '0.7'};
+  background: ${(props) => props.secondaryColor};
   padding: 8px;
   border-radius: 5px;
   justify-content: space-between;
@@ -267,11 +260,11 @@ export const Appointment = styled.aside<PageColor>`
     display: flex;
     align-items: center;
     color: ${(props) =>
-      TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+      TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
 
     svg {
       color: ${(props) =>
-        TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+        TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
 
       margin-right: 8px;
     }
@@ -369,26 +362,17 @@ export const Calendar = styled.aside<PageColor>`
 `;
 
 export const ModalUsers = styled.div<PageColor>`
-  box-shadow: #000 0px 4px 6px;
+  box-shadow: #000000 2px 2px 6px;
 
-  border: 3px solid
-    ${(props) =>
-      TinyColor(props.secondaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
-
-  position: fixed;
-  top: 30%;
-  bottom: 30%;
-  right: 35%;
-  left: 35%;
   border-radius: 5px;
-  z-index: 999;
+  margin-top: 15px;
   display: flex;
   overflow: hidden;
   align-items: center;
   flex-direction: column;
   background: ${(props) => lighten(0.03, props.secondaryColor)};
   color: ${(props) =>
-    TinyColor(props.secondaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+    TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
   padding: 20px;
 
   @media (max-width: 600px) {

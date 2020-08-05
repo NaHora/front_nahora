@@ -7,6 +7,7 @@ import {
   FiChevronUp,
   FiUsers,
 } from 'react-icons/fi';
+import { MdDeleteForever } from 'react-icons/md';
 
 import { useHistory } from 'react-router-dom';
 import Loader from 'react-loader-spinner';
@@ -23,6 +24,7 @@ import {
   SearchContent,
   MyEnterprises,
   CardMine,
+  OpenDelete,
 } from './styles';
 
 import 'react-day-picker/lib/style.css';
@@ -33,6 +35,7 @@ import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
+import Button from '../../components/Button';
 
 interface OpenModal {
   [key: string]: boolean;
@@ -90,6 +93,9 @@ const Enterprises: React.FC = () => {
   const [openShedule, setOpenShedule] = useState<OpenModal>({});
 
   const [loading, setLoading] = useState(false);
+  const [currentAppointment, setCurrentAppointment] = useState<Appointment>();
+  const [openDelete, setOpenDelete] = useState(false);
+
   const [searchValue, setSearchValue] = useState('');
   const [myAppointments, setMyAppointments] = useState<ListAppointment>();
 
@@ -99,24 +105,52 @@ const Enterprises: React.FC = () => {
       const response = await api.get(`/appointments/me`);
 
       setMyAppointments(response.data);
+      setOpenDelete(false);
     } catch (err) {
     } finally {
       setLoading(false);
     }
   }, [toast]);
 
+  const deleteAppointments = useCallback(
+    async (appointment_id: string | undefined) => {
+      setLoading(true);
+
+      try {
+        await api.delete(`/appointments/${appointment_id}`);
+        getMyAppointments();
+
+        toast.addToast({
+          title: 'Agendamento Deletado',
+          type: 'success',
+        });
+      } catch (err) {
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast],
+  );
+
   useEffect(() => {
     getMyAppointments();
   }, []);
 
-  // const selectedDateAsText = useMemo((selectedDate) => {
-  //   return format(selectedDate, "'Dia' dd 'de' MMMM", {
-  //     locale: ptBr,
-  //   });
-  // }, []);
-
   return (
     <Container>
+      {openDelete && (
+        <OpenDelete>
+          <span>Tem certeza que deseja excluir o agendamento ?</span>
+          <div>
+            <Button transparent onClick={() => setOpenDelete(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => deleteAppointments(currentAppointment?.id)}>
+              Excluir
+            </Button>
+          </div>
+        </OpenDelete>
+      )}
       <HeaderMenu />
       <Content>
         <div>
@@ -124,16 +158,43 @@ const Enterprises: React.FC = () => {
           {myAppointments && myAppointments.futureAppointments.length > 0 ? (
             myAppointments.futureAppointments.map((appointment) => {
               return (
-                <Card
-                  onClick={() =>
-                    setOpenShedule({
-                      ...openShedule,
-                      [appointment.id]: !openShedule[appointment.id],
-                    })
-                  }
-                >
+                <Card>
                   <div>
-                    <div>
+                    <div
+                      onClick={() =>
+                        setOpenShedule({
+                          ...openShedule,
+                          [appointment.id]: !openShedule[appointment.id],
+                        })
+                      }
+                    >
+                      {!openShedule[appointment.id] ? (
+                        <FiChevronDown
+                          style={{ marginRight: '8px' }}
+                          onClick={() =>
+                            setOpenShedule({
+                              ...openShedule,
+                              [appointment.id]: true,
+                            })
+                          }
+                          cursor="pointer"
+                          size={20}
+                          color="#ff9000"
+                        />
+                      ) : (
+                        <FiChevronUp
+                          style={{ marginRight: '8px' }}
+                          onClick={() =>
+                            setOpenShedule({
+                              ...openShedule,
+                              [appointment.id]: false,
+                            })
+                          }
+                          cursor="pointer"
+                          size={20}
+                          color="#ff9000"
+                        />
+                      )}
                       <img
                         src={
                           appointment.enterprise.logo_url ||
@@ -152,31 +213,13 @@ const Enterprises: React.FC = () => {
                         )}
                       </span>
                     </div>
-                    {!openShedule[appointment.id] ? (
-                      <FiChevronDown
-                        onClick={() =>
-                          setOpenShedule({
-                            ...openShedule,
-                            [appointment.id]: true,
-                          })
-                        }
-                        cursor="pointer"
-                        size={20}
-                        color="#ff9000"
-                      />
-                    ) : (
-                      <FiChevronUp
-                        onClick={() =>
-                          setOpenShedule({
-                            ...openShedule,
-                            [appointment.id]: false,
-                          })
-                        }
-                        cursor="pointer"
-                        size={20}
-                        color="#ff9000"
-                      />
-                    )}
+                    <MdDeleteForever
+                      onClick={() => {
+                        setCurrentAppointment(appointment);
+                        setOpenDelete(true);
+                      }}
+                      color="#c53030"
+                    />
                   </div>
                   {openShedule[appointment.id] && (
                     <main>

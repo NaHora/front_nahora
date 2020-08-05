@@ -48,6 +48,12 @@ interface Appointment {
   date: Date;
 }
 
+interface ModalData {
+  morning: boolean;
+  afternoom: boolean;
+  night: boolean;
+}
+
 interface Service {
   id: string;
   disabled: boolean;
@@ -68,7 +74,7 @@ const Dashboard: React.FC = () => {
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekDay, setCurrentWeekDay] = useState(getDay(new Date()));
-  const [openModal, setOpeModal] = useState(false);
+  const [openModal, setOpeModal] = useState<ModalData | any>({});
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [selectectedService, setSelectectedService] = useState<Service | null>(
@@ -92,6 +98,8 @@ const Dashboard: React.FC = () => {
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
     // if (modifiers.available && !modifiers.disabled) {
+    setOpeModal({});
+
     setSelectedDate(day);
     setCurrentWeekDay(getDay(day));
     // }
@@ -155,6 +163,7 @@ const Dashboard: React.FC = () => {
   const handleAppointment = useCallback(
     async (service_id) => {
       setLoading(true);
+      setOpeModal({});
       try {
         const body = {
           service_id,
@@ -198,7 +207,7 @@ const Dashboard: React.FC = () => {
     if ((thisEnterprise.id, currentWeekDay, selectectedCategory)) {
       handleServices();
     }
-  }, [thisEnterprise.id, currentWeekDay, selectectedCategory]);
+  }, [thisEnterprise.id, currentWeekDay, selectectedCategory, selectedDate]);
 
   const selectedDateAsText = useMemo(() => {
     return format(selectedDate, "'Dia' dd 'de' MMMM", {
@@ -238,60 +247,6 @@ const Dashboard: React.FC = () => {
       primaryColor={primaryColor || '#28262e'}
       secondaryColor={secondaryColor || '#ff9000'}
     >
-      {openModal && (
-        <ModalUsers
-          primaryColor={primaryColor || '#28262e'}
-          secondaryColor={secondaryColor || '#ff9000'}
-        >
-          <FiX
-            onClick={() => setOpeModal(false)}
-            cursor="pointer"
-            color={primaryColor || '#28262e'}
-            style={{ alignSelf: 'flex-end' }}
-          />
-          <span>
-            <FiHome />
-            {thisEnterprise.name}
-          </span>
-          <span>
-            <GoLocation />
-            {thisEnterprise.address}
-          </span>
-          <span>
-            <FiClock />
-            {selectedDateAsText} {selectectedService?.start_hour}h
-          </span>
-          <br />
-          <span>
-            <FiUsers />
-            Usuários que marcaram horário:
-          </span>
-          <div>
-            {appointments.map((appointment) => (
-              <span key={appointment.id}>
-                <img
-                  src={
-                    appointment.user.avatar_url ||
-                    `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
-                  }
-                  alt=""
-                />
-                {appointment.user.name}
-              </span>
-            ))}
-          </div>
-          <Button
-            style={{ marginTop: 'auto' }}
-            primaryColor={secondaryColor || '#ff9000'}
-            secondaryColor={primaryColor || '#28262e'}
-            onClick={() => handleAppointment(selectectedService?.id)}
-            loading={loading}
-          >
-            <FiCheckCircle />
-            Confirmar
-          </Button>
-        </ModalUsers>
-      )}
       <header>
         <div>
           <Link to={routes.enterprise}>
@@ -329,7 +284,11 @@ const Dashboard: React.FC = () => {
                 secondaryColor={secondaryColor || '#ff9000'}
                 currentSelected={selectectedCategory?.id === category.id}
                 key={category.id}
-                onClick={() => setSelectectedCategory(category)}
+                onClick={() => {
+                  setOpeModal({});
+
+                  setSelectectedCategory(category);
+                }}
               >
                 <span>{category.name}</span>
               </DivCategory>
@@ -340,115 +299,6 @@ const Dashboard: React.FC = () => {
         </div>
       </Category>
       <Content>
-        <Schedule
-          primaryColor={primaryColor || '#28262e'}
-          secondaryColor={secondaryColor || '#ff9000'}
-        >
-          <h1>Horários</h1>
-          <p>
-            {isToday(selectedDate) && <span> Hoje</span>}
-            <span>{selectedDateAsText}</span>
-            <span>{selectedWeekDay}</span>
-          </p>
-
-          <Section
-            primaryColor={primaryColor || '#28262e'}
-            secondaryColor={secondaryColor || '#ff9000'}
-          >
-            <strong>Manhã</strong>
-
-            {morningServices.length === 0 && (
-              <p>Nenhum serviço neste período</p>
-            )}
-            <div>
-              {morningServices.map((service) => (
-                <Appointment
-                  disabled={service.disabled}
-                  onClick={() => {
-                    setOpeModal(true);
-                    setAppointments(service.appointments);
-                    setSelectectedService(service);
-                  }}
-                  primaryColor={primaryColor || '#28262e'}
-                  secondaryColor={secondaryColor || '#ff9000'}
-                  key={service.id}
-                  currentSelected={selectectedService?.id === service.id}
-                >
-                  <span style={{ marginRight: '16px' }}>
-                    <FiClock /> {service.start_hour}
-                  </span>
-                  <span>
-                    <FiUsers /> {service.appointments.length}/{service.capacity}
-                  </span>
-                </Appointment>
-              ))}
-            </div>
-          </Section>
-          <Section
-            primaryColor={primaryColor || '#28262e'}
-            secondaryColor={secondaryColor || '#ff9000'}
-          >
-            <strong>Tarde</strong>
-
-            {afternoonServices.length === 0 && (
-              <p>Nenhum serviço neste período</p>
-            )}
-            <div>
-              {afternoonServices.map((service) => (
-                <Appointment
-                  onClick={() => {
-                    setOpeModal(true);
-                    setAppointments(service.appointments);
-                    setSelectectedService(service);
-                  }}
-                  primaryColor={primaryColor || '#28262e'}
-                  disabled={service.disabled}
-                  secondaryColor={secondaryColor || '#ff9000'}
-                  key={service.id}
-                  currentSelected={selectectedService?.id === service.id}
-                >
-                  <span style={{ marginRight: '16px' }}>
-                    <FiClock /> {service.start_hour}
-                  </span>
-                  <span>
-                    <FiUsers /> {service.appointments.length}/{service.capacity}
-                  </span>
-                </Appointment>
-              ))}
-            </div>
-          </Section>
-          <Section
-            primaryColor={primaryColor || '#28262e'}
-            secondaryColor={secondaryColor || '#ff9000'}
-          >
-            <strong>Noite</strong>
-
-            {nightServices.length === 0 && <p>Nenhum serviço neste período</p>}
-            <div>
-              {nightServices.map((service) => (
-                <Appointment
-                  onClick={() => {
-                    setOpeModal(true);
-                    setAppointments(service.appointments);
-                    setSelectectedService(service);
-                  }}
-                  primaryColor={primaryColor || '#28262e'}
-                  disabled={service.disabled}
-                  secondaryColor={secondaryColor || '#ff9000'}
-                  key={service.id}
-                  currentSelected={selectectedService?.id === service.id}
-                >
-                  <span style={{ marginRight: '16px' }}>
-                    <FiClock /> {service.start_hour}
-                  </span>
-                  <span>
-                    <FiUsers /> {service.appointments.length}/{service.capacity}
-                  </span>
-                </Appointment>
-              ))}
-            </div>
-          </Section>
-        </Schedule>
         <Calendar
           primaryColor={primaryColor || '#28262e'}
           secondaryColor={secondaryColor || '#ff9000'}
@@ -482,19 +332,306 @@ const Dashboard: React.FC = () => {
             ]}
           />
         </Calendar>
-      </Content>
-      <ButtonContainer>
-        {!openModal && (
-          <Button
+        <Schedule
+          primaryColor={primaryColor || '#28262e'}
+          secondaryColor={secondaryColor || '#ff9000'}
+        >
+          <h1>Horários</h1>
+          <p>
+            {isToday(selectedDate) && <span> Hoje</span>}
+            <span>{selectedDateAsText}</span>
+            <span>{selectedWeekDay}</span>
+          </p>
+
+          <Section
             primaryColor={primaryColor || '#28262e'}
             secondaryColor={secondaryColor || '#ff9000'}
-            onClick={() => handleAppointment(selectectedService?.id)}
-            loading={loading}
           >
-            <FiCheckCircle />
-            Confirmar
-          </Button>
-        )}
+            <strong>Manhã</strong>
+
+            {morningServices.length === 0 && (
+              <p>Nenhum serviço neste período</p>
+            )}
+            <div>
+              {morningServices.map((service) => (
+                <Appointment
+                  disabled={service.disabled}
+                  onClick={() => {
+                    if (!service.disabled) {
+                      setOpeModal({ morning: true });
+                      setAppointments(service.appointments);
+                      setSelectectedService(service);
+                    }
+                  }}
+                  primaryColor={primaryColor || '#28262e'}
+                  secondaryColor={secondaryColor || '#ff9000'}
+                  key={service.id}
+                  currentSelected={selectectedService?.id === service.id}
+                >
+                  <span style={{ marginRight: '16px' }}>
+                    <FiClock /> {service.start_hour}
+                  </span>
+                  <span>
+                    <FiUsers /> {service.appointments.length}/{service.capacity}
+                  </span>
+                </Appointment>
+              ))}
+            </div>
+            {openModal.morning && (
+              <ModalUsers
+                primaryColor={primaryColor || '#28262e'}
+                secondaryColor={secondaryColor || '#ff9000'}
+              >
+                <FiX
+                  onClick={() => setOpeModal({ morning: false })}
+                  cursor="pointer"
+                  color={primaryColor || '#28262e'}
+                  style={{ alignSelf: 'flex-end' }}
+                />
+                <span>
+                  <FiHome />
+                  {thisEnterprise.name}
+                </span>
+                <span>
+                  <GoLocation />
+                  {thisEnterprise.address}
+                </span>
+                <span>
+                  <FiClock />
+                  {selectedDateAsText} {selectectedService?.start_hour}h
+                </span>
+                <br />
+                <span>
+                  {appointments.length > 0 ? (
+                    <>
+                      <FiUsers />
+                      Usuários que marcaram horário:
+                    </>
+                  ) : (
+                    'Ninguém se agendou até o momento.'
+                  )}
+                </span>
+                <div>
+                  {appointments.map((appointment) => (
+                    <span key={appointment.id}>
+                      <img
+                        src={
+                          appointment.user.avatar_url ||
+                          `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                        }
+                        alt=""
+                      />
+                      {appointment.user.name}
+                    </span>
+                  ))}
+                </div>
+                {/* <Button
+                  style={{ marginTop: 'auto' }}
+                  primaryColor={secondaryColor || '#ff9000'}
+                  secondaryColor={primaryColor || '#28262e'}
+                  onClick={() => handleAppointment(selectectedService?.id)}
+                  loading={loading}
+                >
+                  <FiCheckCircle />
+                  Confirmar
+                </Button> */}
+              </ModalUsers>
+            )}
+          </Section>
+          <Section
+            primaryColor={primaryColor || '#28262e'}
+            secondaryColor={secondaryColor || '#ff9000'}
+          >
+            <strong>Tarde</strong>
+
+            {afternoonServices.length === 0 && (
+              <p>Nenhum serviço neste período</p>
+            )}
+            <div>
+              {afternoonServices.map((service) => (
+                <Appointment
+                  onClick={() => {
+                    if (!service.disabled) {
+                      setOpeModal({ afternoon: true });
+                      setAppointments(service.appointments);
+                      setSelectectedService(service);
+                    }
+                  }}
+                  primaryColor={primaryColor || '#28262e'}
+                  disabled={service.disabled}
+                  secondaryColor={secondaryColor || '#ff9000'}
+                  key={service.id}
+                  currentSelected={selectectedService?.id === service.id}
+                >
+                  <span style={{ marginRight: '16px' }}>
+                    <FiClock /> {service.start_hour}
+                  </span>
+                  <span>
+                    <FiUsers /> {service.appointments.length}/{service.capacity}
+                  </span>
+                </Appointment>
+              ))}
+            </div>
+            {openModal.afternoon && (
+              <ModalUsers
+                primaryColor={primaryColor || '#28262e'}
+                secondaryColor={secondaryColor || '#ff9000'}
+              >
+                <span>
+                  <FiHome />
+                  {thisEnterprise.name}
+                </span>
+                <span>
+                  <GoLocation />
+                  {thisEnterprise.address}
+                </span>
+                <span>
+                  <FiClock />
+                  {selectedDateAsText} {selectectedService?.start_hour}h
+                </span>
+                <br />
+                <span>
+                  {appointments.length > 0 ? (
+                    <>
+                      <FiUsers />
+                      Usuários que marcaram horário:
+                    </>
+                  ) : (
+                    'Ninguém se agendou até o momento.'
+                  )}
+                </span>
+                <div>
+                  {appointments.map((appointment) => (
+                    <span key={appointment.id}>
+                      <img
+                        src={
+                          appointment.user.avatar_url ||
+                          `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                        }
+                        alt=""
+                      />
+                      {appointment.user.name}
+                    </span>
+                  ))}
+                </div>
+                {/* <Button
+                  style={{ marginTop: 'auto' }}
+                  primaryColor={secondaryColor || '#ff9000'}
+                  secondaryColor={primaryColor || '#28262e'}
+                  onClick={() => handleAppointment(selectectedService?.id)}
+                  loading={loading}
+                >
+                  <FiCheckCircle />
+                  Confirmar
+                </Button> */}
+              </ModalUsers>
+            )}
+          </Section>
+          <Section
+            primaryColor={primaryColor || '#28262e'}
+            secondaryColor={secondaryColor || '#ff9000'}
+          >
+            <strong>Noite</strong>
+
+            {nightServices.length === 0 && <p>Nenhum serviço neste período</p>}
+            <div>
+              {nightServices.map((service) => (
+                <Appointment
+                  onClick={() => {
+                    if (!service.disabled) {
+                      setOpeModal({ night: true });
+                      setAppointments(service.appointments);
+                      setSelectectedService(service);
+                    }
+                  }}
+                  primaryColor={primaryColor || '#28262e'}
+                  disabled={service.disabled}
+                  secondaryColor={secondaryColor || '#ff9000'}
+                  key={service.id}
+                  currentSelected={selectectedService?.id === service.id}
+                >
+                  <span style={{ marginRight: '16px' }}>
+                    <FiClock /> {service.start_hour}
+                  </span>
+                  <span>
+                    <FiUsers /> {service.appointments.length}/{service.capacity}
+                  </span>
+                </Appointment>
+              ))}
+            </div>
+            {openModal.night && (
+              <ModalUsers
+                primaryColor={primaryColor || '#28262e'}
+                secondaryColor={secondaryColor || '#ff9000'}
+              >
+                <FiX
+                  onClick={() => setOpeModal({ night: false })}
+                  cursor="pointer"
+                  color={primaryColor || '#28262e'}
+                  style={{ alignSelf: 'flex-end' }}
+                />
+                <span>
+                  <FiHome />
+                  {thisEnterprise.name}
+                </span>
+                <span>
+                  <GoLocation />
+                  {thisEnterprise.address}
+                </span>
+                <span>
+                  <FiClock />
+                  {selectedDateAsText} {selectectedService?.start_hour}h
+                </span>
+                <br />
+                <span>
+                  {appointments.length > 0 ? (
+                    <>
+                      <FiUsers />
+                      Usuários que marcaram horário:
+                    </>
+                  ) : (
+                    'Ninguém se agendou até o momento.'
+                  )}
+                </span>
+                <div>
+                  {appointments.map((appointment) => (
+                    <span key={appointment.id}>
+                      <img
+                        src={
+                          appointment.user.avatar_url ||
+                          `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                        }
+                        alt=""
+                      />
+                      {appointment.user.name}
+                    </span>
+                  ))}
+                </div>
+                {/* <Button
+                  style={{ marginTop: 'auto' }}
+                  primaryColor={secondaryColor || '#ff9000'}
+                  secondaryColor={primaryColor || '#28262e'}
+                  onClick={() => handleAppointment(selectectedService?.id)}
+                  loading={loading}
+                >
+                  <FiCheckCircle />
+                  Confirmar
+                </Button> */}
+              </ModalUsers>
+            )}
+          </Section>
+        </Schedule>
+      </Content>
+      <ButtonContainer>
+        <Button
+          primaryColor={primaryColor || '#28262e'}
+          secondaryColor={secondaryColor || '#ff9000'}
+          onClick={() => handleAppointment(selectectedService?.id)}
+          loading={loading}
+        >
+          <FiCheckCircle />
+          Confirmar
+        </Button>
       </ButtonContainer>
     </Container>
   );

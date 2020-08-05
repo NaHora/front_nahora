@@ -33,13 +33,14 @@ export const HeaderContent = styled.div`
     a {
       display: flex;
       align-items: center;
-      text-decoration: none;
-    }
-    span {
       color: #999591;
+      text-decoration: none;
+      > span {
+        color: #999591;
 
-      @media (max-width: 600px) {
-        display: none;
+        @media (max-width: 600px) {
+          display: none;
+        }
       }
     }
   }

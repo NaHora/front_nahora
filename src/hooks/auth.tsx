@@ -29,8 +29,8 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC = ({ children }) => {
   const [data, setData] = useState<AuthState>(() => {
-    const token = localStorage.getItem('@GoBarber:token');
-    const user = localStorage.getItem('@GoBarber:user');
+    const token = localStorage.getItem('@NaHora:token');
+    const user = localStorage.getItem('@NaHora:user');
 
     if (token && user) {
       api.defaults.headers.authorization = `Bearer ${token}`;
@@ -49,8 +49,8 @@ export const AuthProvider: React.FC = ({ children }) => {
 
     const { token, user } = response.data;
 
-    localStorage.setItem('@GoBarber:token', token);
-    localStorage.setItem('@GoBarber:user', JSON.stringify(user));
+    localStorage.setItem('@NaHora:token', token);
+    localStorage.setItem('@NaHora:user', JSON.stringify(user));
 
     api.defaults.headers.authorization = `Bearer ${token}`;
 
@@ -58,15 +58,16 @@ export const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const signOut = useCallback(() => {
-    localStorage.removeItem('@GoBarber:token');
-    localStorage.removeItem('@GoBarber:user');
+    localStorage.removeItem('@NaHora:token');
+    localStorage.removeItem('@NaHora:user');
+    localStorage.removeItem('@NaHora:myEnterprise');
 
     setData({} as AuthState);
   }, []);
 
   const updateUser = useCallback(
     (user: User) => {
-      localStorage.setItem('@GoBarber:user', JSON.stringify(user));
+      localStorage.setItem('@NaHora:user', JSON.stringify(user));
 
       setData({
         token: data.token,

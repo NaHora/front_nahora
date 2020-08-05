@@ -1,14 +1,15 @@
 import React from 'react';
-import { FiPower, FiList, FiHome } from 'react-icons/fi';
+import { FiPower, FiList, FiHome, FiCheckCircle } from 'react-icons/fi';
 
 import { Link, useHistory } from 'react-router-dom';
 import { Header, HeaderContent, Profile } from './styles';
 import logoImg from '../../assets/logo.svg';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
+import Menu from '../Menu';
 
 function HeaderMenu() {
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
   const history = useHistory();
 
   return (
@@ -32,9 +33,11 @@ function HeaderMenu() {
           </div>
         </Profile>
         <button>
-          {history.location.pathname === routes.enterprise ? (
+          {localStorage.getItem('@NaHora:myEnterprise') ? (
+            <Menu />
+          ) : history.location.pathname === routes.enterprise ? (
             <Link to={routes.schedule}>
-              <FiList />
+              <FiCheckCircle />
               <span>Agendados</span>
             </Link>
           ) : (

@@ -10,6 +10,7 @@ import ResetPassword from '../pages/ResetPassword';
 import Profile from '../pages/Profile';
 import Enterprises from '../pages/Enterprises';
 import Schedule from '../pages/Schedule';
+import SignUpEnterprise from '../pages/EnterprisePages/SignUp';
 
 export const routes = {
   dashboard: '/dashboard',
@@ -19,6 +20,7 @@ export const routes = {
   resetPassword: '/reset-password',
   enterprise: '/enterprise',
   schedule: '/schedule',
+  signupEnterprise: '/signupEnterprise',
   signin: '/',
 };
 
@@ -28,6 +30,11 @@ const Routes: React.FC = () => (
     <Route path={routes.enterprise} component={Enterprises} isPrivate />
     <Route path={routes.schedule} component={Schedule} isPrivate />
     <Route path={routes.profile} component={Profile} isPrivate />
+    <Route
+      path={routes.signupEnterprise}
+      component={SignUpEnterprise}
+      isPrivate
+    />
     <Route path={routes.signup} component={SignUp} />
     <Route path={routes.forgotPassword} component={ForgotPassword} />
     <Route path={routes.resetPassword} component={ResetPassword} />

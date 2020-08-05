@@ -36,6 +36,7 @@ interface SearchEnterprise {
   primary_color: string;
   secondary_color: string;
   friends: boolean;
+  aceito?: number;
 }
 
 interface MyEnterprise {
@@ -67,7 +68,7 @@ const Enterprises: React.FC = () => {
 
   const getAllEnterprises = useCallback(async () => {
     try {
-      const response = await api.get(`/enterprises/all`);
+      const response = await api.get(`/enterprises/all-unregistered`);
 
       setAllEnterprises(response.data);
     } catch (err) {
@@ -116,6 +117,11 @@ const Enterprises: React.FC = () => {
   const getMyEnterprises = useCallback(async () => {
     try {
       const response = await api.get(`/enterprises/mine`);
+
+      localStorage.setItem(
+        '@NaHora:myEnterprise',
+        JSON.stringify(response.data),
+      );
 
       setMyEnterprises(response.data);
     } catch (err) {}
@@ -176,7 +182,11 @@ const Enterprises: React.FC = () => {
         await api.post(`/invites`, body);
 
         setSearchValue('');
+
         getInviteEnterprise();
+        getMyEnterprises();
+        getAllEnterprises();
+
         toast.addToast({
           type: 'success',
           title: 'Boa, agora é só esperar!',
@@ -200,7 +210,7 @@ const Enterprises: React.FC = () => {
         }
       }
     },
-    [toast, user.id, getInviteEnterprise],
+    [toast, user.id, getInviteEnterprise, getAllEnterprises],
   );
 
   useEffect(() => {
@@ -233,7 +243,7 @@ const Enterprises: React.FC = () => {
             }}
           />
 
-          {searchEnterprises && searchEnterprises.length > 0 ? (
+          {searchEnterprises && searchEnterprises.length > 0 && searchValue && (
             <>
               {searchEnterprises.map((enterprise) => {
                 return (
@@ -257,34 +267,31 @@ const Enterprises: React.FC = () => {
                       </div>
                     </div>
                     <CadastraButton
-                      disabled={enterprise.friends}
+                      disabled={enterprise.aceito == 0}
                       onClick={() => inviteEnterprise(enterprise.id)}
                     >
-                      {enterprise.friends ? 'Enviado' : 'Me associar'}
+                      {enterprise.aceito == 0 ? 'Aguardando' : 'Me associar'}
                     </CadastraButton>
                   </Card>
                 );
               })}
               <hr />
             </>
-          ) : (
-            <>
-              <br />
-              {loading ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    width: '100%',
-                  }}
-                >
-                  <Loader type="Watch" color="#ff9000" height={40} width={40} />
-                </div>
-              ) : (
-                'Nenhuma empresa encontrada com estes dígitos.'
-              )}
-            </>
           )}
+
+          <br />
+          {loading && (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                width: '100%',
+              }}
+            >
+              <Loader type="Watch" color="#ff9000" height={40} width={40} />
+            </div>
+          )}
+
           {allEnterprises && allEnterprises.length > 0 ? (
             allEnterprises.map((enterprise) => {
               return (
@@ -308,10 +315,10 @@ const Enterprises: React.FC = () => {
                     </div>
                   </div>
                   <CadastraButton
-                    disabled={enterprise.friends}
+                    disabled={enterprise.aceito == 0}
                     onClick={() => inviteEnterprise(enterprise.id)}
                   >
-                    {enterprise.friends ? 'Enviado' : 'Me associar'}
+                    {enterprise.aceito == 0 ? 'Aguardando' : 'Me associar'}
                   </CadastraButton>
                 </Card>
               );
@@ -330,7 +337,7 @@ const Enterprises: React.FC = () => {
                   <Loader type="Watch" color="#ff9000" height={40} width={40} />
                 </div>
               ) : (
-                'Nenhuma empresa encontrada com estes dígitos.'
+                'Nenhuma empresa que você ainda não tenha se associado encontrada.'
               )}
             </>
           )}

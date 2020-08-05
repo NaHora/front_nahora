@@ -5,6 +5,7 @@ import { Container } from './styles';
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
+  transparent?: boolean;
   primaryColor?: string;
   secondaryColor?: string;
 };
@@ -13,10 +14,12 @@ const Button: React.FC<ButtonProps> = ({
   children,
   primaryColor,
   secondaryColor,
+  transparent,
   loading,
   ...rest
 }) => (
   <Container
+    transparent={transparent}
     primaryColor={primaryColor || '#28262e'}
     secondaryColor={secondaryColor || '#ff9000'}
     type="button"
