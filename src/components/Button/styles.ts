@@ -40,5 +40,11 @@ export const Container = styled.button<PageColor>`
   &:hover {
     background: ${(props) =>
       shade(0.2, props.secondaryColor ? props.secondaryColor : '#ff9000')};
+    color: ${(props) =>
+      props.transparent
+        ? props.primaryColor
+        : TinyColor(props.secondaryColor).isLight()
+        ? '#000'
+        : '#fff'};
   }
 `;

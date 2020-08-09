@@ -13,6 +13,9 @@ import { useHistory } from 'react-router-dom';
 import Loader from 'react-loader-spinner';
 import { format } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
+import { GoLocation } from 'react-icons/go';
+import { makeStyles } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';
 import {
   Container,
   Content,
@@ -36,7 +39,27 @@ import { useToast } from '../../hooks/toast';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
 import Button from '../../components/Button';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
 
+const useStyles = makeStyles((theme) => ({
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+    color: 'black',
+  },
+  divButton: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+}));
 interface OpenModal {
   [key: string]: boolean;
 }
@@ -98,7 +121,16 @@ const Enterprises: React.FC = () => {
 
   const [searchValue, setSearchValue] = useState('');
   const [myAppointments, setMyAppointments] = useState<ListAppointment>();
+  const classes = useStyles();
+  const [open, setOpen] = React.useState(false);
 
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
   const getMyAppointments = useCallback(async () => {
     setLoading(true);
     try {
@@ -119,6 +151,7 @@ const Enterprises: React.FC = () => {
       try {
         await api.delete(`/appointments/${appointment_id}`);
         getMyAppointments();
+        handleClose();
 
         toast.addToast({
           title: 'Agendamento Deletado',
@@ -138,6 +171,46 @@ const Enterprises: React.FC = () => {
 
   return (
     <Container>
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        className={classes.modal}
+        open={open}
+        onClose={handleClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={open}>
+          <div className={classes.paper}>
+            <h2 id="transition-modal-title">Deseja cancelar o agendamento?</h2>
+            <p id="transition-modal-description">
+              Ao cancelar, você perderá a vaga.
+            </p>
+            <div className={classes.divButton}>
+              <Button
+                primaryColor="#ff9000"
+                secondaryColor="#28262e"
+                onClick={handleClose}
+                loading={loading}
+                transparent
+              >
+                Cancelar
+              </Button>
+              <Button
+                primaryColor="#ff9000"
+                secondaryColor="#28262e"
+                onClick={() => deleteAppointments(currentAppointment?.id)}
+                loading={loading}
+              >
+                Excluir
+              </Button>
+            </div>
+          </div>
+        </Fade>
+      </Modal>
       {openDelete && (
         <OpenDelete>
           <span>Tem certeza que deseja excluir o agendamento ?</span>
@@ -216,7 +289,7 @@ const Enterprises: React.FC = () => {
                     <MdDeleteForever
                       onClick={() => {
                         setCurrentAppointment(appointment);
-                        setOpenDelete(true);
+                        handleOpen();
                       }}
                       color="#c53030"
                     />
@@ -224,6 +297,10 @@ const Enterprises: React.FC = () => {
                   {openShedule[appointment.id] && (
                     <main>
                       <hr />
+                      <span>
+                        <GoLocation size={20} color="#ff9000" />
+                        {appointment.enterprise.address}
+                      </span>
                       <span>
                         <FiUsers size={20} color="#ff9000" />
                         Usuários agendados:
@@ -323,6 +400,10 @@ const Enterprises: React.FC = () => {
                   {openShedule[appointment.id] && (
                     <main>
                       <hr />
+                      <span>
+                        <GoLocation size={20} color="#ff9000" />
+                        {appointment.enterprise.address}
+                      </span>
                       <span>
                         <FiUsers size={20} color="#ff9000" />
                         Usuários agendados:{' '}

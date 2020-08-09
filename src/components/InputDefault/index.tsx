@@ -14,6 +14,7 @@ import { Container, Error } from './styles';
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   name: string;
   value: string;
+  maxWidth?: string;
   containerStyle?: object;
   error?: string;
   icon?: React.ComponentType<IconBaseProps>;
@@ -22,6 +23,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 const InputDefault: React.FC<InputProps> = ({
   containerStyle,
   name,
+  maxWidth,
   error = '',
   value = '',
   icon: Icon,
@@ -45,6 +47,7 @@ const InputDefault: React.FC<InputProps> = ({
       erroMsg={!!error}
       isFilled={isFilled}
       isFocused={isFocused}
+      maxWidth={maxWidth}
       data-testid="input-container"
     >
       {Icon && <Icon size={20} />}

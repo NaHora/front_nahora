@@ -7,6 +7,7 @@ import {
   FiCamera,
   FiArrowLeft,
   FiPower,
+  FiPhone,
 } from 'react-icons/fi';
 import * as Yup from 'yup';
 import { Form } from '@unform/web';
@@ -23,6 +24,7 @@ import { useAuth } from '../../hooks/auth';
 
 interface ProfileFormData {
   name: string;
+  celphone: string;
   email: string;
   password: string;
   password_confirmation: string;
@@ -42,6 +44,7 @@ const Profile: React.FC = () => {
       try {
         const schema = Yup.object().shape({
           name: Yup.string().required('Nome obrigatório'),
+          celphone: Yup.string(),
           email: Yup.string()
             .email('Email inválido')
             .required('Email obrigatório'),
@@ -68,6 +71,7 @@ const Profile: React.FC = () => {
         const {
           name,
           email,
+          celphone,
           old_password,
           password,
           password_confirmation,
@@ -76,6 +80,7 @@ const Profile: React.FC = () => {
         const formData = {
           name,
           email,
+          celphone,
           ...(data.old_password
             ? {
                 old_password,
@@ -89,7 +94,7 @@ const Profile: React.FC = () => {
 
         updateUser(response.data);
 
-        history.push(routes.dashboard);
+        history.push(routes.enterprise);
 
         addToast({
           type: 'success',
@@ -149,6 +154,7 @@ const Profile: React.FC = () => {
           initialData={{
             name: user.name,
             email: user.email,
+            celphone: user.celphone,
           }}
           ref={formRef}
           onSubmit={handleSubmit}
@@ -168,6 +174,12 @@ const Profile: React.FC = () => {
           </AvatarInput>
           <h1>Meu Perfil</h1>
           <Input icon={FiUser} name="name" type="text" placeholder="Nome" />
+          <Input
+            icon={FiPhone}
+            name="celphone"
+            type="text"
+            placeholder="Telefone"
+          />
 
           <Input icon={FiMail} name="email" type="email" placeholder="E-mail" />
           <Input

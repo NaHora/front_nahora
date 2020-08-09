@@ -4,6 +4,7 @@ import Tooltip from '../Tooltip';
 interface ContainerProps {
   isFocused: boolean;
   isFilled: boolean;
+  maxWidth?: string;
   erroMsg: boolean;
 }
 
@@ -12,8 +13,9 @@ export const Container = styled.div<ContainerProps>`
   border-radius: 10px;
   border: 2px solid #232129;
   padding: 16px;
-  width: 100%;
+  width: ${(props) => (props.maxWidth ? props.maxWidth : '100%')};
   color: #666360;
+
 
   display: flex;
   align-items: center;

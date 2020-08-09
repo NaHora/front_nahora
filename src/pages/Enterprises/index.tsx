@@ -35,7 +35,6 @@ interface SearchEnterprise {
   logo_url: string;
   primary_color: string;
   secondary_color: string;
-  friends: boolean;
   aceito?: number;
 }
 
@@ -210,7 +209,7 @@ const Enterprises: React.FC = () => {
         }
       }
     },
-    [toast, user.id, getInviteEnterprise, getAllEnterprises],
+    [toast, user.id, getInviteEnterprise, getAllEnterprises, getMyEnterprises],
   );
 
   useEffect(() => {
@@ -237,7 +236,7 @@ const Enterprises: React.FC = () => {
             name="search"
             type="text"
             value={searchValue}
-            placeholder="Procurar empresas"
+            placeholder="Filtrar empresas"
             onChange={(e) => {
               setSearchValue(e.target.value);
             }}

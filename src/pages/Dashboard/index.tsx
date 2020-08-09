@@ -6,12 +6,16 @@ import {
   FiHome,
   FiX,
   FiCheckCircle,
+  FiPhone,
 } from 'react-icons/fi';
 import { GoLocation } from 'react-icons/go';
 import DayPicker, { DayModifiers } from 'react-day-picker';
 import { isToday, format, getDay, getYear, getMonth, getDate } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { Link, useHistory } from 'react-router-dom';
+import { makeStyles } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
 import {
   Container,
   Content,
@@ -30,11 +34,32 @@ import { routes } from '../../routes';
 import { useToast } from '../../hooks/toast';
 import Button from '../../components/Button';
 import { useAuth } from '../../hooks/auth';
+import Fade from '@material-ui/core/Fade';
+// import { Container } from './styles';
 
+const useStyles = makeStyles((theme) => ({
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+    color: 'black',
+  },
+  divButton: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+}));
 interface User {
   id: string;
   avatar_url: string;
   name: string;
+  celphone: string;
 }
 
 interface Category {
@@ -86,10 +111,22 @@ const Dashboard: React.FC = () => {
   ] = useState<Category | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string | null>('#28262e');
   const [loading, setLoading] = useState(false);
+  const [currentService, setCurrentService] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [secondaryColor, setSecondaryColor] = useState<string | null>(
     '#ff9000',
   );
+  const classes = useStyles();
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpen = (service_id: string) => {
+    setCurrentService(service_id);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     setPrimaryColor(thisEnterprise.primary_color);
@@ -203,6 +240,42 @@ const Dashboard: React.FC = () => {
     [thisEnterprise.id, toast, selectedDate, history],
   );
 
+  const deleteAppointment = useCallback(
+    async (service_id) => {
+      try {
+        await api.delete(`/services/${service_id}`);
+
+        handleClose();
+        handleServices();
+
+        toast.addToast({
+          type: 'success',
+          title: 'Horário excluído !',
+        });
+      } catch (err) {
+        if (err.response) {
+          toast.addToast({
+            type: 'error',
+            title: 'Vishi',
+            description:
+              err.response.data.message ||
+              'Ocorreu um erro ao excluir este horário, tente novamente',
+          });
+        } else {
+          toast.addToast({
+            type: 'error',
+            title: 'Vishi',
+            description:
+              'Ocorreu um erro ao excluir este horário, tente novamente',
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast, handleServices],
+  );
+
   useEffect(() => {
     if ((thisEnterprise.id, currentWeekDay, selectectedCategory)) {
       handleServices();
@@ -247,6 +320,48 @@ const Dashboard: React.FC = () => {
       primaryColor={primaryColor || '#28262e'}
       secondaryColor={secondaryColor || '#ff9000'}
     >
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        className={classes.modal}
+        open={open}
+        onClose={handleClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={open}>
+          <div className={classes.paper}>
+            <h2 id="transition-modal-title">Deseja excluir o horário?</h2>
+            <p id="transition-modal-description">
+              se você confirmar terá que criar novamente o horário
+            </p>
+            <div className={classes.divButton}>
+              <Button
+                primaryColor={secondaryColor || '#ff9000'}
+                secondaryColor={primaryColor || '#28262e'}
+                onClick={handleClose}
+                loading={loading}
+                transparent
+              >
+                <FiCheckCircle />
+                Cancelar
+              </Button>
+              <Button
+                primaryColor={secondaryColor || '#ff9000'}
+                secondaryColor={primaryColor || '#28262e'}
+                onClick={() => deleteAppointment(currentService)}
+                loading={loading}
+              >
+                <FiCheckCircle />
+                Excluir
+              </Button>
+            </div>
+          </div>
+        </Fade>
+      </Modal>
       <header>
         <div>
           <Link to={routes.enterprise}>
@@ -275,7 +390,7 @@ const Dashboard: React.FC = () => {
         primaryColor={primaryColor || '#28262e'}
         secondaryColor={secondaryColor || '#ff9000'}
       >
-        <span>Serviços: </span>
+        <span>Tipo de Serviço: </span>
         <div>
           {categories && categories.length > 0 ? (
             categories.map((category) => (
@@ -342,7 +457,6 @@ const Dashboard: React.FC = () => {
             <span>{selectedDateAsText}</span>
             <span>{selectedWeekDay}</span>
           </p>
-
           <Section
             primaryColor={primaryColor || '#28262e'}
             secondaryColor={secondaryColor || '#ff9000'}
@@ -356,24 +470,36 @@ const Dashboard: React.FC = () => {
               {morningServices.map((service) => (
                 <Appointment
                   disabled={service.disabled}
-                  onClick={() => {
-                    if (!service.disabled) {
-                      setOpeModal({ morning: true });
-                      setAppointments(service.appointments);
-                      setSelectectedService(service);
-                    }
-                  }}
                   primaryColor={primaryColor || '#28262e'}
                   secondaryColor={secondaryColor || '#ff9000'}
                   key={service.id}
                   currentSelected={selectectedService?.id === service.id}
                 >
-                  <span style={{ marginRight: '16px' }}>
-                    <FiClock /> {service.start_hour}
-                  </span>
-                  <span>
-                    <FiUsers /> {service.appointments.length}/{service.capacity}
-                  </span>
+                  <div
+                    onClick={() => {
+                      if (!service.disabled) {
+                        setOpeModal({ morning: true });
+                        setAppointments(service.appointments);
+                        setSelectectedService(service);
+                      }
+                    }}
+                  >
+                    <span style={{ marginRight: '16px' }}>
+                      <FiClock /> {service.start_hour}
+                    </span>
+                    <span>
+                      <FiUsers /> {service.appointments.length}/
+                      {service.capacity}
+                    </span>
+                  </div>
+                  {user.id === thisEnterprise.owner_id && (
+                    <span style={{ marginLeft: '8px' }}>
+                      <FiX
+                        color="#c53030"
+                        onClick={() => handleOpen(service.id)}
+                      />
+                    </span>
+                  )}
                 </Appointment>
               ))}
             </div>
@@ -394,7 +520,7 @@ const Dashboard: React.FC = () => {
                 </span>
                 <span>
                   <GoLocation />
-                  {thisEnterprise.address}
+                  {selectectedCategory?.name}
                 </span>
                 <span>
                   <FiClock />
@@ -408,7 +534,7 @@ const Dashboard: React.FC = () => {
                       Usuários que marcaram horário:
                     </>
                   ) : (
-                    'Ninguém se agendou até o momento.'
+                    <>Ninguém se agendou até o momento.</>
                   )}
                 </span>
                 <div>
@@ -422,19 +548,26 @@ const Dashboard: React.FC = () => {
                         alt=""
                       />
                       {appointment.user.name}
+                      {user.id === thisEnterprise.owner_id && (
+                        <>
+                          <FiPhone />
+                          {appointment.user.celphone}
+                        </>
+                      )}
                     </span>
                   ))}
                 </div>
-                {/* <Button
-                  style={{ marginTop: 'auto' }}
-                  primaryColor={secondaryColor || '#ff9000'}
-                  secondaryColor={primaryColor || '#28262e'}
-                  onClick={() => handleAppointment(selectectedService?.id)}
-                  loading={loading}
-                >
-                  <FiCheckCircle />
-                  Confirmar
-                </Button> */}
+                <ButtonContainer>
+                  <Button
+                    primaryColor={secondaryColor || '#ff9000'}
+                    secondaryColor={primaryColor || '#28262e'}
+                    onClick={() => handleAppointment(selectectedService?.id)}
+                    loading={loading}
+                  >
+                    <FiCheckCircle />
+                    Confirmar
+                  </Button>
+                </ButtonContainer>
               </ModalUsers>
             )}
           </Section>
@@ -450,25 +583,37 @@ const Dashboard: React.FC = () => {
             <div>
               {afternoonServices.map((service) => (
                 <Appointment
-                  onClick={() => {
-                    if (!service.disabled) {
-                      setOpeModal({ afternoon: true });
-                      setAppointments(service.appointments);
-                      setSelectectedService(service);
-                    }
-                  }}
                   primaryColor={primaryColor || '#28262e'}
                   disabled={service.disabled}
                   secondaryColor={secondaryColor || '#ff9000'}
                   key={service.id}
                   currentSelected={selectectedService?.id === service.id}
                 >
-                  <span style={{ marginRight: '16px' }}>
-                    <FiClock /> {service.start_hour}
-                  </span>
-                  <span>
-                    <FiUsers /> {service.appointments.length}/{service.capacity}
-                  </span>
+                  <div
+                    onClick={() => {
+                      if (!service.disabled) {
+                        setOpeModal({ afternoon: true });
+                        setAppointments(service.appointments);
+                        setSelectectedService(service);
+                      }
+                    }}
+                  >
+                    <span style={{ marginRight: '16px' }}>
+                      <FiClock /> {service.start_hour}
+                    </span>
+                    <span>
+                      <FiUsers /> {service.appointments.length}/
+                      {service.capacity}
+                    </span>
+                  </div>
+                  {user.id === thisEnterprise.owner_id && (
+                    <span style={{ marginLeft: '8px' }}>
+                      <FiX
+                        color="#c53030"
+                        onClick={() => handleOpen(service.id)}
+                      />
+                    </span>
+                  )}
                 </Appointment>
               ))}
             </div>
@@ -483,7 +628,7 @@ const Dashboard: React.FC = () => {
                 </span>
                 <span>
                   <GoLocation />
-                  {thisEnterprise.address}
+                  {selectectedCategory?.name}
                 </span>
                 <span>
                   <FiClock />
@@ -511,22 +656,30 @@ const Dashboard: React.FC = () => {
                         alt=""
                       />
                       {appointment.user.name}
+                      {user.id === thisEnterprise.owner_id && (
+                        <>
+                          <FiPhone />
+                          {appointment.user.celphone}
+                        </>
+                      )}
                     </span>
                   ))}
                 </div>
-                {/* <Button
-                  style={{ marginTop: 'auto' }}
-                  primaryColor={secondaryColor || '#ff9000'}
-                  secondaryColor={primaryColor || '#28262e'}
-                  onClick={() => handleAppointment(selectectedService?.id)}
-                  loading={loading}
-                >
-                  <FiCheckCircle />
-                  Confirmar
-                </Button> */}
+                <ButtonContainer>
+                  <Button
+                    primaryColor={secondaryColor || '#ff9000'}
+                    secondaryColor={primaryColor || '#28262e'}
+                    onClick={() => handleAppointment(selectectedService?.id)}
+                    loading={loading}
+                  >
+                    <FiCheckCircle />
+                    Confirmar
+                  </Button>
+                </ButtonContainer>
               </ModalUsers>
             )}
           </Section>
+
           <Section
             primaryColor={primaryColor || '#28262e'}
             secondaryColor={secondaryColor || '#ff9000'}
@@ -537,25 +690,37 @@ const Dashboard: React.FC = () => {
             <div>
               {nightServices.map((service) => (
                 <Appointment
-                  onClick={() => {
-                    if (!service.disabled) {
-                      setOpeModal({ night: true });
-                      setAppointments(service.appointments);
-                      setSelectectedService(service);
-                    }
-                  }}
                   primaryColor={primaryColor || '#28262e'}
                   disabled={service.disabled}
                   secondaryColor={secondaryColor || '#ff9000'}
                   key={service.id}
                   currentSelected={selectectedService?.id === service.id}
                 >
-                  <span style={{ marginRight: '16px' }}>
-                    <FiClock /> {service.start_hour}
-                  </span>
-                  <span>
-                    <FiUsers /> {service.appointments.length}/{service.capacity}
-                  </span>
+                  <div
+                    onClick={() => {
+                      if (!service.disabled) {
+                        setOpeModal({ night: true });
+                        setAppointments(service.appointments);
+                        setSelectectedService(service);
+                      }
+                    }}
+                  >
+                    <span style={{ marginRight: '16px' }}>
+                      <FiClock /> {service.start_hour}
+                    </span>
+                    <span>
+                      <FiUsers /> {service.appointments.length}/
+                      {service.capacity}
+                    </span>
+                  </div>
+                  {user.id === thisEnterprise.owner_id && (
+                    <span style={{ marginLeft: '8px' }}>
+                      <FiX
+                        color="#c53030"
+                        onClick={() => handleOpen(service.id)}
+                      />
+                    </span>
+                  )}
                 </Appointment>
               ))}
             </div>
@@ -576,7 +741,7 @@ const Dashboard: React.FC = () => {
                 </span>
                 <span>
                   <GoLocation />
-                  {thisEnterprise.address}
+                  {selectectedCategory?.name}
                 </span>
                 <span>
                   <FiClock />
@@ -604,25 +769,32 @@ const Dashboard: React.FC = () => {
                         alt=""
                       />
                       {appointment.user.name}
+                      {user.id === thisEnterprise.owner_id && (
+                        <>
+                          <FiPhone />
+                          {appointment.user.celphone}
+                        </>
+                      )}
                     </span>
                   ))}
                 </div>
-                {/* <Button
-                  style={{ marginTop: 'auto' }}
-                  primaryColor={secondaryColor || '#ff9000'}
-                  secondaryColor={primaryColor || '#28262e'}
-                  onClick={() => handleAppointment(selectectedService?.id)}
-                  loading={loading}
-                >
-                  <FiCheckCircle />
-                  Confirmar
-                </Button> */}
+                <ButtonContainer>
+                  <Button
+                    primaryColor={secondaryColor || '#ff9000'}
+                    secondaryColor={primaryColor || '#28262e'}
+                    onClick={() => handleAppointment(selectectedService?.id)}
+                    loading={loading}
+                  >
+                    <FiCheckCircle />
+                    Confirmar
+                  </Button>
+                </ButtonContainer>
               </ModalUsers>
             )}
           </Section>
         </Schedule>
       </Content>
-      <ButtonContainer>
+      {/* <ButtonContainer>
         <Button
           primaryColor={primaryColor || '#28262e'}
           secondaryColor={secondaryColor || '#ff9000'}
@@ -632,7 +804,7 @@ const Dashboard: React.FC = () => {
           <FiCheckCircle />
           Confirmar
         </Button>
-      </ButtonContainer>
+      </ButtonContainer> */}
     </Container>
   );
 };

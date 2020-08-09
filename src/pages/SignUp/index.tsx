@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from 'react';
 
-import { FiMail, FiLock, FiUser, FiArrowLeft } from 'react-icons/fi';
+import { FiMail, FiLock, FiUser, FiArrowLeft, FiPhone } from 'react-icons/fi';
 import * as Yup from 'yup';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
@@ -18,6 +18,7 @@ interface SignUpFormData {
   name: string;
   email: string;
   password: string;
+  celphone: string;
 }
 
 const SignUp: React.FC = () => {
@@ -38,6 +39,10 @@ const SignUp: React.FC = () => {
           password: Yup.string().min(
             6,
             'A senha deve conter no mínimo 6 dígitos',
+          ),
+          celphone: Yup.string().min(
+            10,
+            'Confira se digitou o telefone com DDD',
           ),
         });
 
@@ -80,7 +85,12 @@ const SignUp: React.FC = () => {
           <Form ref={formRef} onSubmit={handleSubmit}>
             <h1>Faça seu cadastro</h1>
             <Input icon={FiUser} name="name" type="text" placeholder="Nome" />
-
+            <Input
+              icon={FiPhone}
+              name="celphone"
+              type="text"
+              placeholder="Telefone"
+            />
             <Input
               icon={FiMail}
               name="email"

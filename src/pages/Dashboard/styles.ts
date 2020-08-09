@@ -127,11 +127,11 @@ export const DivCategory = styled.div<PageColor>`
 export const ButtonContainer = styled.main`
   width: 300px;
   margin: 0 auto;
-  padding-bottom: 30px;
+  padding-bottom: 10px;
 
   @media (max-width: 600px) {
     width: 100%;
-    padding: 15px;
+    padding: 10px;
   }
 `;
 
@@ -142,6 +142,7 @@ export const Content = styled.main`
   margin: 32px auto 0;
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
 
   @media (max-width: 600px) {
     flex-direction: column;
@@ -152,7 +153,7 @@ export const Schedule = styled.div<PageColor>`
   flex: 1;
 
   max-width: 50%;
-  align-self: center;
+
   color: ${(props) =>
     TinyColor(props.primaryColor).isLight() ? '#000' : '#f4ede8'};
 
@@ -255,25 +256,29 @@ export const Appointment = styled.aside<PageColor>`
   justify-content: space-between;
   margin-right: 16px;
   cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
-
-  span {
+  > div {
     display: flex;
     align-items: center;
-    color: ${(props) =>
-      TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
 
-    svg {
+    span {
+      display: flex;
+      align-items: center;
       color: ${(props) =>
         TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
 
-      margin-right: 8px;
+      svg {
+        color: ${(props) =>
+          TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
+
+        margin-right: 8px;
+      }
     }
   }
 `;
 
 export const Calendar = styled.aside<PageColor>`
   width: 380px;
-  align-self: center;
+
   color: ${(props) =>
     TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
 
@@ -375,13 +380,6 @@ export const ModalUsers = styled.div<PageColor>`
     TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
   padding: 20px;
 
-  @media (max-width: 600px) {
-    top: 10%;
-    bottom: 10%;
-    right: 5%;
-    left: 5%;
-  }
-
   img {
     border-radius: 50%;
     height: 30px;
@@ -421,7 +419,7 @@ export const ModalUsers = styled.div<PageColor>`
   }
 
   svg {
-    margin-right: 8px;
+    margin: 8px;
   }
 
   span {
