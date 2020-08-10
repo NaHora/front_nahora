@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { lighten, darken } from 'polished';
 
 interface CardAction {
   past?: boolean | undefined;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiPower, FiList, FiHome, FiCheckCircle } from 'react-icons/fi';
+import { FiHome, FiCheckCircle } from 'react-icons/fi';
 
 import { Link, useHistory } from 'react-router-dom';
 import { Header, HeaderContent, Profile } from './styles';

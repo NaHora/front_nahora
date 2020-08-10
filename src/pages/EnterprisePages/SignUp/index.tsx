@@ -1,14 +1,13 @@
 import React, { useCallback, useState } from 'react';
 
-import { FiMail, FiLock, FiUser, FiArrowLeft } from 'react-icons/fi';
+import { FiArrowLeft } from 'react-icons/fi';
 import * as Yup from 'yup';
-import { FormHandles } from '@unform/core';
-import { Link, useHistory } from 'react-router-dom';
+
+import { useHistory } from 'react-router-dom';
 import Switch from '@material-ui/core/Switch';
-import logoImg from '../../../assets/logo.svg';
+
 import {
   Container,
-  AvatarInput,
   Cel,
   Header,
   Body,
@@ -21,7 +20,6 @@ import getValidationErrors from '../../../utils';
 import { routes } from '../../../routes';
 import { useToast } from '../../../hooks/toast';
 import api from '../../../services/api';
-import HeaderMenu from '../../../components/Header';
 
 interface SignUpFormData {
   name: string;

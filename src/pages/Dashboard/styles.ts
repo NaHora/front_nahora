@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { shade, darken, lighten } from 'polished';
+import { shade, lighten } from 'polished';
 import TinyColor from 'tinycolor2';
 
 interface PageColor {
