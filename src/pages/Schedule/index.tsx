@@ -1,46 +1,27 @@
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import {
-  FiSearch,
-  FiArrowDown,
-  FiArrowDownCircle,
-  FiChevronDown,
-  FiChevronUp,
-  FiUsers,
-} from 'react-icons/fi';
+import React, { useCallback, useState, useEffect } from 'react';
+import { FiChevronDown, FiChevronUp, FiUsers } from 'react-icons/fi';
 import { MdDeleteForever } from 'react-icons/md';
 
 import { useHistory } from 'react-router-dom';
-import Loader from 'react-loader-spinner';
+
 import { format } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { GoLocation } from 'react-icons/go';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
-import {
-  Container,
-  Content,
-  Card,
-  Title,
-  SubTitle,
-  Text,
-  CadastraButton,
-  SearchContent,
-  MyEnterprises,
-  CardMine,
-  OpenDelete,
-} from './styles';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
+import { Container, Content, Card, OpenDelete } from './styles';
 
 import 'react-day-picker/lib/style.css';
 
 import HeaderMenu from '../../components/Header';
-import InputDefault from '../../components/InputDefault';
+
 import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
 import { useAuth } from '../../hooks/auth';
-import { routes } from '../../routes';
+
 import Button from '../../components/Button';
-import Backdrop from '@material-ui/core/Backdrop';
-import Fade from '@material-ui/core/Fade';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
