@@ -30,7 +30,7 @@
     "react/jsx-props-no-spreading": "off",
     "react/prop-types": "off",
     "eslint@typescript-eslint/camelcase": "off",
-    "react-hooks/exhaustive-deps": "off",
+    "react-hooks/exhaustive-deps": "warn",
     "react/jsx-filename-extension": [
       1,
       {

@@ -91,8 +91,6 @@ interface ListAppointment {
 
 const Enterprises: React.FC = () => {
   const toast = useToast();
-  const history = useHistory();
-  const { user } = useAuth();
 
   const [openShedule, setOpenShedule] = useState<OpenModal>({});
 
@@ -100,7 +98,6 @@ const Enterprises: React.FC = () => {
   const [currentAppointment, setCurrentAppointment] = useState<Appointment>();
   const [openDelete, setOpenDelete] = useState(false);
 
-  const [searchValue, setSearchValue] = useState('');
   const [myAppointments, setMyAppointments] = useState<ListAppointment>();
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
@@ -123,7 +120,7 @@ const Enterprises: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   const deleteAppointments = useCallback(
     async (appointment_id: string | undefined) => {
