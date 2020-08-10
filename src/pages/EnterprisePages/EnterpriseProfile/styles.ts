@@ -100,6 +100,7 @@ export const AvatarInput = styled.div`
 `;
 
 export const Cel = styled.div`
+  border: 1px solid #ff9000;
   border-radius: 5px;
   max-width: 320px;
   width: 100%;
