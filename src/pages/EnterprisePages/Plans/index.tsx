@@ -104,7 +104,7 @@ const Plans: React.FC = () => {
 
       setAllUsersEnterpriseAccepted(response.data);
     } catch {}
-  }, []);
+  }, [selectedSolicitation]);
 
   const createPlan = useCallback(async () => {
     try {
@@ -340,7 +340,8 @@ const Plans: React.FC = () => {
           <SolicitationSection>
             <span
               onClick={() =>
-                setOpenSolicitationSection(!openSolicitationSection)}
+                setOpenSolicitationSection(!openSolicitationSection)
+              }
             >
               {!openSolicitationSection ? (
                 <FiChevronDown
@@ -465,7 +466,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           placeholder="Nome"
                           type="text"
                         />
@@ -478,7 +480,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           placeholder="Valor"
                           type="text"
                         />
@@ -490,7 +493,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           name="schedule_limit"
                           placeholder="Limite"
                           type="number"
@@ -503,7 +507,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           name="days_to_expire"
                           placeholder="Expiração"
                           type="number"
@@ -596,7 +601,8 @@ const Plans: React.FC = () => {
                                 setSelectionSolicitation({
                                   ...selectedSolicitation,
                                   [invite.user.id]: e.target.value,
-                                })}
+                                })
+                              }
                               name="selectedSolicitation"
                               value={selectedSolicitation[invite.user.id]}
                             >
@@ -619,7 +625,8 @@ const Plans: React.FC = () => {
                                   invite.user.id,
                                   selectedSolicitation[invite.user.id],
                                   invite.currentPlan?.id,
-                                )}
+                                )
+                              }
                               color="#1ec657"
                               cursor="pointer"
                               size={25}
