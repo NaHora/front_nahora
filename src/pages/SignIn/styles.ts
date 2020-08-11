@@ -44,7 +44,8 @@ export const AnimationContainer = styled.div`
 
   animation: ${appearFromLeft} 1s;
   @media (max-width: 600px) {
-    padding: 20px 0;
+    padding: 10px 10px 50px;
+
     img {
       margin: 100px 0 50px;
     }
