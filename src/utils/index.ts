@@ -12,3 +12,7 @@ export default function getValidationErrors(err: ValidationError): Errors {
 
   return validationErrors;
 }
+
+export const removeMask = (value: string) => {
+  if (value) return value.replace(/[^0-9,]/g, '').replace(',', '.');
+};

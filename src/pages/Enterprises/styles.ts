@@ -75,6 +75,7 @@ export const SearchContent = styled.div`
 `;
 
 export const MyEnterprises = styled.div`
+  padding: 0 0 20px;
   span {
     font-size: 34px;
     font-weight: bold;

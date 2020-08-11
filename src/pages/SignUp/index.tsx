@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import { Link, useHistory } from 'react-router-dom';
+import NumberFormat from 'react-number-format';
 import logoImg from '../../assets/logo.svg';
 import { Container, Content, Background, AnimationContainer } from './styles';
 import Input from '../../components/Input';
@@ -85,12 +86,23 @@ const SignUp: React.FC = () => {
           <Form ref={formRef} onSubmit={handleSubmit}>
             <h1>Faça seu cadastro</h1>
             <Input icon={FiUser} name="name" type="text" placeholder="Nome" />
-            <Input
+            <NumberFormat
+              customInput={Input}
               icon={FiPhone}
-              name="celphone"
               type="text"
+              format="(##) #####-####"
+              name="celphone"
+              // allowLeadingZeros
+              // allowEmptyFormatting
+              mask="_"
               placeholder="Telefone"
             />
+            {/* <Input
+              name="celphone"
+              icon={FiPhone}
+              type="text"
+              placeholder="Telefone"
+            /> */}
             <Input
               icon={FiMail}
               name="email"

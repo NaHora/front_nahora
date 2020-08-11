@@ -180,6 +180,17 @@ const Profile: React.FC = () => {
             type="text"
             placeholder="Telefone"
           />
+          {/* <NumberFormat
+            customInput={Input}
+            icon={FiPhone}
+            type="text"
+            format="(##) #####-####"
+            name="celphone"
+            // allowLeadingZeros
+            // allowEmptyFormatting
+            mask="_"
+            placeholder="Telefone"
+          /> */}
 
           <Input icon={FiMail} name="email" type="email" placeholder="E-mail" />
           <Input

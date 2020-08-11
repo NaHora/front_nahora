@@ -49,7 +49,7 @@ export const AnimationContainer = styled.div`
     width: 100%;
 
     img {
-      margin: 100px 0 50px;
+      margin: 50px 0 10px;
     }
   }
 
@@ -61,6 +61,7 @@ export const AnimationContainer = styled.div`
 
     @media (max-width: 600px) {
       width: 100%;
+      margin: 0;
     }
 
     h1 {

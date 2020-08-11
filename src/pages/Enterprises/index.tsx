@@ -405,6 +405,7 @@ const Enterprises: React.FC = () => {
               <br />
               Você ainda não convidou nenhuma empresa, ou elas ainda não te
               aceitaram.
+              <br />
             </>
           )}
         </MyEnterprises>

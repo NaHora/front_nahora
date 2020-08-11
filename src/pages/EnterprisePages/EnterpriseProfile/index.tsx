@@ -2,6 +2,7 @@ import React, { ChangeEvent, useCallback, useState, useEffect } from 'react';
 
 import { FiCamera, FiArrowLeft } from 'react-icons/fi';
 import { Switch } from '@material-ui/core';
+import NumberFormat from 'react-number-format';
 import { Container, AvatarInput, Cel, Header, Body, Form } from './styles';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
@@ -129,28 +130,40 @@ const EnterpriseProfile: React.FC = () => {
                 />
               </label>
               <label htmlFor="">
-                Horário:{' '}
-                <InputDefault
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
+                Horário de abertura:{' '}
+                <NumberFormat
+                  customInput={InputDefault}
                   value={enterpriseData.open_hour}
                   type="text"
+                  format="##:##"
+                  suffix="h"
                   name="open_hour"
-                />
-                Horário:{' '}
-                <InputDefault
                   onChange={(e) =>
                     setEnterpriseData({
                       ...enterpriseData,
                       [e.target.name]: e.target.value,
                     })
                   }
+                  // allowLeadingZeros
+                  // allowEmptyFormatting
+                  mask="_"
+                />
+                Horário de fechamento:{' '}
+                <NumberFormat
+                  customInput={InputDefault}
                   value={enterpriseData.close_hour}
                   type="text"
+                  format="##:##"
+                  suffix="h"
+                  onChange={(e) =>
+                    setEnterpriseData({
+                      ...enterpriseData,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
+                  // allowLeadingZeros
+                  // allowEmptyFormatting
+                  mask="_"
                   name="close_hour"
                 />
               </label>

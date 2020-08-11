@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import { useHistory } from 'react-router-dom';
 import Switch from '@material-ui/core/Switch';
 
+import NumberFormat from 'react-number-format';
 import {
   Container,
   Cel,
@@ -119,21 +120,39 @@ const SignUp: React.FC = () => {
               </label>
               <label htmlFor="">
                 Horário de abertura:{' '}
-                <InputDefault
-                  onChange={(e) =>
-                    setData({ ...data, [e.target.name]: e.target.value })
-                  }
+                <NumberFormat
+                  customInput={InputDefault}
                   value={data.open_hour}
                   type="text"
+                  format="##:##"
+                  suffix="h"
                   name="open_hour"
+                  onChange={(e) =>
+                    setData({
+                      ...data,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
+                  // allowLeadingZeros
+                  // allowEmptyFormatting
+                  mask="_"
                 />
                 Horário de fechamento:{' '}
-                <InputDefault
-                  onChange={(e) =>
-                    setData({ ...data, [e.target.name]: e.target.value })
-                  }
+                <NumberFormat
+                  customInput={InputDefault}
                   value={data.close_hour}
                   type="text"
+                  format="##:##"
+                  suffix="h"
+                  onChange={(e) =>
+                    setData({
+                      ...data,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
+                  // allowLeadingZeros
+                  // allowEmptyFormatting
+                  mask="_"
                   name="close_hour"
                 />
               </label>
