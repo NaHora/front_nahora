@@ -48,7 +48,7 @@ export const AnimationContainer = styled.div`
   @media (max-width: 600px) {
     padding: 20px 0;
     img {
-      margin: 150px 0 0;
+      margin: 100px 0 50px;
     }
   }
   form {

@@ -48,7 +48,7 @@ export const AnimationContainer = styled.div`
     padding: 20px;
 
     img {
-      margin: 150px 0 0;
+      margin: 100px 0 50px;
     }
   }
 
