@@ -40,7 +40,9 @@ const EnterpriseSchedule: React.FC = () => {
   const history = useHistory();
 
   const [formCategoryName, setFormCategoryName] = useState('');
-  const [formService, setFormService] = useState<any>({});
+  const [formService, setFormService] = useState<any>({
+    pending_scheduling: false,
+  });
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectectedCategory, setSelectectedCategory] = useState<string[]>([]);
   const [selectectedDays, setSelectectedDays] = useState<number[]>([]);

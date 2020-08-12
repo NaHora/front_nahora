@@ -48,10 +48,6 @@ export const AnimationContainer = styled.div`
   @media (max-width: 600px) {
     padding: 10px 10px 50px;
     width: 100%;
-
-    img {
-      margin: 50px 0 10px;
-    }
   }
   form {
     margin: 80px 0;
@@ -61,6 +57,11 @@ export const AnimationContainer = styled.div`
       width: 100%;
       margin: 0;
     }
+    img {
+      margin: 50px 0;
+      width: 300px;
+    }
+
     h1 {
       margin-bottom: 24px;
     }

@@ -495,7 +495,7 @@ const Dashboard: React.FC = () => {
                   {user.id === thisEnterprise.owner_id && (
                     <span style={{ marginLeft: '8px' }}>
                       <FiX
-                        color="#c53030"
+                        cursor="pointer"
                         onClick={() => handleOpen(service.id)}
                       />
                     </span>
@@ -609,7 +609,7 @@ const Dashboard: React.FC = () => {
                   {user.id === thisEnterprise.owner_id && (
                     <span style={{ marginLeft: '8px' }}>
                       <FiX
-                        color="#c53030"
+                        cursor="pointer"
                         onClick={() => handleOpen(service.id)}
                       />
                     </span>
@@ -716,7 +716,7 @@ const Dashboard: React.FC = () => {
                   {user.id === thisEnterprise.owner_id && (
                     <span style={{ marginLeft: '8px' }}>
                       <FiX
-                        color="#c53030"
+                        cursor="pointer"
                         onClick={() => handleOpen(service.id)}
                       />
                     </span>

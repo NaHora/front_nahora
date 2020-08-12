@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import { FiMail, FiLock, FiUser, FiArrowLeft, FiPhone } from 'react-icons/fi';
 import * as Yup from 'yup';
@@ -6,7 +6,7 @@ import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import { Link, useHistory } from 'react-router-dom';
 import NumberFormat from 'react-number-format';
-import logoImg from '../../assets/logo.svg';
+import logoImg from '../../assets/nahora.png';
 import { Container, Content, Background, AnimationContainer } from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -26,11 +26,12 @@ const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const history = useHistory();
   const { addToast } = useToast();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = useCallback(
     async (data: SignUpFormData) => {
       formRef.current?.setErrors({});
-
+      setLoading(true);
       try {
         const schema = Yup.object().shape({
           name: Yup.string().required('Nome obrigatório'),
@@ -71,6 +72,8 @@ const SignUp: React.FC = () => {
           title: 'Erro no cadastro',
           description: 'Ocorreu um erro ao fazer o cadastro, tente novamente',
         });
+      } finally {
+        setLoading(false);
       }
     },
     [addToast, history],
@@ -82,8 +85,8 @@ const SignUp: React.FC = () => {
 
       <Content>
         <AnimationContainer>
-          <img src={logoImg} alt="" />
           <Form ref={formRef} onSubmit={handleSubmit}>
+            <img src={logoImg} alt="" />
             <h1>Faça seu cadastro</h1>
             <Input icon={FiUser} name="name" type="text" placeholder="Nome" />
             <NumberFormat
@@ -115,7 +118,9 @@ const SignUp: React.FC = () => {
               type="password"
               placeholder="Senha"
             />
-            <Button type="submit">Cadastrar</Button>
+            <Button loading={loading} type="submit">
+              Cadastrar
+            </Button>
           </Form>
           <Link to={routes.signin}>
             <FiArrowLeft />

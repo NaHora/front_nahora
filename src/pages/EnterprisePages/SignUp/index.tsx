@@ -191,7 +191,7 @@ const SignUp: React.FC = () => {
                   name="address"
                 />
               </label>
-              <label htmlFor="">
+              <label style={{ width: '150px' }} htmlFor="">
                 Cor primária:{' '}
                 <InputDefault
                   onChange={(e) =>
@@ -202,7 +202,7 @@ const SignUp: React.FC = () => {
                   name="primary_color"
                 />
               </label>
-              <label htmlFor="">
+              <label style={{ width: '150px' }} htmlFor="">
                 Cor secundária:{' '}
                 <InputDefault
                   onChange={(e) =>

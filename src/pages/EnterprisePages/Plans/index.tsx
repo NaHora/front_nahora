@@ -123,6 +123,8 @@ const Plans: React.FC = () => {
         days_to_expire: '',
       });
 
+      setOpenActiveSection(true);
+
       getEnterprisePlans();
     } catch (err) {
       if (err.response) {
@@ -194,6 +196,12 @@ const Plans: React.FC = () => {
           description:
             'Você aceitou a solicitação, ative um plano para o usuário.',
         });
+
+        if (enterprisePlans.length === 0) {
+          setOpenPlanSection(true);
+        } else {
+          setOpenActiveSection(true);
+        }
 
         getAllEnterpriseAcceptedInvites();
         getSolicitations();

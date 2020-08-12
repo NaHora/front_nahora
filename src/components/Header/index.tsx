@@ -3,7 +3,7 @@ import { FiHome, FiCheckCircle } from 'react-icons/fi';
 
 import { Link, useHistory } from 'react-router-dom';
 import { Header, HeaderContent, Profile } from './styles';
-import logoImg from '../../assets/logo.svg';
+import logoImg from '../../assets/nahora.png';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
 import Menu from '../Menu';
@@ -15,7 +15,7 @@ function HeaderMenu() {
   return (
     <Header>
       <HeaderContent>
-        <img src={logoImg} alt="GoBarber" />
+        <img src={logoImg} alt="NaHora" />
 
         <Profile>
           <img
@@ -33,19 +33,7 @@ function HeaderMenu() {
           </div>
         </Profile>
         <button>
-          {localStorage.getItem('@NaHora:myEnterprise') ? (
-            <Menu />
-          ) : history.location.pathname === routes.enterprise ? (
-            <Link to={routes.schedule}>
-              <FiCheckCircle />
-              <span>Agendados</span>
-            </Link>
-          ) : (
-            <Link to={routes.enterprise}>
-              <FiHome />
-              <span>Home</span>
-            </Link>
-          )}
+          <Menu />
         </button>
       </HeaderContent>
     </Header>

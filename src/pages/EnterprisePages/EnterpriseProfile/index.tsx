@@ -55,7 +55,7 @@ const EnterpriseProfile: React.FC = () => {
         close_hour: enterpriseData.close_hour,
         primary_color: enterpriseData.primary_color,
         secondary_color: enterpriseData.secondary_color,
-        isPrivate: enterpriseData.isPrivate,
+        isPrivate: !!enterpriseData.isPrivate,
       };
       const response = await api.put(`/enterprises`, body);
 
@@ -208,7 +208,7 @@ const EnterpriseProfile: React.FC = () => {
                   name="address"
                 />
               </label>
-              <label htmlFor="">
+              <label style={{ width: '150px' }} htmlFor="">
                 Cor primária:{' '}
                 <InputDefault
                   onChange={(e) =>
@@ -222,7 +222,7 @@ const EnterpriseProfile: React.FC = () => {
                   name="primary_color"
                 />
               </label>
-              <label htmlFor="">
+              <label style={{ width: '150px' }} htmlFor="">
                 Cor secundária:{' '}
                 <InputDefault
                   onChange={(e) =>

@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import TinyColor from 'tinycolor2';
-import { shade, lighten } from 'polished';
+import { shade, lighten, darken } from 'polished';
 
 interface PageColor {
   primaryColor: string;
@@ -130,7 +130,10 @@ export const Header = styled.div<PageColor>`
 export const Body = styled.div<PageColor>`
   padding: 15px 20px;
   flex: 1;
-  background: ${(props) => lighten(0.03, props.primaryColor)};
+  background: ${(props) =>
+    TinyColor(props.primaryColor).isLight()
+      ? darken(0.03, props.primaryColor)
+      : lighten(0.03, props.primaryColor)};
 
   display: flex;
   align-items: center;

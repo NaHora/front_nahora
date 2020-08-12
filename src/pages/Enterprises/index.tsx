@@ -231,6 +231,8 @@ const Enterprises: React.FC = () => {
       <HeaderMenu />
       <Content>
         <SearchContent>
+          <span>Procurar Empresas</span>
+
           <InputDefault
             icon={FiSearch}
             name="search"

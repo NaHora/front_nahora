@@ -68,6 +68,14 @@ export const CadastraButton = styled.button`
 
 export const SearchContent = styled.div`
   width: 40%;
+  > span {
+    font-size: 34px;
+    font-weight: bold;
+  }
+
+  > div {
+    margin-top: 20px;
+  }
   @media (max-width: 600px) {
     margin: 25px 0;
     width: 100%;

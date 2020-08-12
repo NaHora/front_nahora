@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { shade, lighten } from 'polished';
+import { shade, lighten, darken } from 'polished';
 import TinyColor from 'tinycolor2';
 
 interface PageColor {
@@ -10,7 +10,10 @@ interface PageColor {
 }
 
 export const Container = styled.div<PageColor>`
-  background: ${(props) => lighten(0.03, props.primaryColor)};
+  background: ${(props) =>
+    TinyColor(props.primaryColor).isLight()
+      ? darken(0.03, props.primaryColor)
+      : lighten(0.03, props.primaryColor)};
   min-height: 100vh;
   width: 100%;
 
@@ -256,6 +259,11 @@ export const Appointment = styled.aside<PageColor>`
   justify-content: space-between;
   margin-right: 16px;
   cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
+
+  svg {
+    color: ${(props) =>
+      TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
+  }
   > div {
     display: flex;
     align-items: center;
@@ -267,9 +275,6 @@ export const Appointment = styled.aside<PageColor>`
         TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
 
       svg {
-        color: ${(props) =>
-          TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
-
         margin-right: 8px;
       }
     }

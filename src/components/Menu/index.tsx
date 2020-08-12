@@ -50,28 +50,44 @@ const Menu: React.FC = () => {
             <span onClick={() => setOpenMenu(false)}>Fechar</span>
           </div>
           <h2>Menu</h2>
+          {localStorage.getItem('@NaHora:myEnterprise') ? (
+            <>
+              <span onClick={() => history.push(routes.enterprise)}>Home</span>
 
-          <span>Dashboard</span>
-          <span onClick={() => history.push(routes.enterpriseSchedule)}>
-            Gestão de horários
-          </span>
-          <span onClick={() => history.push(routes.enterpriseProfile)}>
-            Perfil da Empresa
-          </span>
-          <Badge badgeContent={solicitations.length} color="secondary">
-            <span onClick={() => history.push(routes.plan)}>
-              Gestão de planos
-            </span>
-          </Badge>
-          <hr />
-          <span onClick={() => history.push(routes.enterprise)}>Home</span>
-          <span onClick={() => history.push(routes.schedule)}>
-            Agendamentos
-          </span>
-          <span onClick={() => history.push(routes.profile)}>
-            Perfil do usuário
-          </span>
-          <span onClick={() => signOut()}>sair</span>
+              {/* <span>Dashboard</span> */}
+              <span onClick={() => history.push(routes.enterpriseSchedule)}>
+                Gestão de horários
+              </span>
+              <span onClick={() => history.push(routes.enterpriseProfile)}>
+                Perfil da empresa
+              </span>
+              <Badge badgeContent={solicitations.length} color="secondary">
+                <span onClick={() => history.push(routes.plan)}>
+                  Gestão de planos
+                </span>
+              </Badge>
+              <hr />
+              <span onClick={() => history.push(routes.schedule)}>
+                Agendamentos
+              </span>
+              <span onClick={() => history.push(routes.profile)}>
+                Perfil do usuário
+              </span>
+              <span onClick={() => signOut()}>Sair</span>
+            </>
+          ) : (
+            <>
+              <span onClick={() => history.push(routes.enterprise)}>Home</span>
+              <span onClick={() => history.push(routes.schedule)}>
+                Agendamentos
+              </span>
+              <hr />
+              <span onClick={() => history.push(routes.profile)}>
+                Perfil do usuário
+              </span>
+              <span onClick={() => signOut()}>Sair</span>
+            </>
+          )}
         </Container>
       )}
     </>

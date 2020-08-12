@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import { useHistory, useLocation } from 'react-router-dom';
-import logoImg from '../../assets/logo.svg';
+import logoImg from '../../assets/nahora.png';
 import { Container, Content, Background, AnimationContainer } from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -83,8 +83,8 @@ const ResetPassword: React.FC = () => {
     <Container>
       <Content>
         <AnimationContainer>
-          <img src={logoImg} alt="" />
           <Form ref={formRef} onSubmit={handleSubmit}>
+            <img src={logoImg} alt="" />
             <h1>Resetar Senha</h1>
 
             <Input
