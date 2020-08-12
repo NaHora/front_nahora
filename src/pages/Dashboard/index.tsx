@@ -96,6 +96,8 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const history = useHistory();
 
+console.log(getDay(new Date()))
+
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekDay, setCurrentWeekDay] = useState(getDay(new Date()));
@@ -196,7 +198,7 @@ const Dashboard: React.FC = () => {
   //     Number(minute) || 0,
   //   );
   // }, [selectedDate, selectectedService]);
-
+console.log('selected' selectedDate)
   const handleAppointment = useCallback(
     async (service_id) => {
       setLoading(true);
