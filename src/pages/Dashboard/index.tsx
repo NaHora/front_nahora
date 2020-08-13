@@ -515,6 +515,12 @@ const Dashboard: React.FC = () => {
                         setOpeModal({ morning: true });
                         setAppointments(service.appointments);
                         setSelectectedService(service);
+                      } else {
+                        toast.addToast({
+                          type: 'error',
+                          title: 'Vishi',
+                          description: 'Horário indisponível',
+                        });
                       }
                     }}
                   >
@@ -635,6 +641,12 @@ const Dashboard: React.FC = () => {
                         setOpeModal({ afternoon: true });
                         setAppointments(service.appointments);
                         setSelectectedService(service);
+                      } else {
+                        toast.addToast({
+                          type: 'error',
+                          title: 'Vishi',
+                          description: 'Horário indisponível',
+                        });
                       }
                     }}
                   >
@@ -748,6 +760,12 @@ const Dashboard: React.FC = () => {
                         setOpeModal({ night: true });
                         setAppointments(service.appointments);
                         setSelectectedService(service);
+                      } else {
+                        toast.addToast({
+                          type: 'error',
+                          title: 'Vishi',
+                          description: 'Horário indisponível',
+                        });
                       }
                     }}
                   >

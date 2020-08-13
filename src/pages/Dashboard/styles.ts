@@ -325,8 +325,8 @@ export const Calendar = styled.aside<PageColor>`
   .DayPicker-Day--available:not(.DayPicker-Day--outside) {
     background: ${(props) =>
       TinyColor(props.primaryColor).isLight()
-        ? darken(0.03, props.primaryColor)
-        : lighten(0.03, props.primaryColor)};
+        ? darken(0.2, props.primaryColor)
+        : lighten(0.2, props.primaryColor)};
     border-radius: 10px;
     color: ${(props) =>
       TinyColor(props.primaryColor).isLight() ? '#000' : '#fff'};
