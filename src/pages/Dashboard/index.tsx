@@ -60,6 +60,7 @@ interface User {
   avatar_url: string;
   name: string;
   celphone: string;
+  isPrivate: boolean;
 }
 
 interface Category {
@@ -477,11 +478,9 @@ const Dashboard: React.FC = () => {
                 >
                   <div
                     onClick={() => {
-                      if (!service.disabled) {
-                        setOpeModal({ morning: true });
-                        setAppointments(service.appointments);
-                        setSelectectedService(service);
-                      }
+                      setOpeModal({ morning: true });
+                      setAppointments(service.appointments);
+                      setSelectectedService(service);
                     }}
                   >
                     <span style={{ marginRight: '16px' }}>
@@ -542,12 +541,18 @@ const Dashboard: React.FC = () => {
                     <span key={appointment.id}>
                       <img
                         src={
-                          appointment.user.avatar_url ||
-                          `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                          appointment.user.isPrivate
+                            ? `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                            : appointment.user.avatar_url ||
+                              `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
                         }
                         alt=""
                       />
-                      {appointment.user.name}
+                      {appointment.user.isPrivate ? (
+                        <>Anônimo</>
+                      ) : (
+                        appointment.user.name
+                      )}
                       {user.id === thisEnterprise.owner_id && (
                         <>
                           <FiPhone />
@@ -591,11 +596,9 @@ const Dashboard: React.FC = () => {
                 >
                   <div
                     onClick={() => {
-                      if (!service.disabled) {
-                        setOpeModal({ afternoon: true });
-                        setAppointments(service.appointments);
-                        setSelectectedService(service);
-                      }
+                      setOpeModal({ afternoon: true });
+                      setAppointments(service.appointments);
+                      setSelectectedService(service);
                     }}
                   >
                     <span style={{ marginRight: '16px' }}>
@@ -650,12 +653,18 @@ const Dashboard: React.FC = () => {
                     <span key={appointment.id}>
                       <img
                         src={
-                          appointment.user.avatar_url ||
-                          `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                          appointment.user.isPrivate
+                            ? `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                            : appointment.user.avatar_url ||
+                              `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
                         }
                         alt=""
                       />
-                      {appointment.user.name}
+                      {appointment.user.isPrivate ? (
+                        <>Anônimo</>
+                      ) : (
+                        appointment.user.name
+                      )}
                       {user.id === thisEnterprise.owner_id && (
                         <>
                           <FiPhone />
@@ -698,11 +707,9 @@ const Dashboard: React.FC = () => {
                 >
                   <div
                     onClick={() => {
-                      if (!service.disabled) {
-                        setOpeModal({ night: true });
-                        setAppointments(service.appointments);
-                        setSelectectedService(service);
-                      }
+                      setOpeModal({ night: true });
+                      setAppointments(service.appointments);
+                      setSelectectedService(service);
                     }}
                   >
                     <span style={{ marginRight: '16px' }}>
@@ -763,12 +770,18 @@ const Dashboard: React.FC = () => {
                     <span key={appointment.id}>
                       <img
                         src={
-                          appointment.user.avatar_url ||
-                          `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                          appointment.user.isPrivate
+                            ? `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                            : appointment.user.avatar_url ||
+                              `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
                         }
                         alt=""
                       />
-                      {appointment.user.name}
+                      {appointment.user.isPrivate ? (
+                        <>Anônimo</>
+                      ) : (
+                        appointment.user.name
+                      )}
                       {user.id === thisEnterprise.owner_id && (
                         <>
                           <FiPhone />

@@ -113,10 +113,9 @@ export const DivCategory = styled.div<PageColor>`
   margin: 8px;
   box-shadow: ${(props) => props.currentSelected && '#000 0px 4px 6px'};
   border-radius: 5px;
-  min-width: 120px;
+
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
   text-align: center;
   padding: 8px 15px;
   font-size: 20px;
@@ -125,7 +124,7 @@ export const DivCategory = styled.div<PageColor>`
     props.title ? 'transparent' : props.secondaryColor};
   color: ${(props) =>
     TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
-  max-width: 25ch;
+
   cursor: pointer;
   border: ${(props) => props.title && '1px solid #ff9000'};
 `;

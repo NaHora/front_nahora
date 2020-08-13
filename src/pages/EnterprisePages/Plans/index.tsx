@@ -39,6 +39,7 @@ interface Plan {
   price: number;
   schedule_limit: number;
   days_to_expire: number;
+  type_expiration: string;
 }
 
 interface Solicitation {
@@ -66,7 +67,9 @@ const Plans: React.FC = () => {
   const [openSolicitationSection, setOpenSolicitationSection] = useState(true);
   const [openActiveSection, setOpenActiveSection] = useState(false);
   const [openPlanSection, setOpenPlanSection] = useState(false);
-  const [planData, setPlanData] = useState<Plan | any>({});
+  const [planData, setPlanData] = useState<Plan | any>({
+    type_expiration: 'month',
+  });
   const [selectedSolicitation, setSelectionSolicitation] = useState<
     SelectSolicitation
   >({});
@@ -445,21 +448,21 @@ const Plans: React.FC = () => {
                       >
                         <th>Valor</th>
                       </Tooltip>
-                      <Tooltip
-                        placement="top"
-                        title="Quantidade de vezes no mês que o usuário que tiver este plano poderá realizar agendamentos"
-                      >
-                        <th>
-                          Limite de <br /> agendamentos
-                        </th>
-                      </Tooltip>
 
                       <Tooltip
                         placement="top"
-                        title="Tempo em dias para o plano do usuário expirar"
+                        title="Tempo para o plano do usuário expirar"
                       >
                         <th>
                           Tempo de <br /> expiração
+                        </th>
+                      </Tooltip>
+                      <Tooltip
+                        placement="top"
+                        title="Quantidade de vezes no plano que o usuário poderá realizar agendamentos"
+                      >
+                        <th>
+                          Limite de <br /> agendamentos
                         </th>
                       </Tooltip>
                       <th />
@@ -494,6 +497,37 @@ const Plans: React.FC = () => {
                           type="text"
                         />
                       </td>
+
+                      <td>
+                        <div style={{ display: 'flex' }}>
+                          <input
+                            value={planData.days_to_expire}
+                            onChange={(e) =>
+                              setPlanData({
+                                ...planData,
+                                [e.target.name]: e.target.value,
+                              })
+                            }
+                            style={{ borderRadius: '5px 0 0 5px' }}
+                            name="days_to_expire"
+                            placeholder="Expiração"
+                            type="number"
+                          />
+                          <select
+                            value={planData.type_expiration}
+                            onChange={(e) =>
+                              setPlanData({
+                                ...planData,
+                                [e.target.name]: e.target.value,
+                              })
+                            }
+                            name="type_expiration"
+                          >
+                            <option value="day">Dia</option>
+                            <option value="month">Mês</option>
+                          </select>
+                        </div>
+                      </td>
                       <td>
                         <input
                           value={planData.schedule_limit}
@@ -505,20 +539,6 @@ const Plans: React.FC = () => {
                           }
                           name="schedule_limit"
                           placeholder="Limite"
-                          type="number"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          value={planData.days_to_expire}
-                          onChange={(e) =>
-                            setPlanData({
-                              ...planData,
-                              [e.target.name]: e.target.value,
-                            })
-                          }
-                          name="days_to_expire"
-                          placeholder="Expiração"
                           type="number"
                         />
                       </td>
@@ -537,9 +557,21 @@ const Plans: React.FC = () => {
                           <tr>
                             <td>{plan.name}</td>
                             <td>{plan.price}</td>
-                            <td>{plan.schedule_limit}</td>
 
-                            <td>{plan.days_to_expire}</td>
+                            <td>
+                              {plan.days_to_expire}{' '}
+                              {plan.type_expiration === 'month' &&
+                              plan.days_to_expire === 1
+                                ? 'mês'
+                                : plan.type_expiration === 'day' &&
+                                  plan.days_to_expire === 1
+                                ? 'dia'
+                                : plan.type_expiration === 'month' &&
+                                  plan.days_to_expire !== 1
+                                ? 'meses'
+                                : 'dias'}
+                            </td>
+                            <td>{plan.schedule_limit}</td>
                             <td>
                               {/* <FiX color="#fc384c" cursor="pointer" size={25} /> */}
                             </td>

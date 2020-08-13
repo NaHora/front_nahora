@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, ChangeEvent } from 'react';
+import React, { useCallback, useRef, ChangeEvent, useState } from 'react';
 
 import {
   FiMail,
@@ -13,6 +13,7 @@ import * as Yup from 'yup';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import { useHistory, Link } from 'react-router-dom';
+import { Switch } from '@material-ui/core';
 import { Container, Content, AvatarInput } from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -26,6 +27,7 @@ interface ProfileFormData {
   name: string;
   celphone: string;
   email: string;
+  isPrivate: boolean;
   password: string;
   password_confirmation: string;
   old_password: string;
@@ -36,6 +38,7 @@ const Profile: React.FC = () => {
   const history = useHistory();
   const { addToast } = useToast();
   const { user, updateUser, signOut } = useAuth();
+  const [isPrivate, setIsPrivate] = useState(user.isPrivate);
 
   const handleSubmit = useCallback(
     async (data: ProfileFormData) => {
@@ -80,6 +83,7 @@ const Profile: React.FC = () => {
         const formData = {
           name,
           email,
+          isPrivate,
           celphone,
           ...(data.old_password
             ? {
@@ -115,7 +119,7 @@ const Profile: React.FC = () => {
         });
       }
     },
-    [addToast, history, updateUser],
+    [addToast, history, updateUser, isPrivate],
   );
 
   const handleAvatarChange = useCallback(
@@ -155,6 +159,7 @@ const Profile: React.FC = () => {
             name: user.name,
             email: user.email,
             celphone: user.celphone,
+            isPrivate: !!user.isPrivate,
           }}
           ref={formRef}
           onSubmit={handleSubmit}
@@ -191,8 +196,15 @@ const Profile: React.FC = () => {
             mask="_"
             placeholder="Telefone"
           /> */}
-
           <Input icon={FiMail} name="email" type="email" placeholder="E-mail" />
+          <div>
+            Perfil Anônimo:{' '}
+            <Switch
+              checked={isPrivate}
+              onChange={(e) => setIsPrivate(!isPrivate)}
+              name="isPrivate"
+            />
+          </div>
           <Input
             icon={FiLock}
             name="old_password"

@@ -52,7 +52,9 @@ const Menu: React.FC = () => {
           <h2>Menu</h2>
           {localStorage.getItem('@NaHora:myEnterprise') ? (
             <>
-              <span onClick={() => history.push(routes.enterprise)}>Home</span>
+              <span onClick={() => history.push(routes.enterprise)}>
+                Empresas
+              </span>
 
               {/* <span>Dashboard</span> */}
               <span onClick={() => history.push(routes.enterpriseSchedule)}>
@@ -77,7 +79,9 @@ const Menu: React.FC = () => {
             </>
           ) : (
             <>
-              <span onClick={() => history.push(routes.enterprise)}>Home</span>
+              <span onClick={() => history.push(routes.enterprise)}>
+                Empresas
+              </span>
               <span onClick={() => history.push(routes.schedule)}>
                 Agendamentos
               </span>

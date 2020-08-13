@@ -51,8 +51,7 @@ const EnterpriseProfile: React.FC = () => {
         name: enterpriseData.name,
         address: enterpriseData.address,
         area: enterpriseData.area,
-        open_hour: enterpriseData.open_hour,
-        close_hour: enterpriseData.close_hour,
+
         primary_color: enterpriseData.primary_color,
         secondary_color: enterpriseData.secondary_color,
         isPrivate: !!enterpriseData.isPrivate,
@@ -129,44 +128,7 @@ const EnterpriseProfile: React.FC = () => {
                   name="name"
                 />
               </label>
-              <label htmlFor="">
-                Horário de abertura:{' '}
-                <NumberFormat
-                  customInput={InputDefault}
-                  value={enterpriseData.open_hour}
-                  type="text"
-                  format="##:##"
-                  suffix="h"
-                  name="open_hour"
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  // allowLeadingZeros
-                  // allowEmptyFormatting
-                  mask="_"
-                />
-                Horário de fechamento:{' '}
-                <NumberFormat
-                  customInput={InputDefault}
-                  value={enterpriseData.close_hour}
-                  type="text"
-                  format="##:##"
-                  suffix="h"
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  // allowLeadingZeros
-                  // allowEmptyFormatting
-                  mask="_"
-                  name="close_hour"
-                />
-              </label>
+
               <label htmlFor="">
                 Área de atuação:{' '}
                 <InputDefault
@@ -181,19 +143,7 @@ const EnterpriseProfile: React.FC = () => {
                   name="area"
                 />
               </label>
-              {/* <label htmlFor="">
-                cep:{' '}
-             <InputDefault
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  value={enterpriseData.cep}
-                  type="text"
-                  name="cep"
-                />  </label> */}
+
               <label htmlFor="">
                 Endereço:{' '}
                 <InputDefault

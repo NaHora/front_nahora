@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { FiSearch } from 'react-icons/fi';
+import { FiSearch, FiLock, FiUnlock } from 'react-icons/fi';
 
 import { useHistory } from 'react-router-dom';
 import Loader from 'react-loader-spinner';
@@ -36,6 +36,7 @@ interface SearchEnterprise {
   primary_color: string;
   secondary_color: string;
   aceito?: number;
+  isPrivate?: number;
 }
 
 interface MyEnterprise {
@@ -260,8 +261,15 @@ const Enterprises: React.FC = () => {
                       <div>
                         <Title>{enterprise.name}</Title>
                         <SubTitle>
-                          Aberto de {enterprise.open_hour} até{' '}
-                          {enterprise.close_hour}
+                          {enterprise.isPrivate ? (
+                            <>
+                              <FiLock color="#ff9000" /> Perfil Fechado
+                            </>
+                          ) : (
+                            <>
+                              <FiUnlock color="#ff9000" /> Perfil Aberto
+                            </>
+                          )}
                         </SubTitle>
                         <Text>{enterprise.address}</Text>
                         <Text>{enterprise.area}</Text>
@@ -308,8 +316,15 @@ const Enterprises: React.FC = () => {
                     <div>
                       <Title>{enterprise.name}</Title>
                       <SubTitle>
-                        Aberto de {enterprise.open_hour} até{' '}
-                        {enterprise.close_hour}
+                        {enterprise.isPrivate ? (
+                          <>
+                            <FiLock color="#ff9000" /> Perfil Fechado
+                          </>
+                        ) : (
+                          <>
+                            <FiUnlock color="#ff9000" /> Perfil Aberto
+                          </>
+                        )}
                       </SubTitle>
                       <Text>{enterprise.address}</Text>
                       <Text>{enterprise.area}</Text>
@@ -363,8 +378,15 @@ const Enterprises: React.FC = () => {
                   <div>
                     <Title>{myEnterprise.name}</Title>
                     <SubTitle>
-                      Aberto de {myEnterprise.open_hour} até{' '}
-                      {myEnterprise.close_hour}
+                      {myEnterprise.isPrivate ? (
+                        <>
+                          <FiLock color="#ff9000" /> Perfil Fechado
+                        </>
+                      ) : (
+                        <>
+                          <FiUnlock color="#ff9000" /> Perfil Aberto
+                        </>
+                      )}
                     </SubTitle>
                     <Text>{myEnterprise.area}</Text>
                     <Text>{myEnterprise.address}</Text>
@@ -392,8 +414,15 @@ const Enterprises: React.FC = () => {
                     <div>
                       <Title>{enterprise.enterprise.name}</Title>
                       <SubTitle>
-                        Aberto de {enterprise.enterprise.open_hour} até{' '}
-                        {enterprise.enterprise.close_hour}
+                        {enterprise.enterprise.isPrivate ? (
+                          <>
+                            <FiLock color="#ff9000" /> Perfil Fechado
+                          </>
+                        ) : (
+                          <>
+                            <FiUnlock color="#ff9000" /> Perfil Aberto
+                          </>
+                        )}
                       </SubTitle>
                       <Text>{enterprise.enterprise.area}</Text>
                       <Text>{enterprise.enterprise.address}</Text>

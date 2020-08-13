@@ -26,8 +26,8 @@ interface SignUpFormData {
   name: string;
   area: string;
   address: string;
-  open_hour: string;
-  close_hour: string;
+  open_hour?: string;
+  close_hour?: string;
   primary_color: string;
   secondary_color: string;
   isPrivate: boolean;
@@ -37,8 +37,8 @@ interface ErrorFormData {
   name: string;
   area: string;
   address: string;
-  open_hour: string;
-  close_hour: string;
+  open_hour?: string;
+  close_hour?: string;
   primary_color: string;
   secondary_color: string;
   isPrivate: string;
@@ -52,8 +52,6 @@ const SignUp: React.FC = () => {
     name: '',
     area: '',
     address: '',
-    open_hour: '',
-    close_hour: '',
     primary_color: '#28262e',
     secondary_color: '#ff9000',
     isPrivate: true,
@@ -67,11 +65,9 @@ const SignUp: React.FC = () => {
         name: Yup.string().required('Nome obrigatório'),
         area: Yup.string().required('Área obrigatório'),
         address: Yup.string().required('Endereço obrigatório'),
-        open_hour: Yup.string().required('Endereço obrigatório'),
-        close_hour: Yup.string().required('Endereço obrigatório'),
-        primary_color: Yup.string().required('Endereço obrigatório'),
-        secondary_color: Yup.string().required('Endereço obrigatório'),
-        isPrivate: Yup.boolean().required('Privado obrigatório'),
+        primary_color: Yup.string().required('Cor Primária obrigatório'),
+        secondary_color: Yup.string().required('Cor Secundária obrigatório'),
+        isPrivate: Yup.boolean(),
       });
 
       await schema.validate(data, {
@@ -118,44 +114,7 @@ const SignUp: React.FC = () => {
                   name="name"
                 />
               </label>
-              <label htmlFor="">
-                Horário de abertura:{' '}
-                <NumberFormat
-                  customInput={InputDefault}
-                  value={data.open_hour}
-                  type="text"
-                  format="##:##"
-                  suffix="h"
-                  name="open_hour"
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  // allowLeadingZeros
-                  // allowEmptyFormatting
-                  mask="_"
-                />
-                Horário de fechamento:{' '}
-                <NumberFormat
-                  customInput={InputDefault}
-                  value={data.close_hour}
-                  type="text"
-                  format="##:##"
-                  suffix="h"
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  // allowLeadingZeros
-                  // allowEmptyFormatting
-                  mask="_"
-                  name="close_hour"
-                />
-              </label>
+
               <label htmlFor="">
                 Área de atuação:{' '}
                 <InputDefault
@@ -167,19 +126,7 @@ const SignUp: React.FC = () => {
                   name="area"
                 />
               </label>
-              {/* <label htmlFor="">
-              cep:{' '}
-           <InputDefault
-                onChange={(e) =>
-                  setdata({
-                    ...data,
-                    [e.target.name]: e.target.value,
-                  })
-                }
-                value={data.cep}
-                type="text"
-                name="cep"
-              />  </label> */}
+
               <label htmlFor="">
                 Endereço:{' '}
                 <InputDefault

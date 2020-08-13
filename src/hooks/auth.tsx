@@ -5,6 +5,7 @@ interface User {
   id: string;
   name: string;
   celphone: string;
+  isPrivate: boolean;
   email: string;
   avatar_url: string;
 }

@@ -112,10 +112,7 @@ export const DivCategory = styled.div<PageColor>`
   margin-right: 16px;
   box-shadow: ${(props) => props.currentSelected && '#000 0px 4px 6px'};
   border-radius: 5px;
-  min-width: 120px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   text-align: center;
   padding: 8px 15px;
   font-size: 20px;
@@ -123,7 +120,6 @@ export const DivCategory = styled.div<PageColor>`
   background: ${(props) => props.secondaryColor};
   color: ${(props) =>
     TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
-  max-width: 25ch;
   cursor: pointer;
 `;
 
@@ -327,7 +323,10 @@ export const Calendar = styled.aside<PageColor>`
   }
 
   .DayPicker-Day--available:not(.DayPicker-Day--outside) {
-    background: ${(props) => lighten(0.03, props.primaryColor)};
+    background: ${(props) =>
+      TinyColor(props.primaryColor).isLight()
+        ? darken(0.03, props.primaryColor)
+        : lighten(0.03, props.primaryColor)};
     border-radius: 10px;
     color: ${(props) =>
       TinyColor(props.primaryColor).isLight() ? '#000' : '#fff'};

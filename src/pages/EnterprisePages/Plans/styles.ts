@@ -150,6 +150,17 @@ export const CardSolicitation = styled.div`
             outline: none;
           }
         }
+        select {
+          width: 100%;
+          background: #232129;
+          border: none;
+          color: white;
+          padding: 2px;
+          border-radius: 0 5px 5px 0;
+          :focus {
+            outline: none;
+          }
+        }
       }
     }
   }
