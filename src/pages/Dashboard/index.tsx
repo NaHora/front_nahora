@@ -92,12 +92,19 @@ interface Service {
   };
 }
 
+interface AboutDays {
+  availableDays: number[];
+
+  disabledDays: number[];
+}
+
 const Dashboard: React.FC = () => {
   const toast = useToast();
   const { user } = useAuth();
   const history = useHistory();
 
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
+  const owner_enterprise = thisEnterprise.owner_id === user.id;
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekDay, setCurrentWeekDay] = useState(getDay(new Date()));
   const [openModal, setOpeModal] = useState<ModalData | any>({});
@@ -113,6 +120,10 @@ const Dashboard: React.FC = () => {
   const [primaryColor, setPrimaryColor] = useState<string | null>('#28262e');
   const [loading, setLoading] = useState(false);
   const [currentService, setCurrentService] = useState('');
+  const [aboutDays, setAboutDays] = useState<AboutDays>({
+    availableDays: [],
+    disabledDays: [],
+  });
   const [categories, setCategories] = useState<Category[]>([]);
   const [secondaryColor, setSecondaryColor] = useState<string | null>(
     '#ff9000',
@@ -135,12 +146,18 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
-    // if (modifiers.available && !modifiers.disabled) {
-    setOpeModal({});
+    if ((modifiers.available && !modifiers.disabled) || owner_enterprise) {
+      setOpeModal({});
 
-    setSelectedDate(day);
-    setCurrentWeekDay(getDay(day));
-    // }
+      setSelectedDate(day);
+      setCurrentWeekDay(getDay(day));
+    } else {
+      toast.addToast({
+        type: 'error',
+        title:
+          'Sem Horário disponível este dia, datas com horários disponíveis ficam com um contorno.',
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -149,6 +166,19 @@ const Dashboard: React.FC = () => {
       setCategories(response.data);
     });
   }, [thisEnterprise.id]);
+
+  const getAvaiableDays = useCallback(async () => {
+    try {
+      const response = await api.get(
+        `/services/enterprise/${thisEnterprise.id}/category/${selectectedCategory?.id}`,
+      );
+      setAboutDays(response.data);
+    } catch (err) {}
+  }, [thisEnterprise.id, selectectedCategory]);
+
+  useEffect(() => {
+    getAvaiableDays();
+  }, [selectectedCategory, thisEnterprise.id, getAvaiableDays]);
 
   const handleServices = useCallback(async () => {
     try {
@@ -426,9 +456,12 @@ const Dashboard: React.FC = () => {
                 : ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
             }
             fromMonth={new Date()}
-            disabledDays={[{ before: new Date() }]}
+            disabledDays={[
+              { before: new Date() },
+              { daysOfWeek: aboutDays.disabledDays },
+            ]}
             modifiers={{
-              available: { daysOfWeek: [0, 1, 2, 3, 4, 5, 6] },
+              available: { daysOfWeek: aboutDays.availableDays },
             }}
             selectedDays={selectedDate}
             onDayClick={handleDateChange}
@@ -478,9 +511,11 @@ const Dashboard: React.FC = () => {
                 >
                   <div
                     onClick={() => {
-                      setOpeModal({ morning: true });
-                      setAppointments(service.appointments);
-                      setSelectectedService(service);
+                      if (!service.disabled || owner_enterprise) {
+                        setOpeModal({ morning: true });
+                        setAppointments(service.appointments);
+                        setSelectectedService(service);
+                      }
                     }}
                   >
                     <span style={{ marginRight: '16px' }}>
@@ -596,9 +631,11 @@ const Dashboard: React.FC = () => {
                 >
                   <div
                     onClick={() => {
-                      setOpeModal({ afternoon: true });
-                      setAppointments(service.appointments);
-                      setSelectectedService(service);
+                      if (!service.disabled || owner_enterprise) {
+                        setOpeModal({ afternoon: true });
+                        setAppointments(service.appointments);
+                        setSelectectedService(service);
+                      }
                     }}
                   >
                     <span style={{ marginRight: '16px' }}>
@@ -707,9 +744,11 @@ const Dashboard: React.FC = () => {
                 >
                   <div
                     onClick={() => {
-                      setOpeModal({ night: true });
-                      setAppointments(service.appointments);
-                      setSelectectedService(service);
+                      if (!service.disabled || owner_enterprise) {
+                        setOpeModal({ night: true });
+                        setAppointments(service.appointments);
+                        setSelectectedService(service);
+                      }
                     }}
                   >
                     <span style={{ marginRight: '16px' }}>

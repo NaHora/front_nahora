@@ -89,6 +89,9 @@ const Menu: React.FC = () => {
               <span onClick={() => history.push(routes.profile)}>
                 Perfil do usuário
               </span>
+              <span onClick={() => history.push(routes.signupEnterprise)}>
+                Cadastrar empresa
+              </span>
               <span onClick={() => signOut()}>Sair</span>
             </>
           )}

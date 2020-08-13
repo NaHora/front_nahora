@@ -7,6 +7,8 @@ import { useHistory } from 'react-router-dom';
 import Switch from '@material-ui/core/Switch';
 
 import NumberFormat from 'react-number-format';
+import { Tooltip } from '@material-ui/core';
+import { MdInfoOutline } from 'react-icons/md';
 import {
   Container,
   Cel,
@@ -76,7 +78,7 @@ const SignUp: React.FC = () => {
 
       await api.post('enterprises', data);
 
-      history.push(routes.signin);
+      history.push(routes.enterprise);
 
       addToast({
         type: 'success',
@@ -160,20 +162,23 @@ const SignUp: React.FC = () => {
                   name="secondary_color"
                 />
               </label>
-              <label htmlFor="">
-                Usuário necessitam de plano:{' '}
-                <Switch
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      [e.target.name]: e.target.checked,
-                    })
-                  }
-                  name="isPrivate"
-                  inputProps={{ 'aria-label': 'secondary checkbox' }}
-                  checked={!!data.isPrivate}
-                />
-              </label>
+              <Tooltip title="Perfil privado você controla quem poderá se agendar, já o perfil aberto qualquer usuário estará apto a se agendar na plataforma">
+                <label htmlFor="">
+                  <MdInfoOutline style={{ marginRight: '8px' }} />
+                  Perfil Privado :
+                  <Switch
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        [e.target.name]: e.target.checked,
+                      })
+                    }
+                    name="isPrivate"
+                    inputProps={{ 'aria-label': 'secondary checkbox' }}
+                    checked={!!data.isPrivate}
+                  />
+                </label>
+              </Tooltip>
               <Button onClick={handleSubmit}>Cadastrar</Button>
             </div>
             <div>
