@@ -3,10 +3,16 @@ import { FiMenu } from 'react-icons/fi';
 
 import { useHistory } from 'react-router-dom';
 import { Badge } from '@material-ui/core';
+import { loadStripe } from '@stripe/stripe-js';
 import { Container } from './styles';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
+
 import api from '../../services/api';
+import { useToast } from '../../hooks/toast';
+// Make sure to call `loadStripe` outside of a component’s render to avoid
+// recreating the `Stripe` object on every render.
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY as string);
 
 interface Solicitation {
   id: string;
@@ -16,8 +22,30 @@ const Menu: React.FC = () => {
   const [openMenu, setOpenMenu] = useState(false);
   const { signOut } = useAuth();
   const history = useHistory();
+  const { addToast } = useToast();
 
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
+
+  const handleCheckout = async () => {
+    // Call your backend to create the Checkout session.
+    const response = await api.get('/enterprises/sessionPayment');
+
+    localStorage.setItem('session_id', response.data.id);
+    // When the customer clicks on the button, redirect them to Checkout.
+    const stripe: any = await stripePromise;
+    const { error } = await stripe.redirectToCheckout({
+      sessionId: response.data.id,
+    });
+
+    addToast({
+      type: 'error',
+      title: error,
+    });
+
+    // If `redirectToCheckout` fails due to a browser or network
+    // error, display the localized error message to your customer
+    // using `error.message`.
+  };
 
   const getSolicitations = useCallback(async () => {
     try {
@@ -89,9 +117,7 @@ const Menu: React.FC = () => {
               <span onClick={() => history.push(routes.profile)}>
                 Perfil do usuário
               </span>
-              <span onClick={() => history.push(routes.signupEnterprise)}>
-                Cadastrar empresa
-              </span>
+              <span onClick={handleCheckout}>Cadastrar empresa</span>
               <span onClick={() => signOut()}>Sair</span>
             </>
           )}

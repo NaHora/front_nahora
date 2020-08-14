@@ -14,6 +14,7 @@ import SignUpEnterprise from '../pages/EnterprisePages/SignUp';
 import EnterpriseProfile from '../pages/EnterprisePages/EnterpriseProfile';
 import Plans from '../pages/EnterprisePages/Plans';
 import EnterpriseSchedule from '../pages/EnterprisePages/EnterpriseSchedule';
+import SuccessPage from '../pages/EnterprisePages/SuccessPage';
 
 export const routes = {
   dashboard: '/dashboard',
@@ -27,6 +28,7 @@ export const routes = {
   enterpriseProfile: '/perfil-empresa',
   enterpriseSchedule: '/gestão-de-horários',
   plan: '/gestão-de-planos',
+  success: '/success',
   signin: '/',
 };
 
@@ -37,6 +39,7 @@ const Routes: React.FC = () => (
     <Route path={routes.schedule} component={Schedule} isPrivate />
     <Route path={routes.profile} component={Profile} isPrivate />
     <Route path={routes.plan} component={Plans} isPrivate />
+    <Route path={routes.success} component={SuccessPage} isPrivate />
     <Route
       path={routes.enterpriseSchedule}
       component={EnterpriseSchedule}

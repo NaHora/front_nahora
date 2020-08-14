@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { FiArrowLeft } from 'react-icons/fi';
 import * as Yup from 'yup';
 
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link, useLocation } from 'react-router-dom';
 import Switch from '@material-ui/core/Switch';
 
 import NumberFormat from 'react-number-format';
@@ -58,49 +58,66 @@ const SignUp: React.FC = () => {
     secondary_color: '#ff9000',
     isPrivate: true,
   });
+  const queryParams = new URLSearchParams(useLocation().search);
 
   const handleSubmit = useCallback(async () => {
-    setErrors({});
+    if (queryParams.get('session_id') === localStorage.getItem('session_id')) {
+      setErrors({});
 
-    try {
-      const schema = Yup.object().shape({
-        name: Yup.string().required('Nome obrigatório'),
-        area: Yup.string().required('Área obrigatório'),
-        address: Yup.string().required('Endereço obrigatório'),
-        primary_color: Yup.string().required('Cor Primária obrigatório'),
-        secondary_color: Yup.string().required('Cor Secundária obrigatório'),
-        isPrivate: Yup.boolean(),
-      });
+      try {
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Nome obrigatório'),
+          area: Yup.string().required('Área obrigatório'),
+          address: Yup.string().required('Endereço obrigatório'),
+          primary_color: Yup.string().required('Cor Primária obrigatório'),
+          secondary_color: Yup.string().required('Cor Secundária obrigatório'),
+          isPrivate: Yup.boolean(),
+        });
 
-      await schema.validate(data, {
-        abortEarly: false,
-      });
+        await schema.validate(data, {
+          abortEarly: false,
+        });
 
-      await api.post('enterprises', data);
+        await api.post('enterprises', data);
 
-      history.push(routes.enterprise);
+        history.push(routes.enterprise);
 
-      addToast({
-        type: 'success',
-        title: 'Cadastro Realizado!',
-        description: 'Você já pode fazer seu login no GoBarber!',
-      });
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        setErrors(getValidationErrors(err));
+        addToast({
+          type: 'success',
+          title: 'Cadastro Realizado!',
+          description: 'Você já pode fazer seu login no GoBarber!',
+        });
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          setErrors(getValidationErrors(err));
 
-        return;
+          return;
+        }
+        addToast({
+          type: 'error',
+          title: 'Erro no cadastro',
+          description: 'Ocorreu um erro ao fazer o cadastro, tente novamente',
+        });
       }
+    } else {
       addToast({
         type: 'error',
-        title: 'Erro no cadastro',
-        description: 'Ocorreu um erro ao fazer o cadastro, tente novamente',
+        title: 'Sessão de pagamento não encontrada',
       });
+
+      history.push(routes.enterprise);
     }
-  }, [addToast, history, data]);
+  }, [addToast, history, data, queryParams]);
 
   return (
     <Container>
+      <header>
+        <div>
+          <Link to={routes.enterprise}>
+            <FiArrowLeft />
+          </Link>
+        </div>
+      </header>
       <div>
         <Form>
           <div>
