@@ -160,6 +160,12 @@ const EnterpriseSchedule: React.FC = () => {
         description:
           'Verifique se selecionou pelo menos um tipo de serviço e dia da semana, tente novamente',
       });
+    } else if (formService.start_hour.replace(':', '') > 2359) {
+      addToast({
+        type: 'error',
+        title: 'Ops',
+        description: 'Horários só vão até 23:59, tente novamente',
+      });
     } else {
       const totalSchedule: Service[] = [];
       selectectedCategory.forEach(
