@@ -337,7 +337,13 @@ export const Calendar = styled.aside<PageColor>`
         : lighten(0.2, props.primaryColor)};
     border-radius: 10px;
     color: ${(props) =>
-      TinyColor(props.primaryColor).isLight() ? '#000' : '#fff'};
+      TinyColor(props.primaryColor).isLight()
+        ? TinyColor(darken(0.2, props.primaryColor)).isLight()
+          ? '#000'
+          : '#fff'
+        : TinyColor(lighten(0.2, props.primaryColor)).isLight()
+        ? '#fff'
+        : '#000'};
   }
 
   .DayPicker:not(.DayPicker--interactionDisabled)

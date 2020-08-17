@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import NumberFormat from 'react-number-format';
-import { Switch } from '@material-ui/core';
+import { Switch, Tooltip } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
+import { MdInfoOutline } from 'react-icons/md';
 import HeaderMenu from '../../../components/Header';
 
 import {
@@ -247,7 +248,12 @@ const EnterpriseSchedule: React.FC = () => {
       <Services>
         <div>
           <label htmlFor="">
-            Horário *
+            <Tooltip title="Horário que começará o serviço.">
+              <span>
+                <MdInfoOutline />
+                Horário *
+              </span>
+            </Tooltip>
             <NumberFormat
               customInput={InputDefault}
               type="text"
@@ -268,7 +274,12 @@ const EnterpriseSchedule: React.FC = () => {
             />
           </label>
           <label htmlFor="">
-            Limite de vagas *
+            <Tooltip title="Qual o máximo de pessoas que poderá se agendar este horário.">
+              <span>
+                <MdInfoOutline />
+                Limite de vagas *
+              </span>
+            </Tooltip>
             <InputDefault
               type="text"
               name="capacity"
@@ -285,7 +296,12 @@ const EnterpriseSchedule: React.FC = () => {
           </label>
 
           <label htmlFor="">
-            Horas de antecedência *
+            <Tooltip title="Até quantas horas antes do horário de agendamento o usuário conseguirá se cadastrar. exemplo: 'Para um serviço que será as 08:00h, com 1 hora de antecedência, o usuário só poderá se agendar se ainda não for 07:00h.'">
+              <span>
+                <MdInfoOutline />
+                Horas de antecedência *
+              </span>
+            </Tooltip>
             <InputDefault
               type="text"
               name="hour_to_schedule"
@@ -302,7 +318,12 @@ const EnterpriseSchedule: React.FC = () => {
           </label>
 
           <label htmlFor="">
-            Agendar com agendamento pendente? *
+            <Tooltip title="É possível se agendar caso o usuário já esteja com algum agendamento que ainda não passou ?">
+              <span>
+                <MdInfoOutline />
+                Agendar com agendamento pendente? *
+              </span>
+            </Tooltip>
             <Switch
               onChange={(e) =>
                 setFormService({

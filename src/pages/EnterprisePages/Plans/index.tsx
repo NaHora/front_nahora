@@ -203,8 +203,6 @@ const Plans: React.FC = () => {
         if (enterprisePlans.length === 0) {
           setOpenPlanSection(true);
         } else {
-          setOpenPlanSection(false);
-
           setOpenActiveSection(true);
         }
 
@@ -229,7 +227,12 @@ const Plans: React.FC = () => {
         }
       }
     },
-    [toast, getSolicitations, getAllEnterpriseAcceptedInvites],
+    [
+      toast,
+      getSolicitations,
+      getAllEnterpriseAcceptedInvites,
+      enterprisePlans.length,
+    ],
   );
 
   const recuseInvite = useCallback(
@@ -353,7 +356,8 @@ const Plans: React.FC = () => {
           <SolicitationSection>
             <span
               onClick={() =>
-                setOpenSolicitationSection(!openSolicitationSection)}
+                setOpenSolicitationSection(!openSolicitationSection)
+              }
             >
               {!openSolicitationSection ? (
                 <FiChevronDown
@@ -478,7 +482,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           placeholder="Nome"
                           type="text"
                         />
@@ -491,7 +496,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           placeholder="Valor"
                           type="text"
                         />
@@ -505,7 +511,8 @@ const Plans: React.FC = () => {
                               setPlanData({
                                 ...planData,
                                 [e.target.name]: e.target.value,
-                              })}
+                              })
+                            }
                             style={{ borderRadius: '5px 0 0 5px' }}
                             name="days_to_expire"
                             placeholder="Expiração"
@@ -517,7 +524,8 @@ const Plans: React.FC = () => {
                               setPlanData({
                                 ...planData,
                                 [e.target.name]: e.target.value,
-                              })}
+                              })
+                            }
                             name="type_expiration"
                           >
                             <option value="day">Dia</option>
@@ -532,7 +540,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           name="schedule_limit"
                           placeholder="Limite"
                           type="number"
@@ -637,7 +646,8 @@ const Plans: React.FC = () => {
                                 setSelectionSolicitation({
                                   ...selectedSolicitation,
                                   [invite.user.id]: e.target.value,
-                                })}
+                                })
+                              }
                               name="selectedSolicitation"
                               value={selectedSolicitation[invite.user.id]}
                             >
@@ -660,7 +670,8 @@ const Plans: React.FC = () => {
                                   invite.user.id,
                                   selectedSolicitation[invite.user.id],
                                   invite.currentPlan?.id,
-                                )}
+                                )
+                              }
                               color="#1ec657"
                               cursor="pointer"
                               size={25}
