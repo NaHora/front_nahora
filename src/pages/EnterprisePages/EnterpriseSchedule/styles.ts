@@ -28,6 +28,10 @@ export const Services = styled.main`
 
     label {
       margin-right: 15px;
+
+      svg {
+        margin-right: 8px;
+      }
     }
   }
 
