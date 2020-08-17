@@ -82,7 +82,10 @@ export const Category = styled.main<PageColor>`
     overflow-x: scroll;
     width: 100%;
     padding: 0 0 10px;
-
+    strong {
+      cursor: pointer;
+      color: ${(props) => props.secondaryColor};
+    }
     ::-webkit-scrollbar-track {
       background-color: transparent;
       border-radius: 20px;
@@ -197,6 +200,11 @@ export const Section = styled.aside<PageColor>`
   padding: 15px 20px;
 
   margin: 12px auto;
+
+  strong {
+    color: ${(props) => props.secondaryColor};
+    cursor: pointer;
+  }
 
   > div {
     padding: 0 0 10px;

@@ -4,7 +4,7 @@ import { FiMenu } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
 import { Badge } from '@material-ui/core';
 import { loadStripe } from '@stripe/stripe-js';
-import { Container } from './styles';
+import { Container, Span } from './styles';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
 
@@ -17,16 +17,24 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY as string);
 interface Solicitation {
   id: string;
 }
+interface Enterprise {
+  isPrivate: boolean;
+}
 
 const Menu: React.FC = () => {
+  const myEnterprise = JSON.parse(
+    localStorage.getItem('@NaHora:myEnterprise') as string,
+  ) as Enterprise;
   const [openMenu, setOpenMenu] = useState(false);
   const { signOut } = useAuth();
   const history = useHistory();
   const { addToast } = useToast();
 
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
+  const [checkout, setCheckoutPage] = useState(false);
 
   const handleCheckout = async () => {
+    setCheckoutPage(true);
     // Call your backend to create the Checkout session.
     const response = await api.get('/enterprises/sessionPayment');
 
@@ -78,47 +86,95 @@ const Menu: React.FC = () => {
             <span onClick={() => setOpenMenu(false)}>Fechar</span>
           </div>
           <h2>Menu</h2>
-          {localStorage.getItem('@NaHora:myEnterprise') ? (
+          {myEnterprise ? (
             <>
-              <span onClick={() => history.push(routes.enterprise)}>
+              <Span
+                currentPage={history.location.pathname === routes.enterprise}
+                onClick={() => history.push(routes.enterprise)}
+              >
                 Empresas
-              </span>
+              </Span>
 
-              {/* <span>Dashboard</span> */}
-              <span onClick={() => history.push(routes.enterpriseSchedule)}>
+              {/* <Span>Dashboard</Span> */}
+              <Span
+                currentPage={
+                  history.location.pathname === routes.enterpriseSchedule
+                }
+                onClick={() => history.push(routes.enterpriseSchedule)}
+              >
                 Gestão de horários
-              </span>
-              <span onClick={() => history.push(routes.enterpriseProfile)}>
+              </Span>
+              <Span
+                currentPage={
+                  history.location.pathname === routes.enterpriseProfile
+                }
+                onClick={() => history.push(routes.enterpriseProfile)}
+              >
                 Perfil da empresa
-              </span>
-              <Badge badgeContent={solicitations.length} color="secondary">
-                <span onClick={() => history.push(routes.plan)}>
-                  Gestão de planos
-                </span>
-              </Badge>
+              </Span>
+              {myEnterprise.isPrivate ? (
+                <Badge
+                  style={{
+                    margin: '17px 0',
+                  }}
+                  badgeContent={solicitations.length}
+                  color="secondary"
+                >
+                  <Span
+                    style={{ margin: 0 }}
+                    currentPage={history.location.pathname === routes.plan}
+                    onClick={() => history.push(routes.plan)}
+                  >
+                    Gestão de planos
+                  </Span>
+                </Badge>
+              ) : (
+                ''
+              )}
               <hr />
-              <span onClick={() => history.push(routes.schedule)}>
+              <Span
+                currentPage={history.location.pathname === routes.schedule}
+                onClick={() => history.push(routes.schedule)}
+              >
                 Agendamentos
-              </span>
-              <span onClick={() => history.push(routes.profile)}>
+              </Span>
+              <Span
+                currentPage={history.location.pathname === routes.profile}
+                onClick={() => history.push(routes.profile)}
+              >
                 Perfil do usuário
-              </span>
-              <span onClick={() => signOut()}>Sair</span>
+              </Span>
+              <Span currentPage={false} onClick={() => signOut()}>
+                Sair
+              </Span>
             </>
           ) : (
             <>
-              <span onClick={() => history.push(routes.enterprise)}>
+              <Span
+                currentPage={history.location.pathname === routes.enterprise}
+                onClick={() => history.push(routes.enterprise)}
+              >
                 Empresas
-              </span>
-              <span onClick={() => history.push(routes.schedule)}>
+              </Span>
+              <Span
+                currentPage={history.location.pathname === routes.schedule}
+                onClick={() => history.push(routes.schedule)}
+              >
                 Agendamentos
-              </span>
+              </Span>
               <hr />
-              <span onClick={() => history.push(routes.profile)}>
+              <Span
+                currentPage={history.location.pathname === routes.profile}
+                onClick={() => history.push(routes.profile)}
+              >
                 Perfil do usuário
-              </span>
-              <span onClick={handleCheckout}>Cadastrar empresa</span>
-              <span onClick={() => signOut()}>Sair</span>
+              </Span>
+              <Span currentPage={checkout} onClick={handleCheckout}>
+                Cadastrar empresa
+              </Span>
+              <Span currentPage={false} onClick={() => signOut()}>
+                Sair
+              </Span>
             </>
           )}
         </Container>

@@ -13,36 +13,7 @@ export const Container = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  > header {
-    height: 80px;
-    background: #28262e;
-    display: flex;
-    align-items: center;
 
-    button {
-      margin-left: auto;
-      background: transparent;
-      border: 0;
-    }
-    div {
-      width: 100%;
-      max-width: 1120px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      svg {
-        color: #999591;
-        width: 24px;
-        height: 24px;
-      }
-
-      @media (max-width: 600px) {
-        padding: 15px;
-        width: 100%;
-      }
-    }
-  }
   > div {
     max-width: 1120px;
     width: 100%;

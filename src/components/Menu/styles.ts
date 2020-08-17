@@ -1,5 +1,9 @@
 import styled from 'styled-components';
 
+interface PageColor {
+  currentPage: boolean;
+}
+
 export const Container = styled.div`
   width: 400px;
   background: #504c5a;
@@ -34,13 +38,6 @@ export const Container = styled.div`
     font-weight: bold;
   }
 
-  > span {
-    font-size: 20px;
-    margin: 17px 0;
-    cursor: pointer;
-    color: #ffffff;
-  }
-
   > div {
     display: flex;
     align-items: flex-start;
@@ -62,4 +59,11 @@ export const Container = styled.div`
   @media (max-width: 600px) {
     width: 100%;
   }
+`;
+
+export const Span = styled.span<PageColor>`
+  font-size: 20px;
+  margin: 17px 0;
+  cursor: pointer;
+  color: ${(props) => (props.currentPage ? '#ff9d3b' : '#ffffff')};
 `;

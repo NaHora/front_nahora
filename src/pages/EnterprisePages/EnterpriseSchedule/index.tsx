@@ -247,7 +247,7 @@ const EnterpriseSchedule: React.FC = () => {
       <Services>
         <div>
           <label htmlFor="">
-            Horário
+            Horário *
             <NumberFormat
               customInput={InputDefault}
               type="text"
@@ -268,7 +268,7 @@ const EnterpriseSchedule: React.FC = () => {
             />
           </label>
           <label htmlFor="">
-            Limite de vagas
+            Limite de vagas *
             <InputDefault
               type="text"
               name="capacity"
@@ -285,7 +285,7 @@ const EnterpriseSchedule: React.FC = () => {
           </label>
 
           <label htmlFor="">
-            Horas de antecedência
+            Horas de antecedência *
             <InputDefault
               type="text"
               name="hour_to_schedule"
@@ -302,7 +302,7 @@ const EnterpriseSchedule: React.FC = () => {
           </label>
 
           <label htmlFor="">
-            Agendar com agendamento pendente?
+            Agendar com agendamento pendente? *
             <Switch
               onChange={(e) =>
                 setFormService({

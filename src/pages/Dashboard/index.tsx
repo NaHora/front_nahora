@@ -421,7 +421,7 @@ const Dashboard: React.FC = () => {
         primaryColor={primaryColor || '#28262e'}
         secondaryColor={secondaryColor || '#ff9000'}
       >
-        <span>Tipo de Serviço: </span>
+        <span>Serviço: </span>
         <div>
           {categories && categories.length > 0 ? (
             categories.map((category) => (
@@ -439,6 +439,13 @@ const Dashboard: React.FC = () => {
                 <span>{category.name}</span>
               </DivCategory>
             ))
+          ) : owner_enterprise ? (
+            <span>
+              Cadastre seus serviços,{' '}
+              <strong onClick={() => history.push(routes.enterpriseSchedule)}>
+                clique aqui
+              </strong>
+            </span>
           ) : (
             <span>Empresa sem serviços</span>
           )}
@@ -497,7 +504,14 @@ const Dashboard: React.FC = () => {
           >
             <strong>Manhã</strong>
 
-            {morningServices.length === 0 && (
+            {morningServices.length === 0 && owner_enterprise ? (
+              <span>
+                Cadastre seus horários para este período,{' '}
+                <strong onClick={() => history.push(routes.enterpriseSchedule)}>
+                  clique aqui
+                </strong>
+              </span>
+            ) : (
               <p>Nenhum serviço neste período</p>
             )}
             <div>
@@ -589,7 +603,7 @@ const Dashboard: React.FC = () => {
                         }
                         alt=""
                       />
-                      {appointment.user.isPrivate ? (
+                      {appointment.user.isPrivate && !owner_enterprise ? (
                         <>Anônimo</>
                       ) : (
                         appointment.user.name
@@ -623,7 +637,14 @@ const Dashboard: React.FC = () => {
           >
             <strong>Tarde</strong>
 
-            {afternoonServices.length === 0 && (
+            {afternoonServices.length === 0 && owner_enterprise ? (
+              <span>
+                Cadastre seus horários para este período,{' '}
+                <strong onClick={() => history.push(routes.enterpriseSchedule)}>
+                  clique aqui
+                </strong>
+              </span>
+            ) : (
               <p>Nenhum serviço neste período</p>
             )}
             <div>
@@ -709,7 +730,7 @@ const Dashboard: React.FC = () => {
                         }
                         alt=""
                       />
-                      {appointment.user.isPrivate ? (
+                      {appointment.user.isPrivate && !owner_enterprise ? (
                         <>Anônimo</>
                       ) : (
                         appointment.user.name
@@ -744,7 +765,16 @@ const Dashboard: React.FC = () => {
           >
             <strong>Noite</strong>
 
-            {nightServices.length === 0 && <p>Nenhum serviço neste período</p>}
+            {nightServices.length === 0 && owner_enterprise ? (
+              <span>
+                Cadastre seus horários para este período,{' '}
+                <strong onClick={() => history.push(routes.enterpriseSchedule)}>
+                  clique aqui
+                </strong>
+              </span>
+            ) : (
+              <p>Nenhum serviço neste período</p>
+            )}
             <div>
               {nightServices.map((service) => (
                 <Appointment
@@ -834,7 +864,7 @@ const Dashboard: React.FC = () => {
                         }
                         alt=""
                       />
-                      {appointment.user.isPrivate ? (
+                      {appointment.user.isPrivate && !owner_enterprise ? (
                         <>Anônimo</>
                       ) : (
                         appointment.user.name

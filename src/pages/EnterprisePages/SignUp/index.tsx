@@ -6,16 +6,10 @@ import * as Yup from 'yup';
 import { useHistory, Link, useLocation } from 'react-router-dom';
 import Switch from '@material-ui/core/Switch';
 
-import NumberFormat from 'react-number-format';
 import { Tooltip } from '@material-ui/core';
 import { MdInfoOutline } from 'react-icons/md';
-import {
-  Container,
-  Cel,
-  Header,
-  Body,
-  Form,
-} from '../EnterpriseProfile/styles';
+import { Cel, Header, Body, Form } from '../EnterpriseProfile/styles';
+import { Container } from './styles';
 
 import InputDefault from '../../../components/InputDefault';
 import Button from '../../../components/Button';

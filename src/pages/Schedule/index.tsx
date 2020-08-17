@@ -62,6 +62,7 @@ interface User {
   id: string;
   avatar_url: string;
   name: string;
+  isPrivate: boolean;
 }
 
 interface Service {
@@ -292,12 +293,18 @@ const Enterprises: React.FC = () => {
                               <div>
                                 <img
                                   src={
-                                    currentAppointment.user.avatar_url ||
-                                    `https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png`
+                                    currentAppointment.user.isPrivate
+                                      ? 'https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png'
+                                      : currentAppointment.user.avatar_url ||
+                                        `https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png`
                                   }
                                   alt="User Logo"
                                 />
-                                <span>{currentAppointment.user.name}</span>
+                                <span>
+                                  {currentAppointment.user.isPrivate
+                                    ? 'Anônimo'
+                                    : currentAppointment.user.name}
+                                </span>
                               </div>
                             );
                           },
@@ -395,12 +402,18 @@ const Enterprises: React.FC = () => {
                               <div>
                                 <img
                                   src={
-                                    currentAppointment.user.avatar_url ||
-                                    `https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png`
+                                    currentAppointment.user.isPrivate
+                                      ? 'https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png'
+                                      : currentAppointment.user.avatar_url ||
+                                        `https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png`
                                   }
                                   alt="User Logo"
                                 />
-                                <span>{currentAppointment.user.name}</span>
+                                <span>
+                                  {currentAppointment.user.isPrivate
+                                    ? 'Anônimo'
+                                    : currentAppointment.user.name}
+                                </span>
                               </div>
                             );
                           },
