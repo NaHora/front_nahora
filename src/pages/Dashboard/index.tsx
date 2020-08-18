@@ -620,7 +620,7 @@ const Dashboard: React.FC = () => {
                             }}
                             href={`https://api.whatsapp.com/send?phone=55${removeMask(
                               user.celphone,
-                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%2${
+                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
                               selectectedService?.start_hour
                             }h%20${selectedDateAsText}%20na%20empresa%20${
                               thisEnterprise.name
@@ -763,7 +763,7 @@ const Dashboard: React.FC = () => {
                             }}
                             href={`https://api.whatsapp.com/send?phone=55${removeMask(
                               user.celphone,
-                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%2${
+                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
                               selectectedService?.start_hour
                             }h%20${selectedDateAsText}%20na%20empresa%20${
                               thisEnterprise.name
@@ -913,7 +913,7 @@ const Dashboard: React.FC = () => {
                             }}
                             href={`https://api.whatsapp.com/send?phone=55${removeMask(
                               user.celphone,
-                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%2${
+                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
                               selectectedService?.start_hour
                             }h%20${selectedDateAsText}%20na%20empresa%20${
                               thisEnterprise.name
