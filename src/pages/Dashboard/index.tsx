@@ -6,8 +6,8 @@ import {
   FiHome,
   FiX,
   FiCheckCircle,
-  FiPhone,
 } from 'react-icons/fi';
+import { FaWhatsapp } from 'react-icons/fa';
 import { GoLocation } from 'react-icons/go';
 import DayPicker, { DayModifiers } from 'react-day-picker';
 import { isToday, format, getDay, getYear, getMonth, getDate } from 'date-fns';
@@ -16,6 +16,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
 import {
   Container,
   Content,
@@ -34,7 +35,7 @@ import { routes } from '../../routes';
 import { useToast } from '../../hooks/toast';
 import Button from '../../components/Button';
 import { useAuth } from '../../hooks/auth';
-import Fade from '@material-ui/core/Fade';
+import { removeMask } from '../../utils';
 // import { Container } from './styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -610,7 +611,23 @@ const Dashboard: React.FC = () => {
                       )}
                       {user.id === thisEnterprise.owner_id && (
                         <>
-                          <FiPhone />
+                          <a
+                            target="_blank"
+                            style={{
+                              cursor: 'pointer',
+                              textDecoration: 'none',
+                              color: 'inherit',
+                            }}
+                            href={`https://api.whatsapp.com/send?phone=55${removeMask(
+                              user.celphone,
+                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%2${
+                              selectectedService?.start_hour
+                            }h%20${selectedDateAsText}%20na%20empresa%20${
+                              thisEnterprise.name
+                            }%2C%20posso%20confirmar%20seu%20agendamento%20%3F`}
+                          >
+                            <FaWhatsapp size={20} />
+                          </a>
                           {appointment.user.celphone}
                         </>
                       )}
@@ -737,7 +754,23 @@ const Dashboard: React.FC = () => {
                       )}
                       {user.id === thisEnterprise.owner_id && (
                         <>
-                          <FiPhone />
+                          <a
+                            target="_blank"
+                            style={{
+                              cursor: 'pointer',
+                              textDecoration: 'none',
+                              color: 'inherit',
+                            }}
+                            href={`https://api.whatsapp.com/send?phone=55${removeMask(
+                              user.celphone,
+                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%2${
+                              selectectedService?.start_hour
+                            }h%20${selectedDateAsText}%20na%20empresa%20${
+                              thisEnterprise.name
+                            }%2C%20posso%20confirmar%20seu%20agendamento%20%3F`}
+                          >
+                            <FaWhatsapp size={20} />
+                          </a>
                           {appointment.user.celphone}
                         </>
                       )}
@@ -871,7 +904,23 @@ const Dashboard: React.FC = () => {
                       )}
                       {user.id === thisEnterprise.owner_id && (
                         <>
-                          <FiPhone />
+                          <a
+                            target="_blank"
+                            style={{
+                              cursor: 'pointer',
+                              textDecoration: 'none',
+                              color: 'inherit',
+                            }}
+                            href={`https://api.whatsapp.com/send?phone=55${removeMask(
+                              user.celphone,
+                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%2${
+                              selectectedService?.start_hour
+                            }h%20${selectedDateAsText}%20na%20empresa%20${
+                              thisEnterprise.name
+                            }%2C%20posso%20confirmar%20seu%20agendamento%20%3F`}
+                          >
+                            <FaWhatsapp size={20} />
+                          </a>
                           {appointment.user.celphone}
                         </>
                       )}

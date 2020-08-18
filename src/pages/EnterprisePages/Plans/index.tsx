@@ -7,8 +7,9 @@ import {
   FiX,
 } from 'react-icons/fi';
 import { Tooltip } from '@material-ui/core';
-import { format, formatDistance } from 'date-fns';
+import { format, formatDistance, getMonth, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import numeral from 'numeral';
 import HeaderMenu from '../../../components/Header';
 import {
   Container,
@@ -24,6 +25,7 @@ import {
 import InputDefault from '../../../components/InputDefault';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
+import 'numeral/locales/pt-br';
 
 interface User {
   id: string;
@@ -65,6 +67,8 @@ interface Invite {
 }
 
 const Plans: React.FC = () => {
+  numeral.locale('pt-br');
+
   const toast = useToast();
   const [searchValue, setSearchValue] = useState('');
   const [openSolicitationSection, setOpenSolicitationSection] = useState(true);
@@ -73,6 +77,8 @@ const Plans: React.FC = () => {
   const [planData, setPlanData] = useState<Plan | any>({
     type_expiration: 'month',
   });
+  const [totalMoney, setTotalMoney] = useState(0);
+
   const [selectedSolicitation, setSelectionSolicitation] = useState<
     SelectSolicitation
   >({});
@@ -111,6 +117,21 @@ const Plans: React.FC = () => {
       setAllUsersEnterpriseAccepted(response.data);
     } catch {}
   }, [selectedSolicitation]);
+
+  const getTotalMoney = useCallback(async () => {
+    try {
+      const response = await api.get(
+        `/plans/money/month/${getMonth(new Date()) + 1}/year/${getYear(
+          new Date(),
+        )}`,
+      );
+      setTotalMoney(response.data);
+    } catch (err) {}
+  }, []);
+
+  useEffect(() => {
+    getTotalMoney();
+  }, []);
 
   const createPlan = useCallback(async () => {
     try {
@@ -354,6 +375,9 @@ const Plans: React.FC = () => {
           >
             Usuários
           </Span>
+          <CardSolicitation>
+            Ganho total este mês: R${numeral(totalMoney).format('0,0.00')}
+          </CardSolicitation>
         </MenuTitles>
         <Content>
           <SolicitationSection>
