@@ -7,6 +7,8 @@ import {
   FiX,
 } from 'react-icons/fi';
 import { Tooltip } from '@material-ui/core';
+import { format, formatDistance } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import HeaderMenu from '../../../components/Header';
 import {
   Container,
@@ -50,6 +52,7 @@ interface Solicitation {
 interface UserPlan {
   id: string;
   user: User;
+  expiration_at: Date;
   plan_id: string;
 }
 
@@ -157,7 +160,7 @@ const Plans: React.FC = () => {
         };
 
         await api.post('/plans/active', body);
-
+        getAllEnterpriseAcceptedInvites();
         toast.addToast({
           type: 'success',
           title: 'Boa!',
@@ -181,7 +184,7 @@ const Plans: React.FC = () => {
         }
       }
     },
-    [toast],
+    [toast, getAllEnterpriseAcceptedInvites],
   );
 
   const acceptUser = useCallback(
@@ -271,7 +274,7 @@ const Plans: React.FC = () => {
     async (active_plan_id) => {
       try {
         await api.put(`/plans/${active_plan_id}/cancel`);
-
+        getAllEnterpriseAcceptedInvites();
         toast.addToast({
           type: 'success',
           title: 'Você cancelou a plano do usuário.',
@@ -294,7 +297,7 @@ const Plans: React.FC = () => {
         }
       }
     },
-    [toast],
+    [toast, getAllEnterpriseAcceptedInvites],
   );
 
   useEffect(() => {
@@ -677,6 +680,16 @@ const Plans: React.FC = () => {
                               size={25}
                             />
                           </div>
+                          <main>
+                            expiração do plano:{' '}
+                            {invite.currentPlan
+                              ? formatDistance(
+                                  new Date(invite.currentPlan?.expiration_at),
+                                  new Date(),
+                                  { addSuffix: true, locale: ptBR },
+                                )
+                              : 'usuário sem plano'}
+                          </main>
                         </CardSolicitation>
                       ))}
                 </div>

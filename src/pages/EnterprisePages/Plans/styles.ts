@@ -74,6 +74,7 @@ export const CardSolicitation = styled.div`
   margin: 15px 0;
   position: relative;
   overflow: scroll;
+  flex-direction: column;
 
   @media (min-width: 600px) {
     ::-webkit-scrollbar {

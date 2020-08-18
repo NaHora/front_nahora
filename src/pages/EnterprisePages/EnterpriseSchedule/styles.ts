@@ -117,12 +117,23 @@ export const DivCategory = styled.div<PageColor>`
   margin: 8px;
   box-shadow: ${(props) => props.currentSelected && '#000 0px 4px 6px'};
   border-radius: 5px;
-
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   white-space: nowrap;
-
-  text-align: center;
-  padding: 8px 15px;
+  div {
+    width: 100%;
+    margin-right: 8px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+  }
   font-size: 20px;
+  span {
+    text-align: center;
+  }
+
+  padding: 8px 15px;
   opacity: ${(props) => (props.currentSelected ? '1' : '0.7')};
   background: ${(props) =>
     props.title ? 'transparent' : props.secondaryColor};

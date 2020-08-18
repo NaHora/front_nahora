@@ -3,6 +3,11 @@ import NumberFormat from 'react-number-format';
 import { Switch, Tooltip } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import { MdInfoOutline } from 'react-icons/md';
+import { FiX } from 'react-icons/fi';
+import { makeStyles } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
 import HeaderMenu from '../../../components/Header';
 
 import {
@@ -16,7 +21,27 @@ import api from '../../../services/api';
 import InputDefault from '../../../components/InputDefault';
 import { useToast } from '../../../hooks/toast';
 import { routes } from '../../../routes';
+import { OpenDelete } from '../../Schedule/styles';
+import Button from '../../../components/Button';
 
+const useStyles = makeStyles((theme) => ({
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+    color: 'black',
+  },
+  divButton: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+}));
 interface Category {
   id: string;
   name: string;
@@ -34,6 +59,8 @@ interface Service {
 }
 
 const EnterpriseSchedule: React.FC = () => {
+  const classes = useStyles();
+
   const myEnterprise = JSON.parse(
     localStorage.getItem('@NaHora:myEnterprise') || '{}',
   );
@@ -41,6 +68,8 @@ const EnterpriseSchedule: React.FC = () => {
   const history = useHistory();
 
   const [formCategoryName, setFormCategoryName] = useState('');
+  const [openDeleteCategory, setOpenDeleteCategory] = useState(false);
+  const [categoryId, setCategoryId] = useState('');
   const [formService, setFormService] = useState<any>({
     pending_scheduling: false,
   });
@@ -90,6 +119,36 @@ const EnterpriseSchedule: React.FC = () => {
       }
     }
   }, [addToast, formCategoryName, getCategories]);
+
+  const deleteCategory = useCallback(async () => {
+    try {
+      await api.delete(`/services/category/${categoryId}`);
+
+      getCategories();
+      setOpenDeleteCategory(false);
+      addToast({
+        type: 'success',
+        title: 'Tipo de serviço deletado!',
+      });
+    } catch (err) {
+      if (err.response) {
+        addToast({
+          type: 'error',
+          title: 'Vishi',
+          description:
+            err.response.data.message ||
+            'Ocorreu um erro ao deletar o tipo de serviço, tente novamente',
+        });
+      } else {
+        addToast({
+          type: 'error',
+          title: 'Vishi',
+          description:
+            'Ocorreu um erro ao deletar o tipo de serviço, tente novamente',
+        });
+      }
+    }
+  }, [addToast, categoryId, getCategories]);
 
   const createServices = useCallback(
     async (scheduleTimes) => {
@@ -199,7 +258,45 @@ const EnterpriseSchedule: React.FC = () => {
   return (
     <Container>
       <HeaderMenu />
-
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        className={classes.modal}
+        open={openDeleteCategory}
+        onClose={() => setOpenDeleteCategory(false)}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={openDeleteCategory}>
+          <div className={classes.paper}>
+            <h2 id="transition-modal-title">Deseja deletar este serviço?</h2>
+            <p id="transition-modal-description">
+              Ao deletar, todos agendamentos atrelados a ele serão perdidos.
+            </p>
+            <div className={classes.divButton}>
+              <Button
+                primaryColor="#ff9000"
+                secondaryColor="#28262e"
+                onClick={() => setOpenDeleteCategory(false)}
+                transparent
+              >
+                Cancelar
+              </Button>
+              <Button
+                primaryColor="#ff9000"
+                secondaryColor="#28262e"
+                onClick={deleteCategory}
+                // loading={loading}
+              >
+                Excluir
+              </Button>
+            </div>
+          </div>
+        </Fade>
+      </Modal>
       <Category primaryColor="#28262e" secondaryColor="#ff9000">
         <span>Selecione os tipos de Serviços: </span>
         <main>
@@ -232,11 +329,20 @@ const EnterpriseSchedule: React.FC = () => {
                   secondaryColor="#ff9000"
                   currentSelected={selectectedCategory.includes(category.id)}
                   key={category.id}
-                  onClick={() => {
-                    handlePressCategory(category.id);
-                  }}
                 >
-                  <span>{category.name}</span>
+                  <div
+                    onClick={() => {
+                      handlePressCategory(category.id);
+                    }}
+                  >
+                    <span>{category.name}</span>
+                  </div>
+                  <FiX
+                    onClick={() => {
+                      setCategoryId(category.id);
+                      setOpenDeleteCategory(true);
+                    }}
+                  />
                 </DivCategory>
               ))
             ) : (
