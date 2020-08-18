@@ -12,7 +12,7 @@ interface PageColor {
 export const Container = styled.div<PageColor>`
   background: ${(props) =>
     TinyColor(props.primaryColor).isLight()
-      ? darken(0.03, props.primaryColor)
+      ? darken(0.05, props.primaryColor)
       : lighten(0.03, props.primaryColor)};
   min-height: 100vh;
   width: 100%;
