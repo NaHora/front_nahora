@@ -40,6 +40,9 @@ const Menu: React.FC = () => {
 
     localStorage.setItem('session_id', response.data.id);
     // When the customer clicks on the button, redirect them to Checkout.
+    if (response.data.url) {
+      return (window.location.href = response.data.url);
+    }
     const stripe: any = await stripePromise;
     const { error } = await stripe.redirectToCheckout({
       sessionId: response.data.id,
@@ -131,6 +134,9 @@ const Menu: React.FC = () => {
               ) : (
                 ''
               )}
+              <Span currentPage={checkout} onClick={handleCheckout}>
+                Minha Assinatura
+              </Span>
               <hr />
               <Span
                 currentPage={history.location.pathname === routes.schedule}
