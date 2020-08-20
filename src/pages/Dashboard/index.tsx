@@ -505,7 +505,51 @@ const Dashboard: React.FC = () => {
           >
             <strong>Manhã</strong>
 
-            {morningServices.length === 0 && owner_enterprise ? (
+            {morningServices.length > 0 ? (
+              <div>
+                {morningServices.map((service) => (
+                  <Appointment
+                    disabled={service.disabled}
+                    primaryColor={primaryColor || '#28262e'}
+                    secondaryColor={secondaryColor || '#ff9000'}
+                    key={service.id}
+                    currentSelected={selectectedService?.id === service.id}
+                  >
+                    <div
+                      onClick={() => {
+                        if (!service.disabled || owner_enterprise) {
+                          setOpeModal({ morning: true });
+                          setAppointments(service.appointments);
+                          setSelectectedService(service);
+                        } else {
+                          toast.addToast({
+                            type: 'error',
+                            title: 'Vishi',
+                            description: 'Horário indisponível',
+                          });
+                        }
+                      }}
+                    >
+                      <span style={{ marginRight: '16px' }}>
+                        <FiClock /> {service.start_hour}
+                      </span>
+                      <span>
+                        <FiUsers /> {service.appointments.length}/
+                        {service.capacity}
+                      </span>
+                    </div>
+                    {user.id === thisEnterprise.owner_id && (
+                      <span style={{ marginLeft: '8px' }}>
+                        <FiX
+                          cursor="pointer"
+                          onClick={() => handleOpen(service.id)}
+                        />
+                      </span>
+                    )}
+                  </Appointment>
+                ))}
+              </div>
+            ) : owner_enterprise ? (
               <span>
                 Cadastre seus horários para este período,{' '}
                 <strong onClick={() => history.push(routes.enterpriseSchedule)}>
@@ -515,49 +559,7 @@ const Dashboard: React.FC = () => {
             ) : (
               <p>Nenhum serviço neste período</p>
             )}
-            <div>
-              {morningServices.map((service) => (
-                <Appointment
-                  disabled={service.disabled}
-                  primaryColor={primaryColor || '#28262e'}
-                  secondaryColor={secondaryColor || '#ff9000'}
-                  key={service.id}
-                  currentSelected={selectectedService?.id === service.id}
-                >
-                  <div
-                    onClick={() => {
-                      if (!service.disabled || owner_enterprise) {
-                        setOpeModal({ morning: true });
-                        setAppointments(service.appointments);
-                        setSelectectedService(service);
-                      } else {
-                        toast.addToast({
-                          type: 'error',
-                          title: 'Vishi',
-                          description: 'Horário indisponível',
-                        });
-                      }
-                    }}
-                  >
-                    <span style={{ marginRight: '16px' }}>
-                      <FiClock /> {service.start_hour}
-                    </span>
-                    <span>
-                      <FiUsers /> {service.appointments.length}/
-                      {service.capacity}
-                    </span>
-                  </div>
-                  {user.id === thisEnterprise.owner_id && (
-                    <span style={{ marginLeft: '8px' }}>
-                      <FiX
-                        cursor="pointer"
-                        onClick={() => handleOpen(service.id)}
-                      />
-                    </span>
-                  )}
-                </Appointment>
-              ))}
-            </div>
+
             {openModal.morning && (
               <ModalUsers
                 primaryColor={primaryColor || '#28262e'}
@@ -654,7 +656,51 @@ const Dashboard: React.FC = () => {
           >
             <strong>Tarde</strong>
 
-            {afternoonServices.length === 0 && owner_enterprise ? (
+            {afternoonServices.length > 0 ? (
+              <div>
+                {afternoonServices.map((service) => (
+                  <Appointment
+                    primaryColor={primaryColor || '#28262e'}
+                    disabled={service.disabled}
+                    secondaryColor={secondaryColor || '#ff9000'}
+                    key={service.id}
+                    currentSelected={selectectedService?.id === service.id}
+                  >
+                    <div
+                      onClick={() => {
+                        if (!service.disabled || owner_enterprise) {
+                          setOpeModal({ afternoon: true });
+                          setAppointments(service.appointments);
+                          setSelectectedService(service);
+                        } else {
+                          toast.addToast({
+                            type: 'error',
+                            title: 'Vishi',
+                            description: 'Horário indisponível',
+                          });
+                        }
+                      }}
+                    >
+                      <span style={{ marginRight: '16px' }}>
+                        <FiClock /> {service.start_hour}
+                      </span>
+                      <span>
+                        <FiUsers /> {service.appointments.length}/
+                        {service.capacity}
+                      </span>
+                    </div>
+                    {user.id === thisEnterprise.owner_id && (
+                      <span style={{ marginLeft: '8px' }}>
+                        <FiX
+                          cursor="pointer"
+                          onClick={() => handleOpen(service.id)}
+                        />
+                      </span>
+                    )}
+                  </Appointment>
+                ))}
+              </div>
+            ) : owner_enterprise ? (
               <span>
                 Cadastre seus horários para este período,{' '}
                 <strong onClick={() => history.push(routes.enterpriseSchedule)}>
@@ -664,49 +710,7 @@ const Dashboard: React.FC = () => {
             ) : (
               <p>Nenhum serviço neste período</p>
             )}
-            <div>
-              {afternoonServices.map((service) => (
-                <Appointment
-                  primaryColor={primaryColor || '#28262e'}
-                  disabled={service.disabled}
-                  secondaryColor={secondaryColor || '#ff9000'}
-                  key={service.id}
-                  currentSelected={selectectedService?.id === service.id}
-                >
-                  <div
-                    onClick={() => {
-                      if (!service.disabled || owner_enterprise) {
-                        setOpeModal({ afternoon: true });
-                        setAppointments(service.appointments);
-                        setSelectectedService(service);
-                      } else {
-                        toast.addToast({
-                          type: 'error',
-                          title: 'Vishi',
-                          description: 'Horário indisponível',
-                        });
-                      }
-                    }}
-                  >
-                    <span style={{ marginRight: '16px' }}>
-                      <FiClock /> {service.start_hour}
-                    </span>
-                    <span>
-                      <FiUsers /> {service.appointments.length}/
-                      {service.capacity}
-                    </span>
-                  </div>
-                  {user.id === thisEnterprise.owner_id && (
-                    <span style={{ marginLeft: '8px' }}>
-                      <FiX
-                        cursor="pointer"
-                        onClick={() => handleOpen(service.id)}
-                      />
-                    </span>
-                  )}
-                </Appointment>
-              ))}
-            </div>
+
             {openModal.afternoon && (
               <ModalUsers
                 primaryColor={primaryColor || '#28262e'}
@@ -798,7 +802,51 @@ const Dashboard: React.FC = () => {
           >
             <strong>Noite</strong>
 
-            {nightServices.length === 0 && owner_enterprise ? (
+            {nightServices.length > 0 ? (
+              <div>
+                {nightServices.map((service) => (
+                  <Appointment
+                    primaryColor={primaryColor || '#28262e'}
+                    disabled={service.disabled}
+                    secondaryColor={secondaryColor || '#ff9000'}
+                    key={service.id}
+                    currentSelected={selectectedService?.id === service.id}
+                  >
+                    <div
+                      onClick={() => {
+                        if (!service.disabled || owner_enterprise) {
+                          setOpeModal({ night: true });
+                          setAppointments(service.appointments);
+                          setSelectectedService(service);
+                        } else {
+                          toast.addToast({
+                            type: 'error',
+                            title: 'Vishi',
+                            description: 'Horário indisponível',
+                          });
+                        }
+                      }}
+                    >
+                      <span style={{ marginRight: '16px' }}>
+                        <FiClock /> {service.start_hour}
+                      </span>
+                      <span>
+                        <FiUsers /> {service.appointments.length}/
+                        {service.capacity}
+                      </span>
+                    </div>
+                    {user.id === thisEnterprise.owner_id && (
+                      <span style={{ marginLeft: '8px' }}>
+                        <FiX
+                          cursor="pointer"
+                          onClick={() => handleOpen(service.id)}
+                        />
+                      </span>
+                    )}
+                  </Appointment>
+                ))}
+              </div>
+            ) : owner_enterprise ? (
               <span>
                 Cadastre seus horários para este período,{' '}
                 <strong onClick={() => history.push(routes.enterpriseSchedule)}>
@@ -808,49 +856,7 @@ const Dashboard: React.FC = () => {
             ) : (
               <p>Nenhum serviço neste período</p>
             )}
-            <div>
-              {nightServices.map((service) => (
-                <Appointment
-                  primaryColor={primaryColor || '#28262e'}
-                  disabled={service.disabled}
-                  secondaryColor={secondaryColor || '#ff9000'}
-                  key={service.id}
-                  currentSelected={selectectedService?.id === service.id}
-                >
-                  <div
-                    onClick={() => {
-                      if (!service.disabled || owner_enterprise) {
-                        setOpeModal({ night: true });
-                        setAppointments(service.appointments);
-                        setSelectectedService(service);
-                      } else {
-                        toast.addToast({
-                          type: 'error',
-                          title: 'Vishi',
-                          description: 'Horário indisponível',
-                        });
-                      }
-                    }}
-                  >
-                    <span style={{ marginRight: '16px' }}>
-                      <FiClock /> {service.start_hour}
-                    </span>
-                    <span>
-                      <FiUsers /> {service.appointments.length}/
-                      {service.capacity}
-                    </span>
-                  </div>
-                  {user.id === thisEnterprise.owner_id && (
-                    <span style={{ marginLeft: '8px' }}>
-                      <FiX
-                        cursor="pointer"
-                        onClick={() => handleOpen(service.id)}
-                      />
-                    </span>
-                  )}
-                </Appointment>
-              ))}
-            </div>
+
             {openModal.night && (
               <ModalUsers
                 primaryColor={primaryColor || '#28262e'}

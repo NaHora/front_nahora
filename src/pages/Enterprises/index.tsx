@@ -279,7 +279,7 @@ const Enterprises: React.FC = () => {
                       disabled={enterprise.aceito == 0}
                       onClick={() => inviteEnterprise(enterprise.id)}
                     >
-                      {enterprise.aceito == 0 ? 'Aguardando' : 'Me associar'}
+                      {enterprise.aceito == 0 ? 'Aguardando' : 'Seguir'}
                     </CadastraButton>
                   </Card>
                 );
@@ -334,7 +334,7 @@ const Enterprises: React.FC = () => {
                     disabled={enterprise.aceito == 0}
                     onClick={() => inviteEnterprise(enterprise.id)}
                   >
-                    {enterprise.aceito == 0 ? 'Aguardando' : 'Me associar'}
+                    {enterprise.aceito == 0 ? 'Aguardando' : 'Seguir'}
                   </CadastraButton>
                 </Card>
               );
@@ -353,7 +353,7 @@ const Enterprises: React.FC = () => {
                   <Loader type="Watch" color="#ff9000" height={40} width={40} />
                 </div>
               ) : (
-                'Nenhuma empresa que você ainda não tenha se associado encontrada.'
+                'Nenhuma empresa que você ainda não tenha seguido encontrada.'
               )}
             </>
           )}
@@ -395,7 +395,7 @@ const Enterprises: React.FC = () => {
               </CardMine>
             </>
           )}
-          <span>Empresas Associadas</span>
+          <span>Seguindo</span>
           {enterprises && enterprises.length > 0 ? (
             enterprises.map((enterprise) => {
               return (
