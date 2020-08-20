@@ -619,7 +619,7 @@ const Dashboard: React.FC = () => {
                               color: 'inherit',
                             }}
                             href={`https://api.whatsapp.com/send?phone=55${removeMask(
-                              user.celphone,
+                              appointment.user.celphone,
                             )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
                               selectectedService?.start_hour
                             }h%20${selectedDateAsText}%20na%20empresa%20${
@@ -762,7 +762,7 @@ const Dashboard: React.FC = () => {
                               color: 'inherit',
                             }}
                             href={`https://api.whatsapp.com/send?phone=55${removeMask(
-                              user.celphone,
+                              appointment.user.celphone,
                             )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
                               selectectedService?.start_hour
                             }h%20${selectedDateAsText}%20na%20empresa%20${
@@ -912,7 +912,7 @@ const Dashboard: React.FC = () => {
                               color: 'inherit',
                             }}
                             href={`https://api.whatsapp.com/send?phone=55${removeMask(
-                              user.celphone,
+                              appointment.user.celphone,
                             )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
                               selectectedService?.start_hour
                             }h%20${selectedDateAsText}%20na%20empresa%20${
