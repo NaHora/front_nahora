@@ -1,8 +1,9 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FiSearch, FiLock, FiUnlock } from 'react-icons/fi';
 
 import { useHistory } from 'react-router-dom';
 import Loader from 'react-loader-spinner';
+import socketio from 'socket.io-client';
 import {
   Container,
   Content,
@@ -65,6 +66,14 @@ const Enterprises: React.FC = () => {
   const [myEnterprise, setMyEnterprises] = useState<SearchEnterprise | null>(
     null,
   );
+
+  const socket = useMemo(() => {
+    return socketio(process.env.REACT_APP_API as string, {
+      query: {
+        user_id: user.id,
+      },
+    });
+  }, [user.id]);
 
   const getAllEnterprises = useCallback(async () => {
     try {
@@ -226,6 +235,23 @@ const Enterprises: React.FC = () => {
       searchAllEnterprisesByName(searchValue);
     }
   }, [searchValue]);
+
+  useEffect(() => {
+    socket.on('userAcceptSolicitation', (enterprise: MyEnterprise) => {
+      getAllEnterprises();
+      getInviteEnterprise();
+    });
+
+    socket.on('userDeclineSolicitation', (enterprise: MyEnterprise) => {
+      getAllEnterprises();
+    });
+  }, [
+    socket,
+    enterprises,
+    allEnterprises,
+    getAllEnterprises,
+    getInviteEnterprise,
+  ]);
 
   return (
     <Container>

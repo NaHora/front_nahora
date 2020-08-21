@@ -182,6 +182,7 @@ const Plans: React.FC = () => {
 
         await api.post('/plans/active', body);
         getAllEnterpriseAcceptedInvites();
+        getTotalMoney();
         toast.addToast({
           type: 'success',
           title: 'Boa!',
@@ -205,7 +206,7 @@ const Plans: React.FC = () => {
         }
       }
     },
-    [toast, getAllEnterpriseAcceptedInvites],
+    [toast, getAllEnterpriseAcceptedInvites, getTotalMoney],
   );
 
   const acceptUser = useCallback(

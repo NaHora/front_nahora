@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { FiMenu } from 'react-icons/fi';
 
 import { useHistory } from 'react-router-dom';
 import { Badge } from '@material-ui/core';
 import { loadStripe } from '@stripe/stripe-js';
+import socketio from 'socket.io-client';
 import { Container, Span } from './styles';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
@@ -26,7 +27,7 @@ const Menu: React.FC = () => {
     localStorage.getItem('@NaHora:myEnterprise') as string,
   ) as Enterprise;
   const [openMenu, setOpenMenu] = useState(false);
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const history = useHistory();
   const { addToast } = useToast();
 
@@ -64,6 +65,40 @@ const Menu: React.FC = () => {
       setSolicitations(response.data);
     } catch {}
   }, []);
+
+  const socket = useMemo(() => {
+    return socketio(process.env.REACT_APP_API as string, {
+      query: {
+        user_id: user.id,
+      },
+    });
+  }, [user.id]);
+
+  useEffect(() => {
+    socket.on('solicitation', (solicitation: Solicitation) => {
+      setSolicitations([...solicitations, solicitation]);
+    });
+
+    socket.on('acceptSolicitation', (solicitation: Solicitation) => {
+      const oldSolicitations = [...solicitations];
+
+      const newSolicitations = oldSolicitations.filter(
+        (currentSolicitation) => currentSolicitation.id !== solicitation.id,
+      );
+
+      setSolicitations(newSolicitations);
+    });
+
+    socket.on('declineSolicitation', (solicitation: Solicitation) => {
+      const oldSolicitations = [...solicitations];
+
+      const newSolicitations = oldSolicitations.filter(
+        (currentSolicitation) => currentSolicitation.id !== solicitation.id,
+      );
+
+      setSolicitations(newSolicitations);
+    });
+  }, [socket, solicitations]);
 
   useEffect(() => {
     getSolicitations();
