@@ -17,6 +17,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
+import EnterpriseImg from '../../assets/empresa.png';
 import {
   Container,
   Content,
@@ -409,13 +410,7 @@ const Dashboard: React.FC = () => {
           >
             {thisEnterprise && thisEnterprise.name}
           </span>
-          <img
-            src={
-              thisEnterprise.logo_url ||
-              `https://api.adorable.io/avatars/285/${thisEnterprise.id}.png`
-            }
-            alt="GoBarber"
-          />
+          <img src={thisEnterprise.logo_url || EnterpriseImg} alt="GoBarber" />
         </div>
       </header>
       <Category

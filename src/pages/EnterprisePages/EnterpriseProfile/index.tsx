@@ -9,6 +9,7 @@ import { useToast } from '../../../hooks/toast';
 import HeaderMenu from '../../../components/Header';
 import Button from '../../../components/Button';
 import InputDefault from '../../../components/InputDefault';
+import EnterpriseImg from '../../../assets/empresa.png';
 
 interface Enterprise {
   id?: string;
@@ -100,10 +101,7 @@ const EnterpriseProfile: React.FC = () => {
       <div>
         <AvatarInput>
           <img
-            src={
-              enterpriseData?.logo_url ||
-              `https://api.adorable.io/avatars/285/${myEnterprise.id}.png`
-            }
+            src={enterpriseData?.logo_url || EnterpriseImg}
             alt={myEnterprise.name}
           />
           <label htmlFor="avatar">
@@ -213,10 +211,7 @@ const EnterpriseProfile: React.FC = () => {
                   <FiArrowLeft />
 
                   <img
-                    src={
-                      enterpriseData?.logo_url ||
-                      `https://api.adorable.io/avatars/285/${myEnterprise.id}.png`
-                    }
+                    src={enterpriseData?.logo_url || EnterpriseImg}
                     alt="GoBarber"
                   />
                 </Header>

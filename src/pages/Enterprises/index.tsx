@@ -1,9 +1,8 @@
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { FiSearch, FiLock, FiUnlock } from 'react-icons/fi';
 
 import { useHistory } from 'react-router-dom';
 import Loader from 'react-loader-spinner';
-import socketio from 'socket.io-client';
 import {
   Container,
   Content,
@@ -16,6 +15,7 @@ import {
   MyEnterprises,
   CardMine,
 } from './styles';
+import EnterpriseImg from '../../assets/empresa.png';
 
 import 'react-day-picker/lib/style.css';
 
@@ -265,13 +265,7 @@ const Enterprises: React.FC = () => {
                 return (
                   <Card key={enterprise.id}>
                     <div>
-                      <img
-                        src={
-                          enterprise.logo_url ||
-                          `https://api.adorable.io/avatars/285/${enterprise.id}.png`
-                        }
-                        alt=""
-                      />
+                      <img src={enterprise.logo_url || EnterpriseImg} alt="" />
                       <div>
                         <Title>{enterprise.name}</Title>
                         <SubTitle>
@@ -320,13 +314,7 @@ const Enterprises: React.FC = () => {
               return (
                 <Card key={enterprise.id}>
                   <div>
-                    <img
-                      src={
-                        enterprise.logo_url ||
-                        `https://api.adorable.io/avatars/285/${enterprise.id}.png`
-                      }
-                      alt=""
-                    />
+                    <img src={enterprise.logo_url || EnterpriseImg} alt="" />
                     <div>
                       <Title>{enterprise.name}</Title>
                       <SubTitle>
@@ -382,13 +370,7 @@ const Enterprises: React.FC = () => {
                 key={myEnterprise.id}
               >
                 <div>
-                  <img
-                    src={
-                      myEnterprise.logo_url ||
-                      `https://api.adorable.io/avatars/285/${myEnterprise.id}.png`
-                    }
-                    alt=""
-                  />
+                  <img src={myEnterprise.logo_url || EnterpriseImg} alt="" />
                   <div>
                     <Title>{myEnterprise.name}</Title>
                     <SubTitle>
@@ -419,10 +401,7 @@ const Enterprises: React.FC = () => {
                 >
                   <div>
                     <img
-                      src={
-                        enterprise.enterprise.logo_url ||
-                        `https://api.adorable.io/avatars/285/${enterprise.id}.png`
-                      }
+                      src={enterprise.enterprise.logo_url || EnterpriseImg}
                       alt=""
                     />
                     <div>

@@ -2,8 +2,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { FiChevronDown, FiChevronUp, FiUsers } from 'react-icons/fi';
 import { MdDeleteForever } from 'react-icons/md';
 
-import { useHistory } from 'react-router-dom';
-
 import { format } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { GoLocation } from 'react-icons/go';
@@ -11,6 +9,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
+import EnterpriseImg from '../../assets/empresa.png';
 import { Container, Content, Card, OpenDelete } from './styles';
 
 import 'react-day-picker/lib/style.css';
@@ -18,10 +17,11 @@ import 'react-day-picker/lib/style.css';
 import HeaderMenu from '../../components/Header';
 
 import api from '../../services/api';
-import { useToast } from '../../hooks/toast';
+
 import { useAuth } from '../../hooks/auth';
 
 import Button from '../../components/Button';
+import { useToast } from '../../hooks/toast';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -248,10 +248,7 @@ const Enterprises: React.FC = () => {
                         />
                       )}
                       <img
-                        src={
-                          appointment.enterprise.logo_url ||
-                          `https://api.adorable.io/avatars/285/${appointment.id}.png`
-                        }
+                        src={appointment.enterprise.logo_url || EnterpriseImg}
                         alt="logo empresa"
                       />
                       <span>{appointment.enterprise.name}</span>
@@ -339,10 +336,7 @@ const Enterprises: React.FC = () => {
                   <div>
                     <div>
                       <img
-                        src={
-                          appointment.enterprise.logo_url ||
-                          `https://api.adorable.io/avatars/285/${appointment.id}.png`
-                        }
+                        src={appointment.enterprise.logo_url || EnterpriseImg}
                         alt="logo empresa"
                       />
                       <span>{appointment.enterprise.name}</span>
