@@ -25,6 +25,7 @@ import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
+import { useSocket } from '../../hooks/socket';
 
 interface SearchEnterprise {
   id: string;
@@ -54,6 +55,7 @@ const Enterprises: React.FC = () => {
   const toast = useToast();
   const history = useHistory();
   const { user } = useAuth();
+  const { socket } = useSocket();
 
   const [searchEnterprises, setSearchEnterprises] = useState<
     SearchEnterprise[]
@@ -227,14 +229,6 @@ const Enterprises: React.FC = () => {
       searchAllEnterprisesByName(searchValue);
     }
   }, [searchValue]);
-
-  const socket = useMemo(() => {
-    return socketio(process.env.REACT_APP_API as string, {
-      query: {
-        user_id: user.id,
-      },
-    });
-  }, [user.id]);
 
   useEffect(() => {
     socket.on('userAcceptSolicitation', (enterprise: MyEnterprise) => {

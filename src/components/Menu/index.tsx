@@ -11,6 +11,7 @@ import { routes } from '../../routes';
 
 import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
+import { useSocket } from '../../hooks/socket';
 // Make sure to call `loadStripe` outside of a component’s render to avoid
 // recreating the `Stripe` object on every render.
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY as string);
@@ -27,7 +28,8 @@ const Menu: React.FC = () => {
     localStorage.getItem('@NaHora:myEnterprise') as string,
   ) as Enterprise;
   const [openMenu, setOpenMenu] = useState(false);
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
+  const { socket } = useSocket();
   const history = useHistory();
   const { addToast } = useToast();
 
@@ -65,14 +67,6 @@ const Menu: React.FC = () => {
       setSolicitations(response.data);
     } catch {}
   }, []);
-
-  const socket = useMemo(() => {
-    return socketio(process.env.REACT_APP_API as string, {
-      query: {
-        user_id: user.id,
-      },
-    });
-  }, [user.id]);
 
   useEffect(() => {
     socket.on('solicitation', (solicitation: Solicitation) => {

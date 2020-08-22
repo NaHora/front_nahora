@@ -32,35 +32,37 @@ export const routes = {
   signin: '/',
 };
 
-const Routes: React.FC = () => (
-  <Switch>
-    <Route path={routes.dashboard} component={Dashboard} isPrivate />
-    <Route path={routes.enterprise} component={Enterprises} isPrivate />
-    <Route path={routes.schedule} component={Schedule} isPrivate />
-    <Route path={routes.profile} component={Profile} isPrivate />
-    <Route path={routes.plan} component={Plans} isPrivate />
-    <Route path={routes.success} component={SuccessPage} isPrivate />
-    <Route
-      path={routes.enterpriseSchedule}
-      component={EnterpriseSchedule}
-      isPrivate
-    />
-    <Route
-      path={routes.signupEnterprise}
-      component={SignUpEnterprise}
-      isPrivate
-    />
-    <Route
-      path={routes.enterpriseProfile}
-      component={EnterpriseProfile}
-      isPrivate
-    />
-    <Route path={routes.signup} component={SignUp} />
-    <Route path={routes.forgotPassword} component={ForgotPassword} />
-    <Route path={routes.resetPassword} component={ResetPassword} />
+const Routes: React.FC = () => {
+  return (
+    <Switch>
+      <Route path={routes.dashboard} component={Dashboard} isPrivate />
+      <Route path={routes.enterprise} component={Enterprises} isPrivate />
+      <Route path={routes.schedule} component={Schedule} isPrivate />
+      <Route path={routes.profile} component={Profile} isPrivate />
+      <Route path={routes.plan} component={Plans} isPrivate />
+      <Route path={routes.success} component={SuccessPage} isPrivate />
+      <Route
+        path={routes.enterpriseSchedule}
+        component={EnterpriseSchedule}
+        isPrivate
+      />
+      <Route
+        path={routes.signupEnterprise}
+        component={SignUpEnterprise}
+        isPrivate
+      />
+      <Route
+        path={routes.enterpriseProfile}
+        component={EnterpriseProfile}
+        isPrivate
+      />
+      <Route path={routes.signup} component={SignUp} />
+      <Route path={routes.forgotPassword} component={ForgotPassword} />
+      <Route path={routes.resetPassword} component={ResetPassword} />
 
-    <Route path={routes.signin} component={SignIn} />
-  </Switch>
-);
+      <Route path={routes.signin} component={SignIn} />
+    </Switch>
+  );
+};
 
 export default Routes;
