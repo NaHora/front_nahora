@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   FiChevronDown,
   FiChevronUp,
@@ -10,6 +10,7 @@ import { Tooltip } from '@material-ui/core';
 import { format, formatDistance, getMonth, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numeral from 'numeral';
+import socketio from 'socket.io-client';
 import HeaderMenu from '../../../components/Header';
 import {
   Container,
@@ -26,6 +27,7 @@ import InputDefault from '../../../components/InputDefault';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
 import 'numeral/locales/pt-br';
+import { useAuth } from '../../../hooks/auth';
 
 interface User {
   id: string;
@@ -68,6 +70,7 @@ interface Invite {
 
 const Plans: React.FC = () => {
   numeral.locale('pt-br');
+  const { user } = useAuth();
 
   const toast = useToast();
   const [searchValue, setSearchValue] = useState('');
@@ -321,6 +324,20 @@ const Plans: React.FC = () => {
     },
     [toast, getAllEnterpriseAcceptedInvites],
   );
+
+  const socket = useMemo(() => {
+    return socketio(process.env.REACT_APP_API as string, {
+      query: {
+        user_id: user.id,
+      },
+    });
+  }, [user.id]);
+
+  useEffect(() => {
+    socket.on('solicitation', (solicitation: Solicitation) => {
+      getSolicitations();
+    });
+  }, [socket, getSolicitations]);
 
   useEffect(() => {
     Promise.all([

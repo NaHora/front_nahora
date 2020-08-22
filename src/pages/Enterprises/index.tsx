@@ -67,14 +67,6 @@ const Enterprises: React.FC = () => {
     null,
   );
 
-  const socket = useMemo(() => {
-    return socketio(process.env.REACT_APP_API as string, {
-      query: {
-        user_id: user.id,
-      },
-    });
-  }, [user.id]);
-
   const getAllEnterprises = useCallback(async () => {
     try {
       const response = await api.get(`/enterprises/all-unregistered`);
@@ -236,22 +228,24 @@ const Enterprises: React.FC = () => {
     }
   }, [searchValue]);
 
+  const socket = useMemo(() => {
+    return socketio(process.env.REACT_APP_API as string, {
+      query: {
+        user_id: user.id,
+      },
+    });
+  }, [user.id]);
+
   useEffect(() => {
     socket.on('userAcceptSolicitation', (enterprise: MyEnterprise) => {
       getAllEnterprises();
       getInviteEnterprise();
     });
 
-    socket.on('userDeclineSolicitation', (enterprise: MyEnterprise) => {
+    socket.on('declineSolicitation', (enterprise: MyEnterprise) => {
       getAllEnterprises();
     });
-  }, [
-    socket,
-    enterprises,
-    allEnterprises,
-    getAllEnterprises,
-    getInviteEnterprise,
-  ]);
+  }, [socket, getAllEnterprises, getInviteEnterprise]);
 
   return (
     <Container>
