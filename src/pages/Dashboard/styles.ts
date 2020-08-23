@@ -84,7 +84,7 @@ export const Category = styled.main<PageColor>`
     padding: 0 0 10px;
     span {
       color: ${(props) =>
-        TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+        TinyColor(props.secondaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
     }
     strong {
       cursor: pointer;

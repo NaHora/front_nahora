@@ -10,7 +10,15 @@ import {
 import { FaWhatsapp } from 'react-icons/fa';
 import { GoLocation } from 'react-icons/go';
 import DayPicker, { DayModifiers } from 'react-day-picker';
-import { isToday, format, getDay, getYear, getMonth, getDate } from 'date-fns';
+import {
+  isToday,
+  format,
+  getDay,
+  getYear,
+  getMonth,
+  getDate,
+  isEqual,
+} from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { Link, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
@@ -37,6 +45,7 @@ import { useToast } from '../../hooks/toast';
 import Button from '../../components/Button';
 import { useAuth } from '../../hooks/auth';
 import { removeMask } from '../../utils';
+import { useSocket } from '../../hooks/socket';
 // import { Container } from './styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -72,6 +81,8 @@ interface Category {
 
 interface Appointment {
   id: string;
+  service_id: string;
+  enterprise_id: string;
   user: User;
   date: Date;
 }
@@ -87,6 +98,7 @@ interface Service {
   disabled: boolean;
   start_hour: string;
   capacity: number;
+  category_id: string;
   appointments: Appointment[];
   description: {
     title: string;
@@ -104,6 +116,7 @@ const Dashboard: React.FC = () => {
   const toast = useToast();
   const { user } = useAuth();
   const history = useHistory();
+  const { socket } = useSocket();
 
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
   const owner_enterprise = thisEnterprise.owner_id === user.id;
@@ -179,7 +192,9 @@ const Dashboard: React.FC = () => {
   }, [thisEnterprise.id, selectectedCategory]);
 
   useEffect(() => {
-    getAvaiableDays();
+    if (selectectedCategory && thisEnterprise.id) {
+      getAvaiableDays();
+    }
   }, [selectectedCategory, thisEnterprise.id, getAvaiableDays]);
 
   const handleServices = useCallback(async () => {
@@ -310,7 +325,7 @@ const Dashboard: React.FC = () => {
   );
 
   useEffect(() => {
-    if ((thisEnterprise.id, currentWeekDay, selectectedCategory)) {
+    if (thisEnterprise.id && currentWeekDay && selectectedCategory) {
       handleServices();
     }
   }, [thisEnterprise.id, currentWeekDay, selectectedCategory, selectedDate]);
@@ -347,6 +362,82 @@ const Dashboard: React.FC = () => {
       return Number(service.start_hour.replace(':', '')) >= 1800;
     });
   }, [services]);
+
+  // useEffect(() => {
+  //   socket.on(
+  //     'newAppointment',
+  //     (appointment: { appointment: Appointment; service: Service }) => {
+  //       console.log(
+  //         appointment.appointment.enterprise_id === thisEnterprise.id,
+  //       );
+  //       console.log(
+  //         selectectedCategory?.id === appointment.service.category_id,
+  //       );
+  //       console.log(
+  //         isEqual(
+  //           new Date(
+  //             getYear(new Date(appointment.appointment.date)),
+  //             getMonth(new Date(appointment.appointment.date)),
+  //             getDate(new Date(appointment.appointment.date)),
+  //           ),
+  //           new Date(
+  //             getYear(selectedDate),
+  //             getMonth(selectedDate),
+  //             getDate(selectedDate),
+  //           ),
+  //         ),
+  //       );
+  //       if (
+  //         appointment.appointment.enterprise_id === thisEnterprise.id &&
+  //         selectectedCategory?.id === appointment.service.category_id &&
+  //         isEqual(
+  //           new Date(
+  //             getYear(new Date(appointment.appointment.date)),
+  //             getMonth(new Date(appointment.appointment.date)),
+  //             getDate(new Date(appointment.appointment.date)),
+  //           ),
+  //           new Date(
+  //             getYear(selectedDate),
+  //             getMonth(selectedDate),
+  //             getDate(selectedDate),
+  //           ),
+  //         )
+  //       ) {
+  //         return handleServices();
+  //       }
+  //     },
+  //   );
+
+  //   socket.on(
+  //     'deleteAppointment',
+  //     (appointment: { appointment: Appointment; service: Service }) => {
+  //       if (
+  //         appointment.appointment.enterprise_id === thisEnterprise.id &&
+  //         selectectedCategory?.id === appointment.service.category_id &&
+  //         isEqual(
+  //           new Date(
+  //             getYear(new Date(appointment.appointment.date)),
+  //             getMonth(new Date(appointment.appointment.date)),
+  //             getDate(new Date(appointment.appointment.date)),
+  //           ),
+  //           new Date(
+  //             getYear(selectedDate),
+  //             getMonth(selectedDate),
+  //             getDate(selectedDate),
+  //           ),
+  //         )
+  //       ) {
+  //         return handleServices();
+  //       }
+  //     },
+  //   );
+  // }, [
+  //   socket,
+  //   thisEnterprise.id,
+  //   selectedDate,
+  //   selectectedCategory,
+  //   handleServices,
+  // ]);
 
   return (
     <Container
@@ -639,7 +730,7 @@ const Dashboard: React.FC = () => {
                     loading={loading}
                   >
                     <FiCheckCircle />
-                    Confirmar
+                    Agendar
                   </Button>
                 </ButtonContainer>
               </ModalUsers>
@@ -784,7 +875,7 @@ const Dashboard: React.FC = () => {
                     loading={loading}
                   >
                     <FiCheckCircle />
-                    Confirmar
+                    Agendar
                   </Button>
                 </ButtonContainer>
               </ModalUsers>
@@ -936,7 +1027,7 @@ const Dashboard: React.FC = () => {
                     loading={loading}
                   >
                     <FiCheckCircle />
-                    Confirmar
+                    Agendar
                   </Button>
                 </ButtonContainer>
               </ModalUsers>

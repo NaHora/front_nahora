@@ -4,7 +4,6 @@ import { FiMenu } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
 import { Badge } from '@material-ui/core';
 import { loadStripe } from '@stripe/stripe-js';
-import socketio from 'socket.io-client';
 import { Container, Span } from './styles';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
