@@ -328,7 +328,13 @@ const Dashboard: React.FC = () => {
     if (thisEnterprise.id && currentWeekDay && selectectedCategory) {
       handleServices();
     }
-  }, [thisEnterprise.id, currentWeekDay, selectectedCategory, selectedDate]);
+  }, [
+    thisEnterprise.id,
+    currentWeekDay,
+    selectectedCategory,
+    selectedDate,
+    handleServices,
+  ]);
 
   const selectedDateAsText = useMemo(() => {
     return format(selectedDate, "'Dia' dd 'de' MMMM", {
@@ -364,73 +370,61 @@ const Dashboard: React.FC = () => {
   }, [services]);
 
   // useEffect(() => {
-  //   socket.on(
-  //     'newAppointment',
-  //     (appointment: { appointment: Appointment; service: Service }) => {
-  //       console.log(
-  //         appointment.appointment.enterprise_id === thisEnterprise.id,
-  //       );
-  //       console.log(
-  //         selectectedCategory?.id === appointment.service.category_id,
-  //       );
-  //       console.log(
-  //         isEqual(
-  //           new Date(
-  //             getYear(new Date(appointment.appointment.date)),
-  //             getMonth(new Date(appointment.appointment.date)),
-  //             getDate(new Date(appointment.appointment.date)),
-  //           ),
-  //           new Date(
-  //             getYear(selectedDate),
-  //             getMonth(selectedDate),
-  //             getDate(selectedDate),
-  //           ),
-  //         ),
-  //       );
-  //       if (
-  //         appointment.appointment.enterprise_id === thisEnterprise.id &&
-  //         selectectedCategory?.id === appointment.service.category_id &&
-  //         isEqual(
-  //           new Date(
-  //             getYear(new Date(appointment.appointment.date)),
-  //             getMonth(new Date(appointment.appointment.date)),
-  //             getDate(new Date(appointment.appointment.date)),
-  //           ),
-  //           new Date(
-  //             getYear(selectedDate),
-  //             getMonth(selectedDate),
-  //             getDate(selectedDate),
-  //           ),
-  //         )
-  //       ) {
-  //         return handleServices();
-  //       }
-  //     },
-  //   );
+  //   if (thisEnterprise.id && selectectedCategory?.id && selectedDate) {
+  //     socket.on(
+  //       `new${thisEnterprise.id}${format(
+  //         new Date(selectedDate),
+  //         'dd/MM/yyyy',
+  //       )}${selectectedCategory?.id}`,
+  //       (appointment: { appointment: Appointment; service: Service }) => {
+  //         if (
+  //           appointment.appointment.enterprise_id === thisEnterprise.id &&
+  //           selectectedCategory?.id === appointment.service.category_id &&
+  //           isEqual(
+  //             new Date(
+  //               getYear(new Date(appointment.appointment.date)),
+  //               getMonth(new Date(appointment.appointment.date)),
+  //               getDate(new Date(appointment.appointment.date)),
+  //             ),
+  //             new Date(
+  //               getYear(selectedDate),
+  //               getMonth(selectedDate),
+  //               getDate(selectedDate),
+  //             ),
+  //           )
+  //         ) {
+  //           return handleServices();
+  //         }
+  //       },
+  //     );
 
-  //   socket.on(
-  //     'deleteAppointment',
-  //     (appointment: { appointment: Appointment; service: Service }) => {
-  //       if (
-  //         appointment.appointment.enterprise_id === thisEnterprise.id &&
-  //         selectectedCategory?.id === appointment.service.category_id &&
-  //         isEqual(
-  //           new Date(
-  //             getYear(new Date(appointment.appointment.date)),
-  //             getMonth(new Date(appointment.appointment.date)),
-  //             getDate(new Date(appointment.appointment.date)),
-  //           ),
-  //           new Date(
-  //             getYear(selectedDate),
-  //             getMonth(selectedDate),
-  //             getDate(selectedDate),
-  //           ),
-  //         )
-  //       ) {
-  //         return handleServices();
-  //       }
-  //     },
-  //   );
+  //     socket.on(
+  //       `delete${thisEnterprise.id}${format(
+  //         new Date(selectedDate),
+  //         'dd/MM/yyyy',
+  //       )}${selectectedCategory?.id}`,
+  //       (appointment: { appointment: Appointment; service: Service }) => {
+  //         if (
+  //           appointment.appointment.enterprise_id === thisEnterprise.id &&
+  //           selectectedCategory?.id === appointment.service.category_id &&
+  //           isEqual(
+  //             new Date(
+  //               getYear(new Date(appointment.appointment.date)),
+  //               getMonth(new Date(appointment.appointment.date)),
+  //               getDate(new Date(appointment.appointment.date)),
+  //             ),
+  //             new Date(
+  //               getYear(selectedDate),
+  //               getMonth(selectedDate),
+  //               getDate(selectedDate),
+  //             ),
+  //           )
+  //         ) {
+  //           return handleServices();
+  //         }
+  //       },
+  //     );
+  //   }
   // }, [
   //   socket,
   //   thisEnterprise.id,

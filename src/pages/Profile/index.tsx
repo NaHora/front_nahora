@@ -14,10 +14,11 @@ import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import { useHistory, Link } from 'react-router-dom';
 import { Switch } from '@material-ui/core';
+import NumberFormat from 'react-number-format';
 import { Container, Content, AvatarInput } from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import getValidationErrors from '../../utils';
+import getValidationErrors, { removeMask } from '../../utils';
 import { routes } from '../../routes';
 import { useToast } from '../../hooks/toast';
 import api from '../../services/api';
@@ -158,7 +159,7 @@ const Profile: React.FC = () => {
           initialData={{
             name: user.name,
             email: user.email,
-            celphone: user.celphone,
+            celphone: removeMask(user.celphone),
             isPrivate: !!user.isPrivate,
           }}
           ref={formRef}
