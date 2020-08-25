@@ -212,7 +212,7 @@ const EnterpriseProfile: React.FC = () => {
 
                   <img
                     src={enterpriseData?.logo_url || EnterpriseImg}
-                    alt="GoBarber"
+                    alt="NaHora"
                   />
                 </Header>
                 <Body

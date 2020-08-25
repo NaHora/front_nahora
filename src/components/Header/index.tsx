@@ -15,7 +15,11 @@ function HeaderMenu() {
   return (
     <Header>
       <HeaderContent>
-        <img src={logoImg} alt="NaHora" />
+        <img
+          onClick={() => history.push(routes.enterprise)}
+          src={logoImg}
+          alt="NaHora"
+        />
 
         <Profile>
           <img

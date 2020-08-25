@@ -421,7 +421,7 @@ const Enterprises: React.FC = () => {
             <>
               <br />
               <br />
-              Nenhum agendamento futuro.
+              Nenhum agendamento passado.
             </>
           )}
         </div>

@@ -79,7 +79,6 @@ const SignUp: React.FC = () => {
         addToast({
           type: 'success',
           title: 'Cadastro Realizado!',
-          description: 'Você já pode fazer seu login no GoBarber!',
         });
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -206,7 +205,7 @@ const SignUp: React.FC = () => {
 
                   <img
                     src="https://api.adorable.io/avatars/285/.png"
-                    alt="GoBarber"
+                    alt="NaHora"
                   />
                 </Header>
                 <Body

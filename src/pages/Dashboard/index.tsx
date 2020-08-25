@@ -495,7 +495,7 @@ const Dashboard: React.FC = () => {
           >
             {thisEnterprise && thisEnterprise.name}
           </span>
-          <img src={thisEnterprise.logo_url || EnterpriseImg} alt="GoBarber" />
+          <img src={thisEnterprise.logo_url || EnterpriseImg} alt="NaHora" />
         </div>
       </header>
       <Category
