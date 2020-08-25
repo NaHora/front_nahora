@@ -172,10 +172,10 @@ const SignUp: React.FC = () => {
                   name="secondary_color"
                 />
               </label>
-              <Tooltip title="Perfil privado você controla quem poderá se agendar, já o perfil aberto qualquer usuário estará apto a se agendar na plataforma">
+              <Tooltip title="Perfil fechado você controla quem poderá se agendar, já o perfil aberto qualquer usuário estará apto a se agendar na plataforma">
                 <label htmlFor="">
                   <MdInfoOutline style={{ marginRight: '8px' }} />
-                  Perfil Privado :
+                  Perfil Fechado :
                   <Switch
                     onChange={(e) =>
                       setData({

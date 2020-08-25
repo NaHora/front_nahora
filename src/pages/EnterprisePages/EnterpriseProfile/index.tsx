@@ -1,8 +1,9 @@
 import React, { ChangeEvent, useCallback, useState, useEffect } from 'react';
 
 import { FiCamera, FiArrowLeft } from 'react-icons/fi';
-import { Switch } from '@material-ui/core';
+import { Switch, Tooltip } from '@material-ui/core';
 import NumberFormat from 'react-number-format';
+import { MdInfoOutline } from 'react-icons/md';
 import { Container, AvatarInput, Cel, Header, Body, Form } from './styles';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
@@ -184,20 +185,24 @@ const EnterpriseProfile: React.FC = () => {
                   name="secondary_color"
                 />
               </label>
-              <label htmlFor="">
-                Usuário necessitam de plano:{' '}
-                <Switch
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.checked,
-                    })
-                  }
-                  name="isPrivate"
-                  inputProps={{ 'aria-label': 'secondary checkbox' }}
-                  checked={!!enterpriseData.isPrivate}
-                />
-              </label>
+              <Tooltip title="Perfil fechado você controla quem poderá se agendar, já o perfil aberto qualquer usuário estará apto a se agendar na plataforma">
+                <label htmlFor="">
+                  <MdInfoOutline style={{ marginRight: '8px' }} />
+                  Perfil Fechado :
+                  <Switch
+                    onChange={(e) =>
+                      setEnterpriseData({
+                        ...enterpriseData,
+                        [e.target.name]: e.target.checked,
+                      })
+                    }
+                    name="isPrivate"
+                    inputProps={{ 'aria-label': 'secondary checkbox' }}
+                    checked={!!enterpriseData.isPrivate}
+                  />
+                </label>
+              </Tooltip>
+
               <Button onClick={updateEnterprise}>Salvar</Button>
             </div>
             <div>

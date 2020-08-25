@@ -106,6 +106,21 @@ interface Service {
   };
 }
 
+interface UserPlan {
+  id: string;
+  user: User;
+  expiration_at: Date;
+  plan_id: string;
+}
+
+interface Invite {
+  id: string;
+  user: User;
+
+  accepted: number;
+  currentPlan?: UserPlan;
+}
+
 interface AboutDays {
   availableDays: number[];
 
@@ -122,6 +137,7 @@ const Dashboard: React.FC = () => {
   const owner_enterprise = thisEnterprise.owner_id === user.id;
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekDay, setCurrentWeekDay] = useState(getDay(new Date()));
+  const [currentCustomer, setCurrentCustomer] = useState<any>(null);
   const [openModal, setOpeModal] = useState<ModalData | any>({});
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -145,7 +161,9 @@ const Dashboard: React.FC = () => {
   );
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
-
+  const [allUsersEnterpriseAccepted, setAllUsersEnterpriseAccepted] = useState<
+    Invite[]
+  >([]);
   const handleOpen = (service_id: string) => {
     setCurrentService(service_id);
     setOpen(true);
@@ -158,6 +176,18 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     setPrimaryColor(thisEnterprise.primary_color);
     setSecondaryColor(thisEnterprise.secondary_color);
+  }, []);
+
+  const getAllEnterpriseAcceptedInvites = useCallback(async () => {
+    try {
+      const response = await api.get('/invites/enterprise/accepted');
+
+      setAllUsersEnterpriseAccepted(response.data);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    getAllEnterpriseAcceptedInvites();
   }, []);
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
@@ -254,10 +284,13 @@ const Dashboard: React.FC = () => {
           service_id,
           enterprise_id: thisEnterprise.id,
           service_date: selectedDate,
+          customer_id: currentCustomer,
         };
         await api.post(`/appointments`, body);
 
-        history.push(routes.schedule);
+        if (!currentCustomer) {
+          history.push(routes.schedule);
+        }
 
         toast.addToast({
           type: 'success',
@@ -285,7 +318,7 @@ const Dashboard: React.FC = () => {
         setLoading(false);
       }
     },
-    [thisEnterprise.id, toast, selectedDate, history],
+    [thisEnterprise.id, toast, selectedDate, history, currentCustomer],
   );
 
   const deleteAppointment = useCallback(
@@ -664,6 +697,21 @@ const Dashboard: React.FC = () => {
                   {selectedDateAsText} {selectectedService?.start_hour}h
                 </span>
                 <br />
+                {owner_enterprise && (
+                  <select
+                    value={currentCustomer}
+                    name="customer"
+                    onChange={(e) => setCurrentCustomer(e.target.value)}
+                  >
+                    <option value="">Agendar em seu nome</option>
+                    {allUsersEnterpriseAccepted &&
+                      allUsersEnterpriseAccepted.map((customer) => (
+                        <option value={customer.user.id}>
+                          {customer.user.name}
+                        </option>
+                      ))}
+                  </select>
+                )}
                 <span>
                   {appointments.length > 0 ? (
                     <>
@@ -809,6 +857,21 @@ const Dashboard: React.FC = () => {
                   {selectedDateAsText} {selectectedService?.start_hour}h
                 </span>
                 <br />
+                {owner_enterprise && (
+                  <select
+                    value={currentCustomer}
+                    name="customer"
+                    onChange={(e) => setCurrentCustomer(e.target.value)}
+                  >
+                    <option value="">Agendar em seu nome</option>
+                    {allUsersEnterpriseAccepted &&
+                      allUsersEnterpriseAccepted.map((customer) => (
+                        <option value={customer.user.id}>
+                          {customer.user.name}
+                        </option>
+                      ))}
+                  </select>
+                )}
                 <span>
                   {appointments.length > 0 ? (
                     <>
@@ -961,6 +1024,21 @@ const Dashboard: React.FC = () => {
                   {selectedDateAsText} {selectectedService?.start_hour}h
                 </span>
                 <br />
+                {owner_enterprise && (
+                  <select
+                    value={currentCustomer}
+                    name="customer"
+                    onChange={(e) => setCurrentCustomer(e.target.value)}
+                  >
+                    <option value="">Agendar em seu nome</option>
+                    {allUsersEnterpriseAccepted &&
+                      allUsersEnterpriseAccepted.map((customer) => (
+                        <option value={customer.user.id}>
+                          {customer.user.name}
+                        </option>
+                      ))}
+                  </select>
+                )}
                 <span>
                   {appointments.length > 0 ? (
                     <>

@@ -82,9 +82,9 @@ export const Category = styled.main<PageColor>`
     overflow-x: scroll;
     width: 100%;
     padding: 0 0 10px;
-    span {
+    > span {
       color: ${(props) =>
-        TinyColor(props.secondaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
+        TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
     }
     strong {
       cursor: pointer;
