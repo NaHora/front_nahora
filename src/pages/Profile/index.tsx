@@ -23,27 +23,39 @@ import { routes } from '../../routes';
 import { useToast } from '../../hooks/toast';
 import api from '../../services/api';
 import { useAuth } from '../../hooks/auth';
+import InputDefault from '../../components/InputDefault';
 
 interface ProfileFormData {
   name: string;
-  celphone: string;
+  celphone: string | undefined;
   email: string;
   isPrivate: boolean;
-  password: string;
-  password_confirmation: string;
-  old_password: string;
+  password: any;
+  password_confirmation: any;
+  old_password: any;
 }
 
 const Profile: React.FC = () => {
-  const formRef = useRef<FormHandles>(null);
   const history = useHistory();
   const { addToast } = useToast();
   const { user, updateUser, signOut } = useAuth();
+
   const [isPrivate, setIsPrivate] = useState(user.isPrivate);
+  const [data, setData] = useState<ProfileFormData>({
+    name: user.name,
+    email: user.email,
+    celphone: removeMask(user.celphone),
+    isPrivate: !!user.isPrivate,
+    password: '',
+    password_confirmation: '',
+    old_password: '',
+  });
+  const [errors, setErrors] = useState<any>({});
 
   const handleSubmit = useCallback(
-    async (data: ProfileFormData) => {
-      formRef.current?.setErrors({});
+    async (e) => {
+      e.preventDefault();
+      setErrors({});
 
       try {
         const schema = Yup.object().shape({
@@ -109,7 +121,7 @@ const Profile: React.FC = () => {
         });
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
-          formRef.current?.setErrors(getValidationErrors(err));
+          setErrors(getValidationErrors(err));
 
           return;
         }
@@ -120,16 +132,16 @@ const Profile: React.FC = () => {
         });
       }
     },
-    [addToast, history, updateUser, isPrivate],
+    [addToast, history, updateUser, isPrivate, data],
   );
 
   const handleAvatarChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       if (e.target.files) {
-        const data = new FormData();
-        data.append('avatar', e.target.files[0]);
+        const formData = new FormData();
+        formData.append('avatar', e.target.files[0]);
 
-        api.patch('/users/avatar', data).then((response) => {
+        api.patch('/users/avatar', formData).then((response) => {
           updateUser(response.data);
 
           addToast({
@@ -155,16 +167,7 @@ const Profile: React.FC = () => {
         </div>
       </header>
       <Content>
-        <Form
-          initialData={{
-            name: user.name,
-            email: user.email,
-            celphone: removeMask(user.celphone),
-            isPrivate: !!user.isPrivate,
-          }}
-          ref={formRef}
-          onSubmit={handleSubmit}
-        >
+        <form onSubmit={handleSubmit}>
           <AvatarInput>
             <img
               src={
@@ -179,25 +182,51 @@ const Profile: React.FC = () => {
             </label>
           </AvatarInput>
           <h1>Meu Perfil</h1>
-          <Input icon={FiUser} name="name" type="text" placeholder="Nome" />
-          <Input
+          <InputDefault
+            error={errors.name}
+            value={data.name}
+            onChange={(e) =>
+              setData({ ...data, [e.target.name]: e.target.value })
+            }
+            icon={FiUser}
+            name="name"
+            type="text"
+            placeholder="Nome"
+          />
+          {/* <InputDefault
             icon={FiPhone}
             name="celphone"
             type="text"
             placeholder="Telefone"
-          />
-          {/* <NumberFormat
-            customInput={Input}
+
+          /> */}
+          <NumberFormat
+            customInput={InputDefault}
+            error={errors.celphone}
             icon={FiPhone}
             type="text"
             format="(##) #####-####"
             name="celphone"
+            value={data.celphone}
+            onChange={(e) =>
+              setData({ ...data, [e.target.name]: e.target.value })
+            }
             // allowLeadingZeros
             // allowEmptyFormatting
             mask="_"
             placeholder="Telefone"
-          /> */}
-          <Input icon={FiMail} name="email" type="email" placeholder="E-mail" />
+          />
+          <InputDefault
+            error={errors.email}
+            value={data.email}
+            onChange={(e) =>
+              setData({ ...data, [e.target.name]: e.target.value })
+            }
+            icon={FiMail}
+            name="email"
+            type="email"
+            placeholder="E-mail"
+          />
           <div>
             Perfil Anônimo:{' '}
             <Switch
@@ -206,27 +235,42 @@ const Profile: React.FC = () => {
               name="isPrivate"
             />
           </div>
-          <Input
+          <InputDefault
+            value={data.old_password}
+            error={errors.old_password}
+            onChange={(e) =>
+              setData({ ...data, [e.target.name]: e.target.value })
+            }
             icon={FiLock}
             name="old_password"
             type="password"
             placeholder="Senha atual"
             containerStyle={{ marginTop: 24 }}
           />
-          <Input
+          <InputDefault
+            value={data.password}
+            error={errors.password}
+            onChange={(e) =>
+              setData({ ...data, [e.target.name]: e.target.value })
+            }
             icon={FiLock}
             name="password"
             type="password"
             placeholder="Nova senha"
           />
-          <Input
+          <InputDefault
+            value={data.password_confirmation}
+            error={errors.password_confirmation}
+            onChange={(e) =>
+              setData({ ...data, [e.target.name]: e.target.value })
+            }
             icon={FiLock}
             name="password_confirmation"
             type="password"
             placeholder="Confirmar senha"
           />
           <Button type="submit">Confirmar mudanças</Button>
-        </Form>
+        </form>
       </Content>
     </Container>
   );
