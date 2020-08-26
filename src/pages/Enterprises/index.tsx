@@ -162,6 +162,37 @@ const Enterprises: React.FC = () => {
     [toast, history],
   );
 
+  const checkEnterprisePayment = useCallback(
+    async (enterprise: SearchEnterprise) => {
+      try {
+        const response = await api.get(`/enterprises/checkPayment`);
+
+        if (response.data) {
+          localStorage.setItem('enterprise', JSON.stringify(enterprise));
+
+          return history.push(routes.dashboard);
+        }
+      } catch (err) {
+        if (err.response) {
+          toast.addToast({
+            type: 'error',
+            title: 'Ops! algo deu errado,',
+            description:
+              err.response.data.message ||
+              'Não foi possível conferir sua assinatura.',
+          });
+        } else {
+          toast.addToast({
+            type: 'error',
+            title: 'Vishi',
+            description: 'Não foi possível conferir sua assinatura.',
+          });
+        }
+      }
+    },
+    [toast, history],
+  );
+
   const searchAllEnterprisesByName = useCallback(async (search: string) => {
     setLoading(true);
     try {
@@ -366,7 +397,7 @@ const Enterprises: React.FC = () => {
             <>
               <span>Minha Empresa</span>
               <CardMine
-                onClick={() => checkPermission(myEnterprise)}
+                onClick={() => checkEnterprisePayment(myEnterprise)}
                 key={myEnterprise.id}
               >
                 <div>
