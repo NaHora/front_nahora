@@ -17,6 +17,7 @@ export const HeaderContent = styled.div`
 
   > img {
     height: 80px;
+    cursor: pointer;
 
     @media (max-width: 600px) {
       display: none;

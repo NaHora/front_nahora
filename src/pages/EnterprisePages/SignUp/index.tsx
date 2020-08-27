@@ -55,7 +55,10 @@ const SignUp: React.FC = () => {
   const queryParams = new URLSearchParams(useLocation().search);
 
   const handleSubmit = useCallback(async () => {
-    if (queryParams.get('session_id') === localStorage.getItem('session_id')) {
+    if (
+      queryParams.get('session_id') === localStorage.getItem('session_id') ||
+      queryParams.get('session_id') === 'redirected'
+    ) {
       setErrors({});
 
       try {

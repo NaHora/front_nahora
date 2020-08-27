@@ -42,6 +42,10 @@ const Menu: React.FC = () => {
 
     localStorage.setItem('session_id', response.data.id);
     // When the customer clicks on the button, redirect them to Checkout.
+    if (response.data.enterprise === 'create') {
+      return history.push(`${routes.signupEnterprise}?session_id=redirected`);
+    }
+
     if (response.data.url) {
       return (window.location.href = response.data.url);
     }
