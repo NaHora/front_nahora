@@ -1,7 +1,9 @@
 import styled, { keyframes } from 'styled-components';
 
 import { shade } from 'polished';
+import GoogleLogin from 'react-google-login';
 import signInBackgroundImg from '../../assets/relogio.jpg';
+import Button from '../../components/Button';
 
 export const Container = styled.div`
   height: 100vh;
@@ -19,7 +21,9 @@ export const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  @media (min-width: 600px) {
+    justify-content: center;
+  }
 
   width: 100%;
   max-width: 700px;
@@ -48,16 +52,38 @@ export const AnimationContainer = styled.div`
     width: 100%;
   }
 
+  > span {
+    width: 100%;
+    margin-top: 16px;
+    > button {
+      display: flex;
+      padding: 16px;
+      justify-content: flex-start;
+
+      border-radius: 10px !important;
+      width: 100%;
+      > span {
+        svg {
+          margin-right: 18px;
+        }
+        text-transform: none;
+        font-family: Roboto, sans-serif !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+      }
+    }
+  }
+
+  img {
+    /* margin: 50px 0 0; */
+    width: 300px;
+  }
+
   form {
     margin: 80px 0 20px;
     width: 340px;
     text-align: center;
     justify-content: center;
-
-    img {
-      margin: 50px 0;
-      width: 300px;
-    }
 
     @media (max-width: 600px) {
       width: 100%;
@@ -97,5 +123,38 @@ export const AnimationContainer = styled.div`
     &:hover {
       color: ${shade(0.2, '#ff9000')};
     }
+  }
+`;
+
+export const GoogleLoginStyled = styled(GoogleLogin)`
+  width: 100%;
+  border-radius: 10px !important;
+
+  > span {
+    padding: 0 16px !important;
+    display: flex;
+    align-items: center;
+    svg {
+      margin-right: 8px;
+    }
+    > span {
+      margin-left: 10px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  }
+  height: 56px;
+  > div {
+    display: none;
+  }
+`;
+
+export const ButtonStyled = styled(Button)`
+  margin-bottom: 16px;
+  justify-content: flex-start;
+  color: #312e38;
+  span {
+    margin-left: 10px;
+    font-weight: bold;
   }
 `;

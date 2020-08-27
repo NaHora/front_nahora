@@ -45,7 +45,7 @@ const Profile: React.FC = () => {
     name: user.name,
     email: user.email,
     celphone: removeMask(user.celphone),
-    isPrivate: !!user.isPrivate,
+    isPrivate: user.isPrivate,
     password: '',
     password_confirmation: '',
     old_password: '',
@@ -96,7 +96,7 @@ const Profile: React.FC = () => {
         const formData = {
           name,
           email,
-          isPrivate,
+          isPrivate: !!isPrivate,
           celphone,
           ...(data.old_password
             ? {

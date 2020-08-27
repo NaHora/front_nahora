@@ -1,22 +1,41 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
+import { FiLogIn, FiMail, FiLock, FiFacebook } from 'react-icons/fi';
 import * as Yup from 'yup';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import { Link, useHistory } from 'react-router-dom';
+import { FaFacebook, FaGoogle } from 'react-icons/fa';
+import { MdEmail } from 'react-icons/md';
+import FacebookLogin from 'react-facebook-login';
 import logoImg from '../../assets/nahora.png';
-import { Container, Content, Background, AnimationContainer } from './styles';
+import {
+  Container,
+  Content,
+  Background,
+  AnimationContainer,
+  GoogleLoginStyled,
+  ButtonStyled,
+} from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import getValidationErrors from '../../utils';
 import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 import { routes } from '../../routes';
+import api from '../../services/api';
 
 interface SignInForm {
   email: string;
   password: string;
+  type?: string;
+}
+
+interface SignUpFormData {
+  name: string;
+  email: string;
+  password: string;
+  celphone?: string;
 }
 
 const SignIn: React.FC = () => {
@@ -27,6 +46,35 @@ const SignIn: React.FC = () => {
   const toast = useToast();
 
   const [loading, setLoading] = useState(false);
+  const [email, setByEmail] = useState(false);
+  const [facebook, setFacebook] = useState({} as any);
+
+  const handleAccount = useCallback(async (data: SignUpFormData) => {
+    formRef.current?.setErrors({});
+    setLoading(true);
+    try {
+      const schema = Yup.object().shape({
+        name: Yup.string().required('Nome obrigatório'),
+        email: Yup.string()
+          .email('Email inválido')
+          .required('Email obrigatório'),
+        password: Yup.string().min(
+          6,
+          'A senha deve conter no mínimo 6 dígitos',
+        ),
+        celphone: Yup.string().min(10, 'Confira se digitou o telefone com DDD'),
+      });
+
+      await schema.validate(data, {
+        abortEarly: false,
+      });
+
+      await api.post('users', data);
+    } catch (err) {
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const handleSubmit = useCallback(
     async (data: SignInForm) => {
@@ -63,6 +111,14 @@ const SignIn: React.FC = () => {
 
           return;
         }
+        if (data.type === 'social') {
+          return toast.addToast({
+            type: 'error',
+            title: 'Erro na autenticação',
+            description:
+              'Este email já está registrado no sistema, faça o login por email',
+          });
+        }
         toast.addToast({
           type: 'error',
           title: 'Erro na autenticação',
@@ -75,34 +131,119 @@ const SignIn: React.FC = () => {
     [auth, toast, history],
   );
 
+  const responseFacebook = useCallback((response: any) => {
+    setFacebook(response);
+  }, []);
+
+  const loginFacebook = useCallback(async () => {
+    try {
+      await handleAccount({
+        email: facebook.email,
+        password: facebook.id,
+        name: facebook.name,
+      });
+
+      await handleSubmit({
+        email: facebook.email,
+        password: facebook.id,
+        type: 'social',
+      });
+    } catch (err) {}
+  }, [facebook.name, facebook.email, facebook.id, handleAccount, handleSubmit]);
+
+  const responseGoogle = async (response: any) => {
+    try {
+      await handleAccount({
+        email: response.profileObj.email,
+        password: response.profileObj.googleId,
+        name: response.profileObj.name,
+      });
+
+      await handleSubmit({
+        email: response.profileObj.email,
+        password: response.profileObj.googleId,
+        type: 'social',
+      });
+    } catch (err) {}
+  };
   return (
     <Container>
       <Content>
         <AnimationContainer>
-          <Form ref={formRef} onSubmit={handleSubmit}>
-            <img src={logoImg} alt="" />
-            <h1>Faça seu login</h1>
-            <Input
-              icon={FiMail}
-              name="email"
-              type="email"
-              placeholder="E-mail"
-            />
-            <Input
-              icon={FiLock}
-              name="password"
-              type="password"
-              placeholder="Senha"
-            />
-            <Button loading={loading} type="submit">
-              Entrar
-            </Button>
-            <Link to={routes.forgotPassword}>Esqueci minha senha</Link>
-          </Form>
+          <img src={logoImg} alt="" />
+          {email && (
+            <>
+              <Form ref={formRef} onSubmit={handleSubmit}>
+                <h1>Faça seu login</h1>
+                <Input
+                  icon={FiMail}
+                  name="email"
+                  type="email"
+                  placeholder="E-mail"
+                />
+                <Input
+                  icon={FiLock}
+                  name="password"
+                  type="password"
+                  placeholder="Senha"
+                />
+                <Button loading={loading} type="submit">
+                  Entrar
+                </Button>
+              </Form>
+            </>
+          )}
+          {!email && (
+            <ButtonStyled onClick={() => setByEmail(!email)}>
+              <MdEmail />
+              <span>Entrar com email</span>
+            </ButtonStyled>
+          )}
+          {!email && (
+            <>
+              <GoogleLoginStyled
+                clientId="980793766976-bc2pfer912godkfah31tp9jjmr53pn80.apps.googleusercontent.com"
+                buttonText={
+                  (
+                    <>
+                      <FaGoogle />
+                      <span>Entrar com google</span>
+                    </>
+                  ) as any
+                }
+                onSuccess={responseGoogle}
+                onFailure={responseGoogle}
+                cookiePolicy="single_host_origin"
+              />
+              <FacebookLogin
+                appId="330940161588292"
+                autoLoad
+                fields="first_name,name,email,picture"
+                textButton={
+                  (
+                    <span>
+                      <FiFacebook />
+                      Entrar com facebook
+                    </span>
+                  ) as any
+                }
+                onClick={loginFacebook}
+                callback={responseFacebook}
+              />
+            </>
+          )}
+          <Link style={{ color: '#fff' }} to={routes.forgotPassword}>
+            Esqueci minha senha
+          </Link>
           <Link to={routes.signup}>
             <FiLogIn />
             Criar conta
           </Link>
+          {email && (
+            <p style={{ marginTop: '16px' }} onClick={() => setByEmail(!email)}>
+              voltar
+            </p>
+          )}
         </AnimationContainer>
       </Content>
       <Background />
