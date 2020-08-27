@@ -131,25 +131,28 @@ const SignIn: React.FC = () => {
     [auth, toast, history],
   );
 
-  const responseFacebook = useCallback((response: any) => {
-    setFacebook(response);
-  }, []);
+  // const loginFacebook = useCallback(() => {
+  //   setFacebook(response);
+  // }, []);
 
-  const loginFacebook = useCallback(async () => {
-    try {
-      await handleAccount({
-        email: facebook.email,
-        password: facebook.id,
-        name: facebook.name,
-      });
+  const loginFacebook = useCallback(
+    async (facebook: any) => {
+      try {
+        await handleAccount({
+          email: facebook.email,
+          password: facebook.id,
+          name: facebook.name,
+        });
 
-      await handleSubmit({
-        email: facebook.email,
-        password: facebook.id,
-        type: 'social',
-      });
-    } catch (err) {}
-  }, [facebook.name, facebook.email, facebook.id, handleAccount, handleSubmit]);
+        await handleSubmit({
+          email: facebook.email,
+          password: facebook.id,
+          type: 'social',
+        });
+      } catch (err) {}
+    },
+    [facebook.name, facebook.email, facebook.id, handleAccount, handleSubmit],
+  );
 
   const responseGoogle = async (response: any) => {
     try {
@@ -217,7 +220,7 @@ const SignIn: React.FC = () => {
               />
               <FacebookLogin
                 appId="330940161588292"
-                autoLoad
+                autoLoad={false}
                 fields="first_name,name,email,picture"
                 textButton={
                   (
@@ -227,8 +230,8 @@ const SignIn: React.FC = () => {
                     </span>
                   ) as any
                 }
-                onClick={loginFacebook}
-                callback={responseFacebook}
+                // onClick={loginFacebook}
+                callback={loginFacebook}
               />
             </>
           )}
