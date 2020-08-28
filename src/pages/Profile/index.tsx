@@ -40,6 +40,7 @@ const Profile: React.FC = () => {
   const { addToast } = useToast();
   const { user, updateUser, signOut } = useAuth();
 
+  const [showPass, setShowPass] = useState(false);
   const [isPrivate, setIsPrivate] = useState(user.isPrivate);
   const [data, setData] = useState<ProfileFormData>({
     name: user.name,
@@ -50,7 +51,9 @@ const Profile: React.FC = () => {
     password_confirmation: '',
     old_password: '',
   });
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<any>({
+    celphone: !data.celphone && 'Cadastre seu celular',
+  });
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -235,40 +238,48 @@ const Profile: React.FC = () => {
               name="isPrivate"
             />
           </div>
-          <InputDefault
-            value={data.old_password}
-            error={errors.old_password}
-            onChange={(e) =>
-              setData({ ...data, [e.target.name]: e.target.value })
-            }
-            icon={FiLock}
-            name="old_password"
-            type="password"
-            placeholder="Senha atual"
-            containerStyle={{ marginTop: 24 }}
-          />
-          <InputDefault
-            value={data.password}
-            error={errors.password}
-            onChange={(e) =>
-              setData({ ...data, [e.target.name]: e.target.value })
-            }
-            icon={FiLock}
-            name="password"
-            type="password"
-            placeholder="Nova senha"
-          />
-          <InputDefault
-            value={data.password_confirmation}
-            error={errors.password_confirmation}
-            onChange={(e) =>
-              setData({ ...data, [e.target.name]: e.target.value })
-            }
-            icon={FiLock}
-            name="password_confirmation"
-            type="password"
-            placeholder="Confirmar senha"
-          />
+          {showPass ? (
+            <>
+              <InputDefault
+                value={data.old_password}
+                error={errors.old_password}
+                onChange={(e) =>
+                  setData({ ...data, [e.target.name]: e.target.value })
+                }
+                icon={FiLock}
+                name="old_password"
+                type="password"
+                placeholder="Senha atual"
+                containerStyle={{ marginTop: 24 }}
+              />
+              <InputDefault
+                value={data.password}
+                error={errors.password}
+                onChange={(e) =>
+                  setData({ ...data, [e.target.name]: e.target.value })
+                }
+                icon={FiLock}
+                name="password"
+                type="password"
+                placeholder="Nova senha"
+              />
+              <InputDefault
+                value={data.password_confirmation}
+                error={errors.password_confirmation}
+                onChange={(e) =>
+                  setData({ ...data, [e.target.name]: e.target.value })
+                }
+                icon={FiLock}
+                name="password_confirmation"
+                type="password"
+                placeholder="Confirmar senha"
+              />{' '}
+            </>
+          ) : (
+            <Button transparent type="button" onClick={() => setShowPass(true)}>
+              Trocar senha
+            </Button>
+          )}
           <Button type="submit">Confirmar mudanças</Button>
         </form>
       </Content>
