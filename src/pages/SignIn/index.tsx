@@ -225,6 +225,7 @@ const SignIn: React.FC = () => {
               <FacebookLogin
                 appId="330940161588292"
                 autoLoad={false}
+                redirectUri="https://nahora.app.br"
                 fields="first_name,name,email,picture"
                 textButton={
                   (
