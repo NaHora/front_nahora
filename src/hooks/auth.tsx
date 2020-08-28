@@ -25,6 +25,7 @@ interface SignInCredentialsSocial {
   password: string;
   name: string;
   celphone?: string;
+  photoUrl?: string;
 }
 
 interface AuthContextData {
@@ -68,12 +69,13 @@ export const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const signInSocial = useCallback(
-    async ({ name, email, password, celphone }) => {
+    async ({ name, email, password, celphone, photoUrl }) => {
       const response = await api.post('users/social', {
         name,
         email,
         password,
         celphone,
+        photoUrl,
       });
 
       const { token, user } = response.data;

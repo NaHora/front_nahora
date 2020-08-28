@@ -36,6 +36,7 @@ interface SignUpFormData {
   email: string;
   password: string;
   celphone?: string;
+  photoUrl?: string;
 }
 
 const SignIn: React.FC = () => {
@@ -76,6 +77,7 @@ const SignIn: React.FC = () => {
           password: data.password,
           name: data.name,
           celphone: data.celphone,
+          photoUrl: data.photoUrl,
         });
 
         history.push(routes.enterprise);
@@ -153,6 +155,7 @@ const SignIn: React.FC = () => {
           email: facebook.email,
           password: facebook.id,
           name: facebook.name,
+          photoUrl: facebook.picture.data.url,
         });
       } catch (err) {}
     },
@@ -166,6 +169,7 @@ const SignIn: React.FC = () => {
           email: response.profileObj.email,
           password: response.profileObj.googleId,
           name: response.profileObj.name,
+          photoUrl: response.profileObj.imageUrl,
         });
       } catch (err) {}
     },
