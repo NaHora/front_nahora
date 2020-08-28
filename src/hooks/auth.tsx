@@ -20,9 +20,17 @@ interface SignInCredentials {
   password: string;
 }
 
+interface SignInCredentialsSocial {
+  email: string;
+  password: string;
+  name: string;
+  celphone?: string;
+}
+
 interface AuthContextData {
   user: User;
   signIn(credentials: SignInCredentials): Promise<void>;
+  signInSocial(credentials: SignInCredentialsSocial): Promise<void>;
   signOut(): void;
   updateUser(user: User): void;
 }
@@ -59,6 +67,27 @@ export const AuthProvider: React.FC = ({ children }) => {
     setData({ token, user });
   }, []);
 
+  const signInSocial = useCallback(
+    async ({ name, email, password, celphone }) => {
+      const response = await api.post('users/social', {
+        name,
+        email,
+        password,
+        celphone,
+      });
+
+      const { token, user } = response.data;
+
+      localStorage.setItem('@NaHora:token', token);
+      localStorage.setItem('@NaHora:user', JSON.stringify(user));
+
+      api.defaults.headers.authorization = `Bearer ${token}`;
+
+      setData({ token, user });
+    },
+    [],
+  );
+
   const signOut = useCallback(() => {
     localStorage.removeItem('@NaHora:token');
     localStorage.removeItem('@NaHora:user');
@@ -81,7 +110,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user: data.user, signIn, signOut, updateUser }}
+      value={{ user: data.user, signIn, signOut, updateUser, signInSocial }}
     >
       {children}
     </AuthContext.Provider>

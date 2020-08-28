@@ -6,7 +6,7 @@ import signInBackgroundImg from '../../assets/relogio.jpg';
 import Button from '../../components/Button';
 
 export const Container = styled.div`
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: stretch;
 `;
@@ -21,8 +21,9 @@ export const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 100vh;
+  justify-content: center;
   @media (min-width: 600px) {
-    justify-content: center;
   }
 
   width: 100%;
@@ -44,7 +45,6 @@ export const AnimationContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
 
   animation: ${appearFromLeft} 1s;
   @media (max-width: 600px) {

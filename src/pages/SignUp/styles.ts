@@ -4,7 +4,7 @@ import { shade } from 'polished';
 import signUpBackgroundImg from '../../assets/agenda.jpg';
 
 export const Container = styled.div`
-  height: 100vh;
+  min-height: 100vh;
 
   display: flex;
   align-items: stretch;
@@ -46,7 +46,7 @@ export const AnimationContainer = styled.div`
   animation: ${appearFromRight} 1s;
 
   @media (max-width: 600px) {
-    padding: 100px 10px 50px;
+    padding: 10px 10px 50px;
     width: 100%;
   }
   form {
@@ -58,7 +58,6 @@ export const AnimationContainer = styled.div`
       margin: 0;
     }
     img {
-      margin: 50px 0;
       width: 300px;
     }
 

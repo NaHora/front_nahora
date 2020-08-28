@@ -47,34 +47,56 @@ const SignIn: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [email, setByEmail] = useState(false);
-  const [facebook, setFacebook] = useState({} as any);
 
-  const handleAccount = useCallback(async (data: SignUpFormData) => {
-    formRef.current?.setErrors({});
-    setLoading(true);
-    try {
-      const schema = Yup.object().shape({
-        name: Yup.string().required('Nome obrigatório'),
-        email: Yup.string()
-          .email('Email inválido')
-          .required('Email obrigatório'),
-        password: Yup.string().min(
-          6,
-          'A senha deve conter no mínimo 6 dígitos',
-        ),
-        celphone: Yup.string().min(10, 'Confira se digitou o telefone com DDD'),
-      });
+  const handleAccount = useCallback(
+    async (data: SignUpFormData) => {
+      setLoading(true);
+      try {
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Nome obrigatório'),
+          email: Yup.string()
+            .email('Email inválido')
+            .required('Email obrigatório'),
+          password: Yup.string().min(
+            6,
+            'A senha deve conter no mínimo 6 dígitos',
+          ),
+          celphone: Yup.string().min(
+            10,
+            'Confira se digitou o telefone com DDD',
+          ),
+        });
 
-      await schema.validate(data, {
-        abortEarly: false,
-      });
+        await schema.validate(data, {
+          abortEarly: false,
+        });
 
-      await api.post('users', data);
-    } catch (err) {
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+        await auth.signInSocial({
+          email: data.email,
+          password: data.password,
+          name: data.name,
+          celphone: data.celphone,
+        });
+
+        history.push(routes.enterprise);
+
+        toast.addToast({
+          type: 'success',
+          title: 'Bem Vindo,',
+          description: 'Autenticado com sucesso',
+        });
+      } catch (err) {
+        toast.addToast({
+          type: 'error',
+          title:
+            'Já existe uma conta cadastrada com este email, tente entrar com email',
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast, history, auth],
+  );
 
   const handleSubmit = useCallback(
     async (data: SignInForm) => {
@@ -111,14 +133,7 @@ const SignIn: React.FC = () => {
 
           return;
         }
-        if (data.type === 'social') {
-          return toast.addToast({
-            type: 'error',
-            title: 'Erro na autenticação',
-            description:
-              'Este email já está registrado no sistema, faça o login por email',
-          });
-        }
+
         toast.addToast({
           type: 'error',
           title: 'Erro na autenticação',
@@ -131,10 +146,6 @@ const SignIn: React.FC = () => {
     [auth, toast, history],
   );
 
-  // const loginFacebook = useCallback(() => {
-  //   setFacebook(response);
-  // }, []);
-
   const loginFacebook = useCallback(
     async (facebook: any) => {
       try {
@@ -143,41 +154,33 @@ const SignIn: React.FC = () => {
           password: facebook.id,
           name: facebook.name,
         });
+      } catch (err) {}
+    },
+    [handleAccount],
+  );
 
-        await handleSubmit({
-          email: facebook.email,
-          password: facebook.id,
-          type: 'social',
+  const responseGoogle = useCallback(
+    async (response: any) => {
+      try {
+        await handleAccount({
+          email: response.profileObj.email,
+          password: response.profileObj.googleId,
+          name: response.profileObj.name,
         });
       } catch (err) {}
     },
-    [facebook.name, facebook.email, facebook.id, handleAccount, handleSubmit],
+    [handleAccount],
   );
-
-  const responseGoogle = async (response: any) => {
-    try {
-      await handleAccount({
-        email: response.profileObj.email,
-        password: response.profileObj.googleId,
-        name: response.profileObj.name,
-      });
-
-      await handleSubmit({
-        email: response.profileObj.email,
-        password: response.profileObj.googleId,
-        type: 'social',
-      });
-    } catch (err) {}
-  };
   return (
     <Container>
       <Content>
         <AnimationContainer>
-          <img src={logoImg} alt="" />
-          {email && (
-            <>
-              <Form ref={formRef} onSubmit={handleSubmit}>
-                <h1>Faça seu login</h1>
+          <Form ref={formRef} onSubmit={handleSubmit}>
+            <img src={logoImg} alt="" />
+            <h1>Faça seu login</h1>
+            {email && (
+              <>
+                {' '}
                 <Input
                   icon={FiMail}
                   name="email"
@@ -193,9 +196,10 @@ const SignIn: React.FC = () => {
                 <Button loading={loading} type="submit">
                   Entrar
                 </Button>
-              </Form>
-            </>
-          )}
+              </>
+            )}
+          </Form>
+
           {!email && (
             <ButtonStyled onClick={() => setByEmail(!email)}>
               <MdEmail />
@@ -243,7 +247,10 @@ const SignIn: React.FC = () => {
             Criar conta
           </Link>
           {email && (
-            <p style={{ marginTop: '16px' }} onClick={() => setByEmail(!email)}>
+            <p
+              style={{ marginTop: '20px', cursor: 'pointer' }}
+              onClick={() => setByEmail(!email)}
+            >
               voltar
             </p>
           )}

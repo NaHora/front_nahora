@@ -4,7 +4,7 @@ import { shade } from 'polished';
 import signInBackgroundImg from '../../assets/relogio.jpg';
 
 export const Container = styled.div`
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: stretch;
 `;
@@ -50,13 +50,13 @@ export const AnimationContainer = styled.div`
   }
 
   form {
-    margin: 80px 0;
+    /* margin: 80px 0; */
     width: 340px;
     text-align: center;
     justify-content: center;
 
     img {
-      margin: 50px 0;
+      /* margin: 50px 0; */
       width: 300px;
     }
 
