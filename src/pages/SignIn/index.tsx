@@ -79,7 +79,7 @@ const SignIn: React.FC = () => {
           photoUrl: data.photoUrl,
         });
 
-        history.push(routes.enterprise);
+        history.push(routes.profile);
 
         toast.addToast({
           type: 'success',
