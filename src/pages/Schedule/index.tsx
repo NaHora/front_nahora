@@ -18,8 +18,6 @@ import HeaderMenu from '../../components/Header';
 
 import api from '../../services/api';
 
-import { useAuth } from '../../hooks/auth';
-
 import Button from '../../components/Button';
 import { useToast } from '../../hooks/toast';
 

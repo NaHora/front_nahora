@@ -21,7 +21,6 @@ import api from '../../../services/api';
 import InputDefault from '../../../components/InputDefault';
 import { useToast } from '../../../hooks/toast';
 import { routes } from '../../../routes';
-import { OpenDelete } from '../../Schedule/styles';
 import Button from '../../../components/Button';
 
 const useStyles = makeStyles((theme) => ({

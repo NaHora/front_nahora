@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   FiChevronDown,
   FiChevronUp,
@@ -7,10 +7,9 @@ import {
   FiX,
 } from 'react-icons/fi';
 import { Tooltip } from '@material-ui/core';
-import { format, formatDistance, getMonth, getYear } from 'date-fns';
+import { formatDistance, getMonth, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numeral from 'numeral';
-import socketio from 'socket.io-client';
 import HeaderMenu from '../../../components/Header';
 import {
   Container,

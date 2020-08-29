@@ -2,7 +2,6 @@ import React, { ChangeEvent, useCallback, useState, useEffect } from 'react';
 
 import { FiCamera, FiArrowLeft } from 'react-icons/fi';
 import { Switch, Tooltip } from '@material-ui/core';
-import NumberFormat from 'react-number-format';
 import { MdInfoOutline } from 'react-icons/md';
 import { Container, AvatarInput, Cel, Header, Body, Form } from './styles';
 import api from '../../../services/api';

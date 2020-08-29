@@ -127,6 +127,7 @@ const SignUp: React.FC = () => {
                     setData({ ...data, [e.target.name]: e.target.value })
                   }
                   value={data?.name}
+                  error={error?.name}
                   type="text"
                   name="name"
                 />
@@ -139,6 +140,7 @@ const SignUp: React.FC = () => {
                     setData({ ...data, [e.target.name]: e.target.value })
                   }
                   value={data.area}
+                  error={error?.area}
                   type="text"
                   name="area"
                 />
@@ -151,6 +153,7 @@ const SignUp: React.FC = () => {
                     setData({ ...data, [e.target.name]: e.target.value })
                   }
                   value={data.address}
+                  error={error?.address}
                   type="text"
                   name="address"
                 />
@@ -162,6 +165,7 @@ const SignUp: React.FC = () => {
                     setData({ ...data, [e.target.name]: e.target.value })
                   }
                   value={data.primary_color}
+                  error={error?.primary_color}
                   type="color"
                   name="primary_color"
                 />
@@ -173,6 +177,7 @@ const SignUp: React.FC = () => {
                     setData({ ...data, [e.target.name]: e.target.value })
                   }
                   value={data.secondary_color}
+                  error={error?.secondary_color}
                   type="color"
                   name="secondary_color"
                 />

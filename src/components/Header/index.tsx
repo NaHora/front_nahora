@@ -1,6 +1,4 @@
 import React from 'react';
-import { FiHome, FiCheckCircle } from 'react-icons/fi';
-
 import { Link, useHistory } from 'react-router-dom';
 import { Header, HeaderContent, Profile } from './styles';
 import logoImg from '../../assets/nahora.png';

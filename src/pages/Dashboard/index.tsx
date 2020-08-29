@@ -10,15 +10,7 @@ import {
 import { FaWhatsapp } from 'react-icons/fa';
 import { GoLocation } from 'react-icons/go';
 import DayPicker, { DayModifiers } from 'react-day-picker';
-import {
-  isToday,
-  format,
-  getDay,
-  getYear,
-  getMonth,
-  getDate,
-  isEqual,
-} from 'date-fns';
+import { isToday, format, getDay, getYear, getMonth, getDate } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { Link, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
@@ -46,7 +38,6 @@ import Button from '../../components/Button';
 import { useAuth } from '../../hooks/auth';
 import { removeMask } from '../../utils';
 import { useSocket } from '../../hooks/socket';
-// import { Container } from './styles';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -131,7 +122,7 @@ const Dashboard: React.FC = () => {
   const toast = useToast();
   const { user } = useAuth();
   const history = useHistory();
-  const { socket } = useSocket();
+  // const { socket } = useSocket();
 
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
   const owner_enterprise = thisEnterprise.owner_id === user.id;

@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import { Link, useHistory } from 'react-router-dom';
-import { FaFacebook, FaGoogle } from 'react-icons/fa';
+import { FaGoogle } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
 import FacebookLogin from 'react-facebook-login';
 import logoImg from '../../assets/nahora.png';
@@ -23,7 +23,6 @@ import getValidationErrors from '../../utils';
 import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 import { routes } from '../../routes';
-import api from '../../services/api';
 
 interface SignInForm {
   email: string;
@@ -207,7 +206,7 @@ const SignIn: React.FC = () => {
           {!email && (
             <ButtonStyled onClick={() => setByEmail(!email)}>
               <MdEmail />
-              <span>Entrar com email</span>
+              <span>Entrar com conta NaHora</span>
             </ButtonStyled>
           )}
           {!email && (
@@ -218,7 +217,7 @@ const SignIn: React.FC = () => {
                   (
                     <>
                       <FaGoogle />
-                      <span>Entrar com google</span>
+                      <span>Entrar com conta gmail</span>
                     </>
                   ) as any
                 }
@@ -226,6 +225,7 @@ const SignIn: React.FC = () => {
                 onFailure={responseGoogle}
                 cookiePolicy="single_host_origin"
               />
+
               <FacebookLogin
                 appId="330940161588292"
                 // redirectUri="https://nahora.app.br"
@@ -235,7 +235,7 @@ const SignIn: React.FC = () => {
                   (
                     <span>
                       <FiFacebook />
-                      Entrar com facebook
+                      Entrar com conta facebook
                     </span>
                   ) as any
                 }

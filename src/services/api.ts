@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { isAfter } from 'date-fns';
 import jwt from 'jsonwebtoken';
-import { useHistory } from 'react-router-dom';
-import { routes } from '../routes';
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API,
