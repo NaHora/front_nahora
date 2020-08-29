@@ -79,13 +79,16 @@ const SignIn: React.FC = () => {
           photoUrl: data.photoUrl,
         });
 
-        history.push(routes.profile);
-
         toast.addToast({
           type: 'success',
           title: 'Bem Vindo,',
           description: 'Autenticado com sucesso',
         });
+
+        if (!auth.user.celphone) {
+          return history.push(routes.profile);
+        }
+        return history.push(routes.enterprise);
       } catch (err) {
         toast.addToast({
           type: 'error',

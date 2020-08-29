@@ -63,7 +63,7 @@ const Profile: React.FC = () => {
       try {
         const schema = Yup.object().shape({
           name: Yup.string().required('Nome obrigatório'),
-          celphone: Yup.string(),
+          celphone: Yup.string().required('Cadastre seu celular'),
           email: Yup.string()
             .email('Email inválido')
             .required('Email obrigatório'),
@@ -131,7 +131,9 @@ const Profile: React.FC = () => {
         addToast({
           type: 'error',
           title: 'Erro na atualização',
-          description: 'Ocorreu um erro ao atualizar o perfil, tente novamente',
+          description:
+            err.response.data.message ||
+            'Ocorreu um erro ao atualizar o perfil, tente novamente',
         });
       }
     },
