@@ -26,7 +26,6 @@ import InputDefault from '../../../components/InputDefault';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
 import 'numeral/locales/pt-br';
-import { useAuth } from '../../../hooks/auth';
 import { useSocket } from '../../../hooks/socket';
 
 interface User {
@@ -70,7 +69,6 @@ interface Invite {
 
 const Plans: React.FC = () => {
   numeral.locale('pt-br');
-  const { user } = useAuth();
   const { socket } = useSocket();
 
   const toast = useToast();
