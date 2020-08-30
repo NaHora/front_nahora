@@ -63,7 +63,7 @@ const Profile: React.FC = () => {
       try {
         const schema = Yup.object().shape({
           name: Yup.string().required('Nome obrigatório'),
-          celphone: Yup.string().required('Cadastre seu celular'),
+          celphone: Yup.string().required('Celular obrigatório'),
           email: Yup.string()
             .email('Email inválido')
             .required('Email obrigatório'),

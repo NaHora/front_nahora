@@ -84,11 +84,6 @@ const SignIn: React.FC = () => {
           title: 'Bem Vindo,',
           description: 'Autenticado com sucesso',
         });
-
-        if (!auth.user.celphone) {
-          return history.push(routes.profile);
-        }
-        return history.push(routes.enterprise);
       } catch (err) {
         toast.addToast({
           type: 'error',
@@ -99,7 +94,7 @@ const SignIn: React.FC = () => {
         setLoading(false);
       }
     },
-    [toast, history, auth],
+    [toast, auth],
   );
 
   const handleSubmit = useCallback(

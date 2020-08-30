@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useState, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import api from '../services/api';
+import { routes } from '../routes';
 
 interface User {
   id: string;
@@ -39,6 +41,7 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC = ({ children }) => {
+  const history = useHistory();
   const [data, setData] = useState<AuthState>(() => {
     const token = localStorage.getItem('@NaHora:token');
     const user = localStorage.getItem('@NaHora:user');
@@ -86,6 +89,11 @@ export const AuthProvider: React.FC = ({ children }) => {
       api.defaults.headers.authorization = `Bearer ${token}`;
 
       setData({ token, user });
+
+      if (!user.celphone) {
+        return history.push(routes.profile);
+      }
+      return history.push(routes.enterprise);
     },
     [],
   );
