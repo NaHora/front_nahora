@@ -10,7 +10,7 @@ interface LoadContextData {
 const LoadContext = createContext<LoadContextData>({} as LoadContextData);
 
 export const LoadProvider: React.FC = ({ children }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const start = useCallback(() => {
     setLoading(true);
