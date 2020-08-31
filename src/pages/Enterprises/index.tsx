@@ -26,6 +26,7 @@ import { useToast } from '../../hooks/toast';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
 import { useSocket } from '../../hooks/socket';
+import { useLoad } from '../../hooks/load';
 
 interface SearchEnterprise {
   id: string;
@@ -56,6 +57,7 @@ const Enterprises: React.FC = () => {
   const history = useHistory();
   const { user } = useAuth();
   const { socket } = useSocket();
+  const { start, stop } = useLoad();
 
   const [searchEnterprises, setSearchEnterprises] = useState<
     SearchEnterprise[]
@@ -247,12 +249,21 @@ const Enterprises: React.FC = () => {
     [toast, user.id, getInviteEnterprise, getAllEnterprises, getMyEnterprises],
   );
 
+  const getAllRequests = useCallback(async () => {
+    start();
+    try {
+      await Promise.all([
+        getInviteEnterprise(),
+        getMyEnterprises(),
+        getAllEnterprises(),
+      ]);
+    } finally {
+      stop();
+    }
+  }, []);
+
   useEffect(() => {
-    Promise.all([
-      getInviteEnterprise(),
-      getMyEnterprises(),
-      getAllEnterprises(),
-    ]);
+    getAllRequests();
   }, []);
 
   useEffect(() => {

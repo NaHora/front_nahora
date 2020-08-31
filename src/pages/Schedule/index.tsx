@@ -20,6 +20,7 @@ import api from '../../services/api';
 
 import Button from '../../components/Button';
 import { useToast } from '../../hooks/toast';
+import { useLoad } from '../../hooks/load';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -90,6 +91,7 @@ interface ListAppointment {
 
 const Enterprises: React.FC = () => {
   const toast = useToast();
+  const { start, stop } = useLoad();
 
   const [openShedule, setOpenShedule] = useState<OpenModal>({});
 
@@ -110,6 +112,7 @@ const Enterprises: React.FC = () => {
   };
   const getMyAppointments = useCallback(async () => {
     setLoading(true);
+    start();
     try {
       const response = await api.get(`/appointments/me`);
 
@@ -117,6 +120,7 @@ const Enterprises: React.FC = () => {
       setOpenDelete(false);
     } catch (err) {
     } finally {
+      stop();
       setLoading(false);
     }
   }, []);

@@ -365,6 +365,7 @@ export const Calendar = styled.aside<PageColor>`
         ? '#3e3b47'
         : '#f4ede8'} !important;
     background: transparent !important;
+    opacity: 0.2;
   }
 
   .DayPicker-Weekday {

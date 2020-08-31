@@ -38,6 +38,7 @@ import Button from '../../components/Button';
 import { useAuth } from '../../hooks/auth';
 import { removeMask } from '../../utils';
 import { useSocket } from '../../hooks/socket';
+import { useLoad } from '../../hooks/load';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -123,6 +124,7 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const history = useHistory();
   // const { socket } = useSocket();
+  const { start, stop } = useLoad();
 
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
   const owner_enterprise = thisEnterprise.owner_id === user.id;
@@ -204,12 +206,17 @@ const Dashboard: React.FC = () => {
   }, [thisEnterprise.id]);
 
   const getAvaiableDays = useCallback(async () => {
+    start();
+
     try {
       const response = await api.get(
         `/services/enterprise/${thisEnterprise.id}/category/${selectectedCategory?.id}`,
       );
       setAboutDays(response.data);
-    } catch (err) {}
+    } catch (err) {
+    } finally {
+      stop();
+    }
   }, [thisEnterprise.id, selectectedCategory]);
 
   useEffect(() => {
@@ -219,6 +226,8 @@ const Dashboard: React.FC = () => {
   }, [selectectedCategory, thisEnterprise.id, getAvaiableDays]);
 
   const handleServices = useCallback(async () => {
+    start();
+
     try {
       const response = await api.get(
         `/services/enterprise/${
@@ -245,6 +254,8 @@ const Dashboard: React.FC = () => {
             'Ocorreu um erro ao procurar os serviços, tente novamente',
         });
       }
+    } finally {
+      stop();
     }
   }, [
     thisEnterprise.id,
