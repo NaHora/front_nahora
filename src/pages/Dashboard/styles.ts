@@ -316,9 +316,9 @@ export const Calendar = styled.aside<PageColor>`
   .DayPicker-Month {
     border-collapse: separate;
     border-spacing: 8px;
-    margin: 16px;
+    padding: 16px;
     @media (max-width: 600px) {
-      margin: 8px;
+      padding: 8px;
       border-spacing: 6px;
     }
   }
