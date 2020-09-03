@@ -132,6 +132,12 @@ const Menu: React.FC = () => {
 
               {/* <Span>Dashboard</Span> */}
               <Span
+                currentPage={history.location.pathname === routes.financial}
+                onClick={() => history.push(routes.financial)}
+              >
+                Gestão de Financeira
+              </Span>
+              <Span
                 currentPage={
                   history.location.pathname === routes.enterpriseSchedule
                 }
@@ -160,7 +166,7 @@ const Menu: React.FC = () => {
                     currentPage={history.location.pathname === routes.plan}
                     onClick={() => history.push(routes.plan)}
                   >
-                    Gestão de planos
+                    Gestão de clientes
                   </Span>
                 </Badge>
               ) : (

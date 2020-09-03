@@ -5,6 +5,7 @@ interface ContainerProps {
   isFocused: boolean;
   isFilled: boolean;
   maxWidth?: string;
+  margin?: boolean;
   erroMsg: boolean;
 }
 
@@ -16,24 +17,40 @@ export const Container = styled.div<ContainerProps>`
   width: ${(props) => (props.maxWidth ? props.maxWidth : '100%')};
   color: #666360;
 
-
   display: flex;
   align-items: center;
 
   input {
-    flex: 1;
+    width: 100%;
     border: 0;
     background: transparent;
     color: #f4ede8;
 
+    ::-webkit-calendar-picker-indicator {
+      filter: invert(100%);
+    }
+
+    :-webkit-autofill {
+      -webkit-box-shadow: 0 0 0 30px #232129 inset;
+    }
+
+    /* Cor do texto do autocomplete */
+    :-webkit-autofill {
+      -webkit-text-fill-color: white !important;
+    }
     ::placeholder {
       color: #666360;
     }
   }
 
-  & + div {
-    margin-top: 8px;
-  }
+  ${(props) =>
+    props.margin &&
+    css`
+      & + div {
+        margin-top: 8px;
+      }
+    `}
+
   ${(props) =>
     props.erroMsg &&
     css`

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
+import Button from '../Button';
 // import { Container } from './styles';
-
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: 'flex',
@@ -16,42 +16,68 @@ const useStyles = makeStyles((theme) => ({
     border: '2px solid #000',
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
+    color: 'black',
+  },
+  divButton: {
+    display: 'flex',
+    alignItems: 'center',
   },
 }));
 
-interface IComponentProps {
+interface ComponentProps {
   text?: string;
-  openModal?: boolean;
+  title?: string;
+  onSubmit(): void;
+  setOpenModal(bool: boolean): void;
+  openModal: boolean;
 }
 
-const DialogModal: React.FC<IComponentProps> = ({
+const DialogModal: React.FC<ComponentProps> = ({
   text = '',
-  openModal = false,
+  title = '',
+  onSubmit,
+  setOpenModal,
+  openModal,
 }) => {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-
-  const handleModal = () => {
-    setOpen(openModal);
-  };
 
   return (
     <Modal
       aria-labelledby="transition-modal-title"
       aria-describedby="transition-modal-description"
       className={classes.modal}
-      open={open}
-      onClose={handleModal}
+      open={openModal}
+      onClose={() => setOpenModal(false)}
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{
         timeout: 500,
       }}
     >
-      <Fade in={open}>
+      <Fade in={openModal}>
         <div className={classes.paper}>
-          <h2 id="transition-modal-title">Transition modal</h2>
-          <p id="transition-modal-description">{text}</p>
+          <h2 id="transition-modal-title"> {title || 'Deseja excluir?'} </h2>
+          <p id="transition-modal-description">
+            {text || 'Ao continuar o item será excluído.'}
+          </p>
+          <div className={classes.divButton}>
+            <Button
+              primaryColor="#ff9000"
+              secondaryColor="#28262e"
+              onClick={() => setOpenModal(false)}
+              transparent
+            >
+              Cancelar
+            </Button>
+            <Button
+              primaryColor="#ff9000"
+              secondaryColor="#28262e"
+              onClick={onSubmit}
+              // loading={loading}
+            >
+              Excluir
+            </Button>
+          </div>
         </div>
       </Fade>
     </Modal>
