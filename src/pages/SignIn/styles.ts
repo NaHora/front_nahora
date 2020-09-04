@@ -2,7 +2,7 @@ import styled, { keyframes } from 'styled-components';
 
 import { shade } from 'polished';
 import GoogleLogin from 'react-google-login';
-import signInBackgroundImg from '../../assets/relogio.jpg';
+import signInBackgroundImg from '../../assets/teste2.svg';
 import Button from '../../components/Button';
 
 export const Container = styled.div`
@@ -14,7 +14,11 @@ export const Container = styled.div`
 export const Background = styled.div`
   flex: 1;
   background: url(${signInBackgroundImg}) no-repeat center;
-  background-size: cover;
+  background-size: contain;
+
+  @media (max-width: 600px) {
+    display: none;
+  }
 `;
 
 export const Content = styled.div`
