@@ -1,7 +1,7 @@
 import styled, { keyframes } from 'styled-components';
 
 import { shade } from 'polished';
-import signUpBackgroundImg from '../../../assets/teste1.png';
+import signUpBackgroundImg from '../../../assets/teste.svg';
 
 export const Container = styled.div`
   width: 100%;
