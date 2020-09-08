@@ -141,8 +141,7 @@ const Plans: React.FC = () => {
 
       toast.addToast({
         type: 'success',
-        title: 'Boa!',
-        description: 'Plano criado com sucesso.',
+        title: 'Plano criado com sucesso.',
       });
 
       setPlanData({
@@ -159,16 +158,14 @@ const Plans: React.FC = () => {
       if (err.response) {
         toast.addToast({
           type: 'error',
-          title: 'Vishi',
-          description:
+          title:
             err.response.data.message ||
             'Ocorreu um erro ao criar o plano, tente novamente',
         });
       } else {
         toast.addToast({
           type: 'error',
-          title: 'Vishi',
-          description: 'Ocorreu um erro ao criar o plano, tente novamente',
+          title: 'Ocorreu um erro ao criar o plano, tente novamente',
         });
       }
     }
@@ -187,23 +184,20 @@ const Plans: React.FC = () => {
         getTotalMoney();
         toast.addToast({
           type: 'success',
-          title: 'Boa!',
-          description: 'Plano ativado com sucesso.',
+          title: 'Plano ativado com sucesso.',
         });
       } catch (err) {
         if (err.response) {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
+            title:
               err.response.data.message ||
               'Ocorreu um erro ao ativar o plano, tente novamente',
           });
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description: 'Ocorreu um erro ao ativar o plano, tente novamente',
+            title: 'Ocorreu um erro ao ativar o plano, tente novamente',
           });
         }
       }
@@ -222,9 +216,7 @@ const Plans: React.FC = () => {
 
         toast.addToast({
           type: 'success',
-          title: 'Boa!',
-          description:
-            'Você aceitou a solicitação, ative um plano para o usuário.',
+          title: 'Você aceitou a solicitação, ative um plano para o usuário.',
         });
 
         if (enterprisePlans.length === 0) {
@@ -239,17 +231,14 @@ const Plans: React.FC = () => {
         if (err.response) {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
+            title:
               err.response.data.message ||
               'Ocorreu um erro ao procurar empresas, tente novamente',
           });
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
-              'Ocorreu um erro ao procurar os serviços, tente novamente',
+            title: 'Ocorreu um erro ao procurar os serviços, tente novamente',
           });
         }
       }
@@ -277,16 +266,14 @@ const Plans: React.FC = () => {
         if (err.response) {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
+            title:
               err.response.data.message ||
               'Ocorreu um erro ao recusar, tente novamente',
           });
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description: 'Ocorreu um erro ao recusar, tente novamente',
+            title: 'Ocorreu um erro ao recusar, tente novamente',
           });
         }
       }
@@ -307,16 +294,14 @@ const Plans: React.FC = () => {
         if (err.response) {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
+            title:
               err.response.data.message ||
               'Ocorreu um erro ao cancelar o plano, tente novamente',
           });
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description: 'Ocorreu um erro ao cancelar o plano, tente novamente',
+            title: 'Ocorreu um erro ao cancelar o plano, tente novamente',
           });
         }
       }

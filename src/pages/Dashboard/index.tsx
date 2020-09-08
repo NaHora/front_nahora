@@ -241,17 +241,14 @@ const Dashboard: React.FC = () => {
       if (err.response) {
         toast.addToast({
           type: 'error',
-          title: 'Vishi',
-          description:
+          title:
             err.response.data.message ||
-            'Ocorreu um erro ao procurar empresas, tente novamente',
+            'Ocorreu um erro ao procurar serviços, tente novamente',
         });
       } else {
         toast.addToast({
           type: 'error',
-          title: 'Vishi',
-          description:
-            'Ocorreu um erro ao procurar os serviços, tente novamente',
+          title: 'Ocorreu um erro ao procurar os serviços, tente novamente',
         });
       }
     } finally {
@@ -296,24 +293,20 @@ const Dashboard: React.FC = () => {
 
         toast.addToast({
           type: 'success',
-          title: 'Boa!',
-          description: 'Agendamento realizado com sucesso.',
+          title: 'Agendamento realizado com sucesso.',
         });
       } catch (err) {
         if (err.response) {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
+            title:
               err.response.data.message ||
               'Ocorreu um erro ao agendar este horário, tente novamente',
           });
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
-              'Ocorreu um erro ao agendar este horário, tente novamente',
+            title: 'Ocorreu um erro ao agendar este horário, tente novamente',
           });
         }
       } finally {
@@ -339,17 +332,14 @@ const Dashboard: React.FC = () => {
         if (err.response) {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
+            title:
               err.response.data.message ||
               'Ocorreu um erro ao excluir este horário, tente novamente',
           });
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
-              'Ocorreu um erro ao excluir este horário, tente novamente',
+            title: 'Ocorreu um erro ao excluir este horário, tente novamente',
           });
         }
       } finally {
@@ -639,8 +629,7 @@ const Dashboard: React.FC = () => {
                         } else {
                           toast.addToast({
                             type: 'error',
-                            title: 'Vishi',
-                            description: 'Horário indisponível',
+                            title: 'Horário indisponível',
                           });
                         }
                       }}
@@ -805,8 +794,7 @@ const Dashboard: React.FC = () => {
                         } else {
                           toast.addToast({
                             type: 'error',
-                            title: 'Vishi',
-                            description: 'Horário indisponível',
+                            title: 'Horário indisponível',
                           });
                         }
                       }}
@@ -966,8 +954,7 @@ const Dashboard: React.FC = () => {
                         } else {
                           toast.addToast({
                             type: 'error',
-                            title: 'Vishi',
-                            description: 'Horário indisponível',
+                            title: 'Horário indisponível',
                           });
                         }
                       }}

@@ -80,7 +80,7 @@ const Enterprises: React.FC = () => {
       if (err.response) {
         toast.addToast({
           type: 'error',
-          title: 'Ops! algo deu errado,',
+          title: 'Algo deu errado,',
           description:
             err.response.data.message ||
             'Não foi possível carregar suas empresas',
@@ -88,8 +88,7 @@ const Enterprises: React.FC = () => {
       } else {
         toast.addToast({
           type: 'error',
-          title: 'Vishi',
-          description: 'Ocorreu um erro ao procurar empresas, tente novamente',
+          title: 'Ocorreu um erro ao procurar empresas, tente novamente',
         });
       }
     }
@@ -104,7 +103,7 @@ const Enterprises: React.FC = () => {
       if (err.response) {
         toast.addToast({
           type: 'error',
-          title: 'Ops! algo deu errado,',
+          title: 'Algo deu errado,',
           description:
             err.response.data.message ||
             'Não foi possível carregar suas empresas',
@@ -112,8 +111,7 @@ const Enterprises: React.FC = () => {
       } else {
         toast.addToast({
           type: 'error',
-          title: 'Vishi',
-          description: 'Ocorreu um erro ao procurar empresas, tente novamente',
+          title: 'Ocorreu um erro ao procurar empresas, tente novamente',
         });
       }
     }
@@ -146,7 +144,7 @@ const Enterprises: React.FC = () => {
         if (err.response) {
           toast.addToast({
             type: 'error',
-            title: 'Ops! algo deu errado,',
+            title: 'Algo deu errado,',
             description:
               err.response.data.message ||
               'Não foi possível carregar suas empresas',
@@ -154,9 +152,7 @@ const Enterprises: React.FC = () => {
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
-              'Ocorreu um erro ao procurar empresas, tente novamente',
+            title: 'Ocorreu um erro ao procurar empresas, tente novamente',
           });
         }
       }
@@ -178,7 +174,7 @@ const Enterprises: React.FC = () => {
         if (err.response) {
           toast.addToast({
             type: 'error',
-            title: 'Ops! algo deu errado,',
+            title: 'Algo deu errado,',
             description:
               err.response.data.message ||
               'Não foi possível conferir sua assinatura.',
@@ -186,8 +182,7 @@ const Enterprises: React.FC = () => {
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description: 'Não foi possível conferir sua assinatura.',
+            title: 'Não foi possível conferir sua assinatura.',
           });
         }
       }
@@ -225,7 +220,7 @@ const Enterprises: React.FC = () => {
 
         toast.addToast({
           type: 'success',
-          title: 'Boa, agora é só esperar!',
+          title: 'Agora é só esperar!',
           description:
             'Você enviou um convite para acessar os horários desta empresa',
         });
@@ -233,15 +228,13 @@ const Enterprises: React.FC = () => {
         if (err.response) {
           toast.addToast({
             type: 'error',
-            title: 'Ops! algo deu errado,',
+            title: 'Algo deu errado,',
             description: err.response.data.message || 'Erro interno',
           });
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
-              'Ocorreu um erro ao procurar empresas, tente novamente',
+            title: 'Ocorreu um erro ao procurar empresas, tente novamente',
           });
         }
       }

@@ -103,16 +103,14 @@ const EnterpriseSchedule: React.FC = () => {
       if (err.response) {
         addToast({
           type: 'error',
-          title: 'Vishi',
-          description:
+          title:
             err.response.data.message ||
             'Ocorreu um erro ao adicionar o tipo de serviço, tente novamente',
         });
       } else {
         addToast({
           type: 'error',
-          title: 'Vishi',
-          description:
+          title:
             'Ocorreu um erro ao adicionar o tipo de serviço, tente novamente',
         });
       }
@@ -133,16 +131,14 @@ const EnterpriseSchedule: React.FC = () => {
       if (err.response) {
         addToast({
           type: 'error',
-          title: 'Vishi',
-          description:
+          title:
             err.response.data.message ||
             'Ocorreu um erro ao deletar o tipo de serviço, tente novamente',
         });
       } else {
         addToast({
           type: 'error',
-          title: 'Vishi',
-          description:
+          title:
             'Ocorreu um erro ao deletar o tipo de serviço, tente novamente',
         });
       }
@@ -167,17 +163,14 @@ const EnterpriseSchedule: React.FC = () => {
         if (err.response) {
           addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
+            title:
               err.response.data.message ||
               'Ocorreu um erro ao adicionar horários, tente novamente',
           });
         } else {
           addToast({
             type: 'error',
-            title: 'Vishi',
-            description:
-              'Ocorreu um erro ao adicionar horários, tente novamente',
+            title: 'Ocorreu um erro ao adicionar horários, tente novamente',
           });
         }
       }
@@ -215,15 +208,13 @@ const EnterpriseSchedule: React.FC = () => {
     if (selectectedCategory.length === 0 || selectectedDays.length === 0) {
       addToast({
         type: 'error',
-        title: 'Ops',
-        description:
+        title:
           'Verifique se selecionou pelo menos um tipo de serviço e dia da semana, tente novamente',
       });
     } else if (formService.start_hour.replace(':', '') > 2359) {
       addToast({
         type: 'error',
-        title: 'Ops',
-        description: 'Horários só vão até 23:59, tente novamente',
+        title: 'Horários só vão até 23:59, tente novamente',
       });
     } else {
       const totalSchedule: Service[] = [];

@@ -173,16 +173,14 @@ const Financial: React.FC = () => {
       if (err.response) {
         addToast({
           type: 'error',
-          title: 'Vishi',
-          description:
+          title:
             err.response.data.message ||
             'Ocorreu um erro ao adicionar o tipo de serviço, tente novamente',
         });
       } else {
         addToast({
           type: 'error',
-          title: 'Vishi',
-          description:
+          title:
             'Ocorreu um erro ao adicionar o tipo de serviço, tente novamente',
         });
       }
