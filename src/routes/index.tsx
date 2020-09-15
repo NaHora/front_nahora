@@ -17,6 +17,7 @@ import EnterpriseSchedule from '../pages/EnterprisePages/EnterpriseSchedule';
 import SuccessPage from '../pages/EnterprisePages/SuccessPage';
 import Financial from '../pages/EnterprisePages/Financial';
 import PolicyPrivate from '../pages/PolicyPrivate';
+import TermsUse from '../pages/TermsUse';
 
 export const routes = {
   dashboard: '/dashboard',
@@ -27,6 +28,7 @@ export const routes = {
   enterprise: '/enterprise',
   schedule: '/schedule',
   private: '/politica-de-privacidade',
+  terms: '/termos-de-uso',
   signupEnterprise: '/signupEnterprise',
   enterpriseProfile: '/perfil-empresa',
   enterpriseSchedule: '/gestão-de-horários',
@@ -62,6 +64,7 @@ const Routes: React.FC = () => {
         isPrivate
       />
       <Route path={routes.private} component={PolicyPrivate} />
+      <Route path={routes.terms} component={TermsUse} />
       <Route path={routes.signup} component={SignUp} />
       <Route path={routes.forgotPassword} component={ForgotPassword} />
       <Route path={routes.resetPassword} component={ResetPassword} />
