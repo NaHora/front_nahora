@@ -16,6 +16,7 @@ import Plans from '../pages/EnterprisePages/Plans';
 import EnterpriseSchedule from '../pages/EnterprisePages/EnterpriseSchedule';
 import SuccessPage from '../pages/EnterprisePages/SuccessPage';
 import Financial from '../pages/EnterprisePages/Financial';
+import PolicyPrivate from '../pages/PolicyPrivate';
 
 export const routes = {
   dashboard: '/dashboard',
@@ -25,6 +26,7 @@ export const routes = {
   resetPassword: '/reset-password',
   enterprise: '/enterprise',
   schedule: '/schedule',
+  private: '/politica-de-privacidade',
   signupEnterprise: '/signupEnterprise',
   enterpriseProfile: '/perfil-empresa',
   enterpriseSchedule: '/gestão-de-horários',
@@ -59,6 +61,7 @@ const Routes: React.FC = () => {
         component={EnterpriseProfile}
         isPrivate
       />
+      <Route path={routes.private} component={PolicyPrivate} />
       <Route path={routes.signup} component={SignUp} />
       <Route path={routes.forgotPassword} component={ForgotPassword} />
       <Route path={routes.resetPassword} component={ResetPassword} />
