@@ -374,24 +374,57 @@ const Dashboard: React.FC = () => {
   }, [selectedDate]);
 
   const morningServices = useMemo(() => {
-    return services.filter((service) => {
-      return Number(service.start_hour.replace(':', '')) < 1200;
-    });
+    return services
+      .filter((service) => {
+        return Number(service.start_hour.replace(':', '')) < 1200;
+      })
+      .sort(function (a, b) {
+        if (a.start_hour > b.start_hour) {
+          return 1;
+        }
+        if (a.start_hour < b.start_hour) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      });
   }, [services]);
 
   const afternoonServices = useMemo(() => {
-    return services.filter((service) => {
-      return (
-        Number(service.start_hour.replace(':', '')) >= 1200 &&
-        Number(service.start_hour.replace(':', '')) < 1800
-      );
-    });
+    return services
+      .filter((service) => {
+        return (
+          Number(service.start_hour.replace(':', '')) >= 1200 &&
+          Number(service.start_hour.replace(':', '')) < 1800
+        );
+      })
+      .sort(function (a, b) {
+        if (a.start_hour > b.start_hour) {
+          return 1;
+        }
+        if (a.start_hour < b.start_hour) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      });
   }, [services]);
 
   const nightServices = useMemo(() => {
-    return services.filter((service) => {
-      return Number(service.start_hour.replace(':', '')) >= 1800;
-    });
+    return services
+      .filter((service) => {
+        return Number(service.start_hour.replace(':', '')) >= 1800;
+      })
+      .sort(function (a, b) {
+        if (a.start_hour > b.start_hour) {
+          return 1;
+        }
+        if (a.start_hour < b.start_hour) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      });
   }, [services]);
 
   // useEffect(() => {
