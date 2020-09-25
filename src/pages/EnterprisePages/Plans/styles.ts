@@ -16,6 +16,8 @@ export const Container = styled.div`
     margin: 100px 0;
 
     @media (max-width: 600px) {
+      flex-direction: column-reverse;
+
       margin: 15px 0;
     }
   }
@@ -40,11 +42,13 @@ export const MenuTitles = styled.div`
 `;
 
 export const Content = styled.div`
-  width: 60%;
+  width: 50%;
   display: flex;
   flex-direction: column;
-  padding: 0 100px;
-
+  padding: 0 50px;
+  & + div {
+    border-left: 1px solid #fff;
+  }
   @media (max-width: 600px) {
     width: 100%;
     padding: 0 15px;

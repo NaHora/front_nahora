@@ -79,7 +79,7 @@ const Plans: React.FC = () => {
   const [planData, setPlanData] = useState<Plan | any>({
     type_expiration: 'month',
   });
-  const [totalMoney, setTotalMoney] = useState(0);
+  // const [totalMoney, setTotalMoney] = useState(0);
 
   const [selectedSolicitation, setSelectionSolicitation] = useState<
     SelectSolicitation
@@ -120,20 +120,20 @@ const Plans: React.FC = () => {
     } catch {}
   }, [selectedSolicitation]);
 
-  const getTotalMoney = useCallback(async () => {
-    try {
-      const response = await api.get(
-        `/plans/money/month/${getMonth(new Date()) + 1}/year/${getYear(
-          new Date(),
-        )}`,
-      );
-      setTotalMoney(response.data);
-    } catch (err) {}
-  }, []);
+  // const getTotalMoney = useCallback(async () => {
+  //   try {
+  //     const response = await api.get(
+  //       `/plans/money/month/${getMonth(new Date()) + 1}/year/${getYear(
+  //         new Date(),
+  //       )}`,
+  //     );
+  //     setTotalMoney(response.data);
+  //   } catch (err) {}
+  // }, []);
 
-  useEffect(() => {
-    getTotalMoney();
-  }, []);
+  // useEffect(() => {
+  //   getTotalMoney();
+  // }, []);
 
   const createPlan = useCallback(async () => {
     try {
@@ -211,7 +211,7 @@ const Plans: React.FC = () => {
 
         await api.post('/plans/active', body);
         getAllEnterpriseAcceptedInvites();
-        getTotalMoney();
+        // getTotalMoney();
         toast.addToast({
           type: 'success',
           title: 'Plano ativado com sucesso.',
@@ -232,7 +232,7 @@ const Plans: React.FC = () => {
         }
       }
     },
-    [toast, getAllEnterpriseAcceptedInvites, getTotalMoney],
+    [toast, getAllEnterpriseAcceptedInvites],
   );
 
   const acceptUser = useCallback(
@@ -368,8 +368,8 @@ const Plans: React.FC = () => {
     <Container>
       <HeaderMenu />
       <div>
-        <MenuTitles>
-          <Span
+        <Content>
+          {/* <Span
             onClick={() => {
               setOpenPlanSection(false);
               setOpenActiveSection(false);
@@ -398,11 +398,116 @@ const Plans: React.FC = () => {
             currentSection={openActiveSection}
           >
             Usuários
-          </Span>
-          <CardSolicitation>
+          </Span> */}
+          <ActiveSection>
+            <span onClick={() => setOpenActiveSection(!openActiveSection)}>
+              {!openActiveSection ? (
+                <FiChevronDown
+                  style={{ marginRight: '8px' }}
+                  cursor="pointer"
+                  size={20}
+                  color="#ff9000"
+                />
+              ) : (
+                <FiChevronUp
+                  style={{ marginRight: '8px' }}
+                  cursor="pointer"
+                  size={20}
+                  color="#ff9000"
+                />
+              )}
+              Usuários
+            </span>
+            {openActiveSection && (
+              <>
+                <div style={{ marginBottom: '10px' }}>
+                  <InputDefault
+                    icon={FiSearch}
+                    name="search"
+                    type="text"
+                    value={searchValue}
+                    placeholder="Filtrar usuários"
+                    onChange={(e) => {
+                      setSearchValue(e.target.value);
+                    }}
+                  />
+                </div>
+                <div>
+                  {allUsersEnterpriseAccepted &&
+                    selectedSolicitation &&
+                    allUsersEnterpriseAccepted
+                      .filter((invite) =>
+                        invite.user.name
+                          .toLowerCase()
+                          .includes(searchValue.toLowerCase()),
+                      )
+                      .map((invite) => (
+                        <CardSolicitation>
+                          <div>
+                            <img
+                              src={
+                                invite.user.avatar_url ||
+                                `https://api.adorable.io/avatars/285/${invite.user.id}.png`
+                              }
+                              alt=""
+                            />
+                            <span>{invite.user.name}</span>
+                            <select
+                              onChange={(e) =>
+                                setSelectionSolicitation({
+                                  ...selectedSolicitation,
+                                  [invite.user.id]: e.target.value,
+                                })
+                              }
+                              name="selectedSolicitation"
+                              value={selectedSolicitation[invite.user.id]}
+                            >
+                              <option value="">-</option>
+                              <option value="cancelActivatedPlanNow">
+                                Cancelar Plano Atual
+                              </option>
+
+                              {enterprisePlans &&
+                                enterprisePlans.map((plan) => {
+                                  return (
+                                    <option value={plan.id}>{plan.name}</option>
+                                  );
+                                })}
+                            </select>
+
+                            <FiCheck
+                              onClick={() =>
+                                handleSelectSolicitation(
+                                  invite.user.id,
+                                  selectedSolicitation[invite.user.id],
+                                  invite.currentPlan?.id,
+                                )
+                              }
+                              color="#1ec657"
+                              cursor="pointer"
+                              size={25}
+                            />
+                          </div>
+                          <main>
+                            expiração do plano:{' '}
+                            {invite.currentPlan
+                              ? formatDistance(
+                                  new Date(invite.currentPlan?.expiration_at),
+                                  new Date(),
+                                  { addSuffix: true, locale: ptBR },
+                                )
+                              : 'usuário sem plano'}
+                          </main>
+                        </CardSolicitation>
+                      ))}
+                </div>
+              </>
+            )}
+          </ActiveSection>
+          {/* <CardSolicitation>
             Ganho total este mês: R${numeral(totalMoney).format('0,0.00')}
-          </CardSolicitation>
-        </MenuTitles>
+          </CardSolicitation> */}
+        </Content>
         <Content>
           <SolicitationSection>
             <span
@@ -644,111 +749,6 @@ const Plans: React.FC = () => {
               </div>
             )}
           </PlanSection>
-          <ActiveSection>
-            <span onClick={() => setOpenActiveSection(!openActiveSection)}>
-              {!openActiveSection ? (
-                <FiChevronDown
-                  style={{ marginRight: '8px' }}
-                  cursor="pointer"
-                  size={20}
-                  color="#ff9000"
-                />
-              ) : (
-                <FiChevronUp
-                  style={{ marginRight: '8px' }}
-                  cursor="pointer"
-                  size={20}
-                  color="#ff9000"
-                />
-              )}
-              Usuários
-            </span>
-            {openActiveSection && (
-              <>
-                <div style={{ marginBottom: '10px' }}>
-                  <InputDefault
-                    icon={FiSearch}
-                    name="search"
-                    type="text"
-                    value={searchValue}
-                    placeholder="Filtrar usuários"
-                    onChange={(e) => {
-                      setSearchValue(e.target.value);
-                    }}
-                  />
-                </div>
-                <div>
-                  {allUsersEnterpriseAccepted &&
-                    selectedSolicitation &&
-                    allUsersEnterpriseAccepted
-                      .filter((invite) =>
-                        invite.user.name
-                          .toLowerCase()
-                          .includes(searchValue.toLowerCase()),
-                      )
-                      .map((invite) => (
-                        <CardSolicitation>
-                          <div>
-                            <img
-                              src={
-                                invite.user.avatar_url ||
-                                `https://api.adorable.io/avatars/285/${invite.user.id}.png`
-                              }
-                              alt=""
-                            />
-                            <span>{invite.user.name}</span>
-                            <select
-                              onChange={(e) =>
-                                setSelectionSolicitation({
-                                  ...selectedSolicitation,
-                                  [invite.user.id]: e.target.value,
-                                })
-                              }
-                              name="selectedSolicitation"
-                              value={selectedSolicitation[invite.user.id]}
-                            >
-                              <option value="">-</option>
-                              <option value="cancelActivatedPlanNow">
-                                Cancelar Plano Atual
-                              </option>
-
-                              {enterprisePlans &&
-                                enterprisePlans.map((plan) => {
-                                  return (
-                                    <option value={plan.id}>{plan.name}</option>
-                                  );
-                                })}
-                            </select>
-
-                            <FiCheck
-                              onClick={() =>
-                                handleSelectSolicitation(
-                                  invite.user.id,
-                                  selectedSolicitation[invite.user.id],
-                                  invite.currentPlan?.id,
-                                )
-                              }
-                              color="#1ec657"
-                              cursor="pointer"
-                              size={25}
-                            />
-                          </div>
-                          <main>
-                            expiração do plano:{' '}
-                            {invite.currentPlan
-                              ? formatDistance(
-                                  new Date(invite.currentPlan?.expiration_at),
-                                  new Date(),
-                                  { addSuffix: true, locale: ptBR },
-                                )
-                              : 'usuário sem plano'}
-                          </main>
-                        </CardSolicitation>
-                      ))}
-                </div>
-              </>
-            )}
-          </ActiveSection>
         </Content>
       </div>
     </Container>
