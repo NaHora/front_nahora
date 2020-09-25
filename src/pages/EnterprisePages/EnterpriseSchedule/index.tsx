@@ -365,8 +365,7 @@ const EnterpriseSchedule: React.FC = () => {
                 setFormService({
                   ...formService,
                   [e.target.name]: e.target.value,
-                })
-              }
+                })}
             />
           </label>
           <label htmlFor="">
@@ -386,8 +385,7 @@ const EnterpriseSchedule: React.FC = () => {
                 setFormService({
                   ...formService,
                   [e.target.name]: e.target.value,
-                })
-              }
+                })}
             />
           </label>
 
@@ -408,8 +406,7 @@ const EnterpriseSchedule: React.FC = () => {
                 setFormService({
                   ...formService,
                   [e.target.name]: e.target.value,
-                })
-              }
+                })}
             />
           </label>
 
@@ -425,8 +422,7 @@ const EnterpriseSchedule: React.FC = () => {
                 setFormService({
                   ...formService,
                   [e.target.name]: e.target.checked,
-                })
-              }
+                })}
               name="pending_scheduling"
               inputProps={{ 'aria-label': 'secondary checkbox' }}
               checked={!!formService.pending_scheduling}

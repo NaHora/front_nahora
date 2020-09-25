@@ -1,9 +1,7 @@
 import styled, { keyframes } from 'styled-components';
 
 import { shade } from 'polished';
-import GoogleLogin from 'react-google-login';
 import signInBackgroundImg from '../../assets/teste2.svg';
-import Button from '../../components/Button';
 
 export const Container = styled.div`
   min-height: 100vh;
@@ -127,38 +125,5 @@ export const AnimationContainer = styled.div`
     &:hover {
       color: ${shade(0.2, '#ff9000')};
     }
-  }
-`;
-
-export const GoogleLoginStyled = styled(GoogleLogin)`
-  width: 100%;
-  border-radius: 10px !important;
-
-  > span {
-    padding: 0 16px !important;
-    display: flex;
-    align-items: center;
-    svg {
-      margin-right: 8px;
-    }
-    > span {
-      margin-left: 10px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-  }
-  height: 56px;
-  > div {
-    display: none;
-  }
-`;
-
-export const ButtonStyled = styled(Button)`
-  margin-bottom: 16px;
-  justify-content: flex-start;
-  color: #312e38;
-  span {
-    margin-left: 10px;
-    font-weight: bold;
   }
 `;

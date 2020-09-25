@@ -171,6 +171,36 @@ const Plans: React.FC = () => {
     }
   }, [toast, getEnterprisePlans, planData, setPlanData]);
 
+  const deletePlan = useCallback(
+    async (plan_id) => {
+      try {
+        await api.delete(`/plans/${plan_id}`);
+
+        toast.addToast({
+          type: 'success',
+          title: 'Plano deletado com sucesso.',
+        });
+
+        getEnterprisePlans();
+      } catch (err) {
+        if (err.response) {
+          toast.addToast({
+            type: 'error',
+            title:
+              err.response.data.message ||
+              'Ocorreu um erro ao criar o plano, tente novamente',
+          });
+        } else {
+          toast.addToast({
+            type: 'error',
+            title: 'Ocorreu um erro ao criar o plano, tente novamente',
+          });
+        }
+      }
+    },
+    [toast, getEnterprisePlans],
+  );
+
   const activeUserPlan = useCallback(
     async (user_id, plan_id) => {
       try {
@@ -599,7 +629,12 @@ const Plans: React.FC = () => {
                             </td>
                             <td>{plan.schedule_limit}</td>
                             <td>
-                              {/* <FiX color="#fc384c" cursor="pointer" size={25} /> */}
+                              <FiX
+                                color="#fc384c"
+                                onClick={() => deletePlan(plan.id)}
+                                cursor="pointer"
+                                size={25}
+                              />
                             </td>
                           </tr>
                         );

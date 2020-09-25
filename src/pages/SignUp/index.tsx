@@ -1,36 +1,55 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { FiMail, FiLock, FiUser, FiArrowLeft, FiPhone } from 'react-icons/fi';
+import {
+  FiMail,
+  FiLock,
+  FiUser,
+  FiArrowLeft,
+  FiPhone,
+  FiFacebook,
+} from 'react-icons/fi';
 import * as Yup from 'yup';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import NumberFormat from 'react-number-format';
+import { FaGoogle } from 'react-icons/fa';
+
+import FacebookLogin from 'react-facebook-login';
 import logoImg from '../../assets/nahora.png';
-import { Container, Content, Background, AnimationContainer } from './styles';
+import {
+  Container,
+  Content,
+  Background,
+  AnimationContainer,
+  GoogleLoginStyled,
+} from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import getValidationErrors from '../../utils';
 import { routes } from '../../routes';
 import { useToast } from '../../hooks/toast';
-import api from '../../services/api';
+
+import { useAuth } from '../../hooks/auth';
 
 interface SignUpFormData {
   name: string;
   email: string;
   password: string;
-  celphone: string;
+  celphone?: string;
+  photoUrl?: string;
 }
 
 const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
-  const history = useHistory();
-  const { addToast } = useToast();
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = useCallback(
+  const { addToast } = useToast();
+  const { signInSocial } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [values, setValues] = useState({} as SignUpFormData);
+
+  const handleAccount = useCallback(
     async (data: SignUpFormData) => {
-      formRef.current?.setErrors({});
       setLoading(true);
       try {
         const schema = Yup.object().shape({
@@ -52,14 +71,18 @@ const SignUp: React.FC = () => {
           abortEarly: false,
         });
 
-        await api.post('users', data);
-
-        history.push(routes.signin);
+        await signInSocial({
+          email: data.email,
+          password: data.password,
+          name: data.name,
+          celphone: data.celphone,
+          photoUrl: values?.photoUrl,
+        });
 
         addToast({
           type: 'success',
-          title: 'Cadastro Realizado!',
-          description: 'Você já pode fazer seu login no NaHora!',
+          title: 'Bem Vindo,',
+          description: 'Autenticado com sucesso',
         });
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -68,7 +91,7 @@ const SignUp: React.FC = () => {
           return;
         }
         if (err.response) {
-          addToast({
+          return addToast({
             type: 'error',
             title:
               err.response.data.message ||
@@ -84,8 +107,26 @@ const SignUp: React.FC = () => {
         setLoading(false);
       }
     },
-    [addToast, history],
+    [addToast, signInSocial, values],
   );
+
+  const loginFacebook = useCallback((facebook: any) => {
+    setValues({
+      email: facebook.email,
+      password: '',
+      name: facebook.name,
+      photoUrl: facebook.picture.data.url,
+    });
+  }, []);
+
+  const responseGoogle = useCallback((response: any) => {
+    setValues({
+      email: response?.profileObj?.email,
+      password: '',
+      name: response?.profileObj?.name,
+      photoUrl: response?.profileObj?.imageUrl,
+    });
+  }, []);
 
   return (
     <Container>
@@ -93,9 +134,10 @@ const SignUp: React.FC = () => {
 
       <Content>
         <AnimationContainer>
-          <Form ref={formRef} onSubmit={handleSubmit}>
+          <Form initialData={values} ref={formRef} onSubmit={handleAccount}>
             <img src={logoImg} alt="" />
-            <h1>Faça seu cadastro</h1>
+
+            <h1>Complete seu cadastro</h1>
             <Input icon={FiUser} name="name" type="text" placeholder="Nome" />
             <NumberFormat
               customInput={Input}
@@ -129,6 +171,38 @@ const SignUp: React.FC = () => {
             <Button loading={loading} type="submit">
               Cadastrar
             </Button>
+            <hr style={{ margin: '20px' }} />
+            <GoogleLoginStyled
+              clientId="980793766976-bc2pfer912godkfah31tp9jjmr53pn80.apps.googleusercontent.com"
+              buttonText={
+                (
+                  <>
+                    <FaGoogle />
+                    <span>Cadastrar com gmail</span>
+                  </>
+                ) as any
+              }
+              onSuccess={responseGoogle}
+              onFailure={responseGoogle}
+              cookiePolicy="single_host_origin"
+            />
+
+            <FacebookLogin
+              appId="330940161588292"
+              // redirectUri="https://nahora.app.br"
+              fields="first_name,name,email,picture"
+              disableMobileRedirect
+              textButton={
+                (
+                  <span>
+                    <FiFacebook />
+                    Cadastrar com facebook
+                  </span>
+                ) as any
+              }
+              // onClick={loginFacebook}
+              callback={loginFacebook}
+            />
           </Form>
           <Link to={routes.signin}>
             <FiArrowLeft />
