@@ -488,11 +488,17 @@ const Plans: React.FC = () => {
                   size={20}
                   color="#ff9000"
                 />
-                Convidar cliente
+                Convidar
               </span>
             </header>
             {openInvite && (
-              <div style={{ margin: '24px 0', padding: 8 }}>
+              <div
+                style={{
+                  margin: '24px 0',
+                  padding: 16,
+                  border: '1px solid #ff9000',
+                }}
+              >
                 <InputDefault
                   icon={FiUser}
                   name="name"
