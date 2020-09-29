@@ -5,11 +5,16 @@ import {
   FiSearch,
   FiCheck,
   FiX,
+  FiPlus,
+  FiUser,
+  FiPhone,
+  FiMail,
 } from 'react-icons/fi';
 import { Tooltip } from '@material-ui/core';
 import { formatDistance, getMonth, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numeral from 'numeral';
+import NumberFormat from 'react-number-format';
 import HeaderMenu from '../../../components/Header';
 import {
   Container,
@@ -27,6 +32,7 @@ import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
 import 'numeral/locales/pt-br';
 import { useSocket } from '../../../hooks/socket';
+import Button from '../../../components/Button';
 
 interface User {
   id: string;
@@ -74,8 +80,15 @@ const Plans: React.FC = () => {
   const toast = useToast();
   const [searchValue, setSearchValue] = useState('');
   const [openSolicitationSection, setOpenSolicitationSection] = useState(true);
-  const [openActiveSection, setOpenActiveSection] = useState(false);
+  const [openActiveSection, setOpenActiveSection] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [openInvite, setOpenInvite] = useState(false);
   const [openPlanSection, setOpenPlanSection] = useState(false);
+  const [inviteData, setInviteData] = useState({
+    name: '',
+    email: '',
+    celphone: '',
+  });
   const [planData, setPlanData] = useState<Plan | any>({
     type_expiration: 'month',
   });
@@ -281,6 +294,52 @@ const Plans: React.FC = () => {
     ],
   );
 
+  const inviteUser = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { name, email, celphone } = inviteData;
+
+      const body = {
+        name,
+        email,
+        celphone,
+      };
+
+      await api.post('/invites/new-user', body);
+
+      toast.addToast({
+        type: 'success',
+        title: 'Convite enviado com sucesso.',
+      });
+
+      setOpenActiveSection(true);
+
+      getAllEnterpriseAcceptedInvites();
+
+      setInviteData({
+        name: '',
+        email: '',
+        celphone: '',
+      });
+    } catch (err) {
+      if (err.response) {
+        toast.addToast({
+          type: 'error',
+          title:
+            err.response.data.message ||
+            'Ocorreu um erro ao enviar o convite, tente novamente',
+        });
+      } else {
+        toast.addToast({
+          type: 'error',
+          title: 'Ocorreu um erro ao enviar o convite, tente novamente',
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [toast, getAllEnterpriseAcceptedInvites, inviteData]);
+
   const recuseInvite = useCallback(
     async (invite_id) => {
       try {
@@ -400,24 +459,90 @@ const Plans: React.FC = () => {
             Usuários
           </Span> */}
           <ActiveSection>
-            <span onClick={() => setOpenActiveSection(!openActiveSection)}>
-              {!openActiveSection ? (
-                <FiChevronDown
+            <header>
+              <span onClick={() => setOpenActiveSection(!openActiveSection)}>
+                {!openActiveSection ? (
+                  <FiChevronDown
+                    style={{ marginRight: '8px' }}
+                    cursor="pointer"
+                    size={20}
+                    color="#ff9000"
+                  />
+                ) : (
+                  <FiChevronUp
+                    style={{ marginRight: '8px' }}
+                    cursor="pointer"
+                    size={20}
+                    color="#ff9000"
+                  />
+                )}
+                Usuários
+              </span>
+              <span
+                onClick={() => setOpenInvite(!openInvite)}
+                style={{ color: '#ff9000' }}
+              >
+                <FiPlus
                   style={{ marginRight: '8px' }}
                   cursor="pointer"
                   size={20}
                   color="#ff9000"
                 />
-              ) : (
-                <FiChevronUp
-                  style={{ marginRight: '8px' }}
-                  cursor="pointer"
-                  size={20}
-                  color="#ff9000"
+                Convidar cliente
+              </span>
+            </header>
+            {openInvite && (
+              <div style={{ margin: '24px 0', padding: 8 }}>
+                <InputDefault
+                  icon={FiUser}
+                  name="name"
+                  type="text"
+                  value={inviteData.name}
+                  onChange={(e) =>
+                    setInviteData({
+                      ...inviteData,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
+                  placeholder="Nome"
                 />
-              )}
-              Usuários
-            </span>
+                <NumberFormat
+                  customInput={InputDefault}
+                  icon={FiPhone}
+                  type="text"
+                  format="(##) #####-####"
+                  value={inviteData.celphone}
+                  name="celphone"
+                  // allowLeadingZeros
+                  // allowEmptyFormatting
+                  mask="_"
+                  placeholder="Telefone"
+                  onValueChange={(text) =>
+                    setInviteData({
+                      ...inviteData,
+                      celphone: text.value,
+                    })
+                  }
+                />
+
+                <InputDefault
+                  value={inviteData.email}
+                  icon={FiMail}
+                  name="email"
+                  type="email"
+                  placeholder="E-mail"
+                  onChange={(e) =>
+                    setInviteData({
+                      ...inviteData,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
+                />
+                <Button loading={loading} onClick={inviteUser}>
+                  Convidar
+                </Button>
+              </div>
+            )}
             {openActiveSection && (
               <>
                 <div style={{ marginBottom: '10px' }}>

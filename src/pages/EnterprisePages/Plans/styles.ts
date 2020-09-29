@@ -186,13 +186,17 @@ export const SolicitationSection = styled.div`
 
 export const ActiveSection = styled.div`
   margin: 10px 0;
-  > span {
-    cursor: pointer;
-    font-size: 22px;
-  }
+  > header {
+    display: flex;
+    justify-content: space-between;
+    > span {
+      cursor: pointer;
+      font-size: 22px;
+    }
 
-  > div {
-    margin: 8px 0;
+    > div {
+      margin: 8px 0;
+    }
   }
 `;
 
