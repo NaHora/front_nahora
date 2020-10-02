@@ -112,10 +112,10 @@ const SignUp: React.FC = () => {
 
   const loginFacebook = useCallback((facebook: any) => {
     setValues({
-      email: facebook.email,
+      email: facebook?.email,
       password: '',
-      name: facebook.name,
-      photoUrl: facebook.picture.data.url,
+      name: facebook?.name,
+      photoUrl: facebook?.picture?.data?.url,
     });
   }, []);
 

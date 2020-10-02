@@ -202,13 +202,55 @@ export const ActiveSection = styled.div`
 
 export const PlanSection = styled.div`
   margin: 10px 0;
-  > span {
-    cursor: pointer;
-    font-size: 22px;
-  }
-
   > div {
     margin: 8px 0;
+    > label {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 8px;
+      > select {
+        width: 100%;
+
+        height: 50px;
+        background: #232129;
+        border-radius: 5px;
+        padding: 0 5px;
+        color: #fff;
+        border: none;
+
+        option {
+          background: #232129;
+        }
+      }
+    }
+  }
+  > header {
+    display: flex;
+    justify-content: space-between;
+    > span {
+      cursor: pointer;
+      font-size: 22px;
+    }
+
+    > div {
+      margin: 8px 0;
+      > label {
+        > select {
+          width: 100%;
+          margin: 0 8px;
+          height: 100%;
+          background: #232129;
+          border-radius: 5px;
+          padding: 0 5px;
+          color: #fff;
+          border: none;
+
+          option {
+            background: #232129;
+          }
+        }
+      }
+    }
   }
 `;
 

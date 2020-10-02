@@ -9,6 +9,8 @@ import {
   FiUser,
   FiPhone,
   FiMail,
+  FiAlertTriangle,
+  FiArrowRight,
 } from 'react-icons/fi';
 import { Tooltip } from '@material-ui/core';
 import { formatDistance, getMonth, getYear } from 'date-fns';
@@ -40,6 +42,10 @@ interface User {
   name: string;
 }
 
+interface Category {
+  id: string;
+  name: string;
+}
 interface SelectSolicitation {
   [key: string]: string;
 }
@@ -73,21 +79,34 @@ interface Invite {
   currentPlan?: UserPlan;
 }
 
+interface Restrict {
+  id: string;
+  plan: Plan;
+  category: Category;
+}
+
 const Plans: React.FC = () => {
   numeral.locale('pt-br');
   const { socket } = useSocket();
-
+  const myEnterprise = JSON.parse(
+    localStorage.getItem('@NaHora:myEnterprise') || '{}',
+  );
   const toast = useToast();
   const [searchValue, setSearchValue] = useState('');
   const [openSolicitationSection, setOpenSolicitationSection] = useState(true);
   const [openActiveSection, setOpenActiveSection] = useState(true);
   const [loading, setLoading] = useState(false);
   const [openInvite, setOpenInvite] = useState(false);
-  const [openPlanSection, setOpenPlanSection] = useState(false);
+  const [openRestrict, setOpenRestrict] = useState(false);
+  const [openPlanSection, setOpenPlanSection] = useState(true);
   const [inviteData, setInviteData] = useState({
     name: '',
     email: '',
     celphone: '',
+  });
+  const [restrictData, setRestrictData] = useState({
+    plan_id: '',
+    category_id: '',
   });
   const [planData, setPlanData] = useState<Plan | any>({
     type_expiration: 'month',
@@ -102,6 +121,25 @@ const Plans: React.FC = () => {
   >([]);
   const [enterprisePlans, setEnterprisePlans] = useState<Plan[]>([]);
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [restricts, setRestricts] = useState<Restrict[]>([]);
+
+  const getRestricts = useCallback(async () => {
+    api.get(`/plans/restrict`).then((response) => {
+      setRestricts(response.data);
+    });
+  }, []);
+
+  const getCategories = useCallback(async () => {
+    api.get(`/services/category/${myEnterprise.id}`).then((response) => {
+      setCategories(response.data);
+    });
+  }, [myEnterprise.id]);
+
+  useEffect(() => {
+    getCategories();
+    getRestricts();
+  }, []);
 
   const getSolicitations = useCallback(async () => {
     try {
@@ -184,6 +222,36 @@ const Plans: React.FC = () => {
     }
   }, [toast, getEnterprisePlans, planData, setPlanData]);
 
+  const deleteRestrict = useCallback(
+    async (restrict_id) => {
+      try {
+        await api.delete(`/plans/restrict/${restrict_id}`);
+
+        toast.addToast({
+          type: 'success',
+          title: 'Restrição deletado com sucesso.',
+        });
+
+        getRestricts();
+      } catch (err) {
+        if (err.response) {
+          toast.addToast({
+            type: 'error',
+            title:
+              err.response.data.message ||
+              'Ocorreu um erro ao deletar restrição, tente novamente',
+          });
+        } else {
+          toast.addToast({
+            type: 'error',
+            title: 'Ocorreu um erro ao deletar restrição, tente novamente',
+          });
+        }
+      }
+    },
+    [toast, getRestricts],
+  );
+
   const deletePlan = useCallback(
     async (plan_id) => {
       try {
@@ -201,12 +269,12 @@ const Plans: React.FC = () => {
             type: 'error',
             title:
               err.response.data.message ||
-              'Ocorreu um erro ao criar o plano, tente novamente',
+              'Ocorreu um erro ao deletar o plano, tente novamente',
           });
         } else {
           toast.addToast({
             type: 'error',
-            title: 'Ocorreu um erro ao criar o plano, tente novamente',
+            title: 'Ocorreu um erro ao deletar o plano, tente novamente',
           });
         }
       }
@@ -247,6 +315,37 @@ const Plans: React.FC = () => {
     },
     [toast, getAllEnterpriseAcceptedInvites],
   );
+
+  const createRestriction = useCallback(async () => {
+    const { category_id, plan_id } = restrictData;
+    try {
+      const body = {
+        category_id,
+        plan_id,
+      };
+
+      await api.post('/plans/restrict', body);
+      getRestricts();
+      toast.addToast({
+        type: 'success',
+        title: 'Plano restringido com sucesso.',
+      });
+    } catch (err) {
+      if (err.response) {
+        toast.addToast({
+          type: 'error',
+          title:
+            err.response.data.message ||
+            'Ocorreu um erro ao restringir o plano, tente novamente',
+        });
+      } else {
+        toast.addToast({
+          type: 'error',
+          title: 'Ocorreu um erro ao restringir o plano, tente novamente',
+        });
+      }
+    }
+  }, [toast, restrictData, getRestricts]);
 
   const acceptUser = useCallback(
     async (invite_id) => {
@@ -703,24 +802,96 @@ const Plans: React.FC = () => {
             )}
           </SolicitationSection>
           <PlanSection>
-            <span onClick={() => setOpenPlanSection(!openPlanSection)}>
-              {!openPlanSection ? (
-                <FiChevronDown
+            <header>
+              <span onClick={() => setOpenPlanSection(!openPlanSection)}>
+                {!openPlanSection ? (
+                  <FiChevronDown
+                    style={{ marginRight: '8px' }}
+                    cursor="pointer"
+                    size={20}
+                    color="#ff9000"
+                  />
+                ) : (
+                  <FiChevronUp
+                    style={{ marginRight: '8px' }}
+                    cursor="pointer"
+                    size={20}
+                    color="#ff9000"
+                  />
+                )}
+                Planos
+              </span>
+              <span
+                onClick={() => setOpenRestrict(!openRestrict)}
+                style={{ color: '#ff9000' }}
+              >
+                <FiPlus
                   style={{ marginRight: '8px' }}
                   cursor="pointer"
                   size={20}
                   color="#ff9000"
                 />
-              ) : (
-                <FiChevronUp
-                  style={{ marginRight: '8px' }}
-                  cursor="pointer"
-                  size={20}
-                  color="#ff9000"
-                />
-              )}
-              Planos
-            </span>
+                Restrição
+              </span>
+            </header>
+            {openRestrict && (
+              <div
+                style={{
+                  margin: '24px 0',
+                  padding: 16,
+                  border: '1px solid #ff9000',
+                }}
+              >
+                <label>
+                  Plano
+                  <select
+                    value={restrictData.plan_id}
+                    onChange={(e) =>
+                      setRestrictData({
+                        ...restrictData,
+                        [e.target.name]: e.target.value,
+                      })
+                    }
+                    name="plan_id"
+                  >
+                    {' '}
+                    <option value="">-</option>
+                    {enterprisePlans.map((plan) => {
+                      return (
+                        <option key={plan.id} value={plan.id}>
+                          {plan.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </label>
+                <label>
+                  Serviço
+                  <select
+                    value={restrictData.category_id}
+                    onChange={(e) =>
+                      setRestrictData({
+                        ...restrictData,
+                        [e.target.name]: e.target.value,
+                      })
+                    }
+                    name="category_id"
+                  >
+                    <option value="">-</option>
+                    {categories.map((category) => {
+                      return (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </label>
+                <Button loading={loading} onClick={createRestriction}>
+                  Restringir
+                </Button>
+              </div>
+            )}
             {openPlanSection && (
               <div>
                 <CardSolicitation>
@@ -877,6 +1048,36 @@ const Plans: React.FC = () => {
                       })}
                   </table>
                 </CardSolicitation>
+                Restrições de planos:
+                <br />
+                {restricts.length > 0 ? (
+                  restricts.map((restrict) => (
+                    <CardSolicitation>
+                      <div>
+                        <FiAlertTriangle />
+                        <div
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <span>{restrict.plan.name}</span>
+                          <FiArrowRight style={{ margin: '0 8px' }} />
+                          <span>{restrict.category.name}</span>
+                        </div>
+                        <FiX
+                          color="#fc384c"
+                          onClick={() => deleteRestrict(restrict.id)}
+                          cursor="pointer"
+                          size={25}
+                        />
+                      </div>
+                    </CardSolicitation>
+                  ))
+                ) : (
+                  <span>Nenhum plano com restrição</span>
+                )}
               </div>
             )}
           </PlanSection>
