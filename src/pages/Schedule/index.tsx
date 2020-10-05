@@ -139,11 +139,24 @@ const Enterprises: React.FC = () => {
           type: 'success',
         });
       } catch (err) {
+        if (err.response) {
+          toast.addToast({
+            type: 'error',
+            title:
+              err.response.data.message ||
+              'Ocorreu um erro ao deletar o agendamento, tente novamente',
+          });
+        } else {
+          toast.addToast({
+            type: 'error',
+            title: 'Ocorreu um erro ao deletar o agendamento, tente novamente',
+          });
+        }
       } finally {
         setLoading(false);
       }
     },
-    [toast],
+    [toast, getMyAppointments],
   );
 
   useEffect(() => {

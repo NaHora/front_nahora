@@ -13,10 +13,11 @@ import {
   FiArrowRight,
 } from 'react-icons/fi';
 import { Tooltip } from '@material-ui/core';
-import { formatDistance, getMonth, getYear } from 'date-fns';
+import { formatDistance, getMonth, getYear, isAfter } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numeral from 'numeral';
 import NumberFormat from 'react-number-format';
+import { useHistory } from 'react-router-dom';
 import HeaderMenu from '../../../components/Header';
 import {
   Container,
@@ -35,6 +36,7 @@ import { useToast } from '../../../hooks/toast';
 import 'numeral/locales/pt-br';
 import { useSocket } from '../../../hooks/socket';
 import Button from '../../../components/Button';
+import { routes } from '../../../routes';
 
 interface User {
   id: string;
@@ -55,6 +57,7 @@ interface Plan {
   name: string;
   price: number;
   schedule_limit: number;
+  week_limit: number;
   days_to_expire: number;
   type_expiration: string;
 }
@@ -88,6 +91,7 @@ interface Restrict {
 const Plans: React.FC = () => {
   numeral.locale('pt-br');
   const { socket } = useSocket();
+  const history = useHistory();
   const myEnterprise = JSON.parse(
     localStorage.getItem('@NaHora:myEnterprise') || '{}',
   );
@@ -199,7 +203,9 @@ const Plans: React.FC = () => {
         name: '',
         price: '',
         schedule_limit: '',
+        week_limit: '',
         days_to_expire: '',
+        type_expiration: 'month',
       });
 
       setOpenActiveSection(true);
@@ -720,14 +726,58 @@ const Plans: React.FC = () => {
                           </div>
                           <main>
                             expiração do plano:{' '}
-                            {invite.currentPlan
-                              ? formatDistance(
+                            {invite.currentPlan ? (
+                              isAfter(
+                                new Date(invite.currentPlan?.expiration_at),
+                                new Date(),
+                              ) ? (
+                                formatDistance(
                                   new Date(invite.currentPlan?.expiration_at),
                                   new Date(),
                                   { addSuffix: true, locale: ptBR },
                                 )
-                              : 'usuário sem plano'}
+                              ) : (
+                                <>
+                                  Expirou{' '}
+                                  {formatDistance(
+                                    new Date(invite.currentPlan?.expiration_at),
+                                    new Date(),
+                                    { addSuffix: true, locale: ptBR },
+                                  )}
+                                </>
+                              )
+                            ) : (
+                              'usuário sem plano'
+                            )}
                           </main>
+                          {invite.currentPlan &&
+                            isAfter(
+                              new Date(invite.currentPlan.expiration_at),
+                              new Date(),
+                            ) && (
+                              <span
+                                onClick={() =>
+                                  history.push(
+                                    `${routes.clientDetailNoParams}/${invite.user.id}`,
+                                  )
+                                }
+                                style={{
+                                  color: '#ff9000',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  marginTop: '4px',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <FiPlus
+                                  style={{ marginRight: '4px' }}
+                                  cursor="pointer"
+                                  size={20}
+                                  color="#ff9000"
+                                />
+                                detalhes
+                              </span>
+                            )}
                         </CardSolicitation>
                       ))}
                 </div>
@@ -928,6 +978,14 @@ const Plans: React.FC = () => {
                           Limite de <br /> agendamentos
                         </th>
                       </Tooltip>
+                      <Tooltip
+                        placement="top"
+                        title="Quantidade de vezes por semana que o usuário poderá realizar agendamentos"
+                      >
+                        <th>
+                          Limite <br /> semanal
+                        </th>
+                      </Tooltip>
                       <th />
                     </tr>
 
@@ -1006,6 +1064,20 @@ const Plans: React.FC = () => {
                         />
                       </td>
                       <td>
+                        <input
+                          value={planData.week_limit}
+                          onChange={(e) =>
+                            setPlanData({
+                              ...planData,
+                              [e.target.name]: e.target.value,
+                            })
+                          }
+                          name="week_limit"
+                          placeholder="Limite Semanal"
+                          type="number"
+                        />
+                      </td>
+                      <td>
                         <FiCheck
                           color="#1ec657"
                           onClick={createPlan}
@@ -1035,6 +1107,7 @@ const Plans: React.FC = () => {
                                 : 'dias'}
                             </td>
                             <td>{plan.schedule_limit}</td>
+                            <td>{plan.week_limit}</td>
                             <td>
                               <FiX
                                 color="#fc384c"

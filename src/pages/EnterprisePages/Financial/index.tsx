@@ -10,8 +10,9 @@ import {
   MdExpandMore,
   MdUnfoldMore,
 } from 'react-icons/md';
-import { endOfMonth, startOfMonth, format } from 'date-fns';
+import { endOfMonth, startOfMonth, format, setHours } from 'date-fns';
 import NumberFormat from 'react-number-format';
+import { addDays } from 'date-fns/esm';
 import DialogModal from '../../../components/DialogModal';
 import HeaderMenu from '../../../components/Header';
 import { sortArray } from '../../../utils';
@@ -147,7 +148,7 @@ const Financial: React.FC = () => {
       category,
       price,
       type,
-      date,
+      date: addDays(new Date(date), 1),
       quantity,
     };
     try {

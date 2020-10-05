@@ -18,6 +18,7 @@ import SuccessPage from '../pages/EnterprisePages/SuccessPage';
 import Financial from '../pages/EnterprisePages/Financial';
 import PolicyPrivate from '../pages/PolicyPrivate';
 import TermsUse from '../pages/TermsUse';
+import ClientDetail from '../pages/EnterprisePages/ClientDetail';
 
 export const routes = {
   dashboard: '/dashboard',
@@ -26,6 +27,8 @@ export const routes = {
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
   enterprise: '/enterprise',
+  clientDetailNoParams: '/detalhes-do-usuario',
+  clientDetail: '/detalhes-do-usuario/:client_id',
   schedule: '/schedule',
   private: '/politica-de-privacidade',
   terms: '/termos-de-uso',
@@ -43,6 +46,7 @@ const Routes: React.FC = () => {
     <Switch>
       <Route path={routes.dashboard} component={Dashboard} isPrivate />
       <Route path={routes.enterprise} component={Enterprises} isPrivate />
+      <Route path={routes.clientDetail} component={ClientDetail} isPrivate />
       <Route path={routes.schedule} component={Schedule} isPrivate />
       <Route path={routes.profile} component={Profile} isPrivate />
       <Route path={routes.plan} component={Plans} isPrivate />

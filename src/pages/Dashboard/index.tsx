@@ -157,6 +157,7 @@ const Dashboard: React.FC = () => {
   const [allUsersEnterpriseAccepted, setAllUsersEnterpriseAccepted] = useState<
     Invite[]
   >([]);
+
   const handleOpen = (service_id: string) => {
     setCurrentService(service_id);
     setOpen(true);
