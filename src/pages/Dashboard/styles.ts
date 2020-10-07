@@ -317,6 +317,7 @@ export const Calendar = styled.aside<PageColor>`
     border-collapse: separate;
     border-spacing: 8px;
     padding: 16px;
+    display: block;
     @media (max-width: 600px) {
       padding: 8px;
       border-spacing: 6px;

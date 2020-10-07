@@ -26,7 +26,7 @@ function observeToken(instance: any) {
       return response;
     },
     (error: any) => {
-      if (error.response.status === 401) {
+      if (error?.response?.status === 401) {
         return getNewRefreshToken();
       }
       return Promise.reject(error);

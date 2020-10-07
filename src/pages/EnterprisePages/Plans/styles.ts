@@ -42,9 +42,9 @@ export const MenuTitles = styled.div`
 `;
 
 export const Content = styled.div`
-  width: 50%;
+  width: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   padding: 0 50px;
   & + div {
     border-left: 1px solid #fff;

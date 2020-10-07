@@ -130,7 +130,7 @@ const Dashboard: React.FC = () => {
   const owner_enterprise = thisEnterprise.owner_id === user.id;
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekDay, setCurrentWeekDay] = useState(getDay(new Date()));
-  const [currentCustomer, setCurrentCustomer] = useState<any>(null);
+  const [currentCustomer, setCurrentCustomer] = useState<any>('');
   const [openModal, setOpeModal] = useState<ModalData | any>({});
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -224,7 +224,7 @@ const Dashboard: React.FC = () => {
     if (selectectedCategory && thisEnterprise.id) {
       getAvaiableDays();
     }
-  }, [selectectedCategory, thisEnterprise.id, getAvaiableDays]);
+  }, [selectectedCategory, thisEnterprise.id]);
 
   const handleServices = useCallback(async () => {
     start();
@@ -261,6 +261,8 @@ const Dashboard: React.FC = () => {
     toast,
     selectectedCategory,
     selectedDate,
+    start,
+    stop,
   ]);
 
   // const selectedDateWithHourService = useMemo(() => {
@@ -280,6 +282,20 @@ const Dashboard: React.FC = () => {
       setLoading(true);
       setOpeModal({});
       try {
+        if (currentCustomer === 'full-schedule-service') {
+          const body = {
+            service_id,
+
+            service_date: selectedDate,
+          };
+          await api.post(`/appointments/full-time`, body);
+
+          handleServices();
+          return toast.addToast({
+            type: 'success',
+            title: 'Vagas encerradas com sucesso.',
+          });
+        }
         const body = {
           service_id,
           enterprise_id: thisEnterprise.id,
@@ -288,9 +304,10 @@ const Dashboard: React.FC = () => {
         };
         await api.post(`/appointments`, body);
 
-        if (!currentCustomer) {
+        if (!currentCustomer && !owner_enterprise) {
           history.push(routes.schedule);
         }
+        handleServices();
 
         toast.addToast({
           type: 'success',
@@ -354,13 +371,7 @@ const Dashboard: React.FC = () => {
     if (thisEnterprise.id && currentWeekDay && selectectedCategory) {
       handleServices();
     }
-  }, [
-    thisEnterprise.id,
-    currentWeekDay,
-    selectectedCategory,
-    selectedDate,
-    handleServices,
-  ]);
+  }, [thisEnterprise.id, currentWeekDay, selectectedCategory, selectedDate]);
 
   const selectedDateAsText = useMemo(() => {
     return format(selectedDate, "'Dia' dd 'de' MMMM", {
@@ -728,6 +739,9 @@ const Dashboard: React.FC = () => {
                     name="customer"
                     onChange={(e) => setCurrentCustomer(e.target.value)}
                   >
+                    <option value="full-schedule-service">
+                      Ocupar todo horário
+                    </option>
                     <option value="">Agendar em seu nome</option>
                     {allUsersEnterpriseAccepted &&
                       allUsersEnterpriseAccepted.map((customer) => (
@@ -887,6 +901,9 @@ const Dashboard: React.FC = () => {
                     name="customer"
                     onChange={(e) => setCurrentCustomer(e.target.value)}
                   >
+                    <option value="full-schedule-service">
+                      Ocupar todo horário
+                    </option>
                     <option value="">Agendar em seu nome</option>
                     {allUsersEnterpriseAccepted &&
                       allUsersEnterpriseAccepted.map((customer) => (
@@ -1053,6 +1070,9 @@ const Dashboard: React.FC = () => {
                     name="customer"
                     onChange={(e) => setCurrentCustomer(e.target.value)}
                   >
+                    <option value="full-schedule-service">
+                      Ocupar todo horário
+                    </option>
                     <option value="">Agendar em seu nome</option>
                     {allUsersEnterpriseAccepted &&
                       allUsersEnterpriseAccepted.map((customer) => (

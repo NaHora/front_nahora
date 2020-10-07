@@ -58,6 +58,7 @@ interface Plan {
   price: number;
   schedule_limit: number;
   week_limit: number;
+  delete_limit: number;
   days_to_expire: number;
   type_expiration: string;
 }
@@ -204,6 +205,7 @@ const Plans: React.FC = () => {
         price: '',
         schedule_limit: '',
         week_limit: '',
+        delete_limit: '',
         days_to_expire: '',
         type_expiration: 'month',
       });
@@ -787,8 +789,7 @@ const Plans: React.FC = () => {
           {/* <CardSolicitation>
             Ganho total este mês: R${numeral(totalMoney).format('0,0.00')}
           </CardSolicitation> */}
-        </Content>
-        <Content>
+
           <SolicitationSection>
             <span
               onClick={() =>
@@ -986,6 +987,15 @@ const Plans: React.FC = () => {
                           Limite <br /> semanal
                         </th>
                       </Tooltip>
+                      <Tooltip
+                        placement="top"
+                        title="Quantidade de vezes até o plano expirar que o usuário poderá cancelar agendamentos"
+                      >
+                        <th>
+                          Limite de
+                          <br /> cancelamentos
+                        </th>
+                      </Tooltip>
                       <th />
                     </tr>
 
@@ -1078,6 +1088,20 @@ const Plans: React.FC = () => {
                         />
                       </td>
                       <td>
+                        <input
+                          value={planData.delete_limit}
+                          onChange={(e) =>
+                            setPlanData({
+                              ...planData,
+                              [e.target.name]: e.target.value,
+                            })
+                          }
+                          name="delete_limit"
+                          placeholder="Limite de Cancelamento"
+                          type="number"
+                        />
+                      </td>
+                      <td>
                         <FiCheck
                           color="#1ec657"
                           onClick={createPlan}
@@ -1108,6 +1132,7 @@ const Plans: React.FC = () => {
                             </td>
                             <td>{plan.schedule_limit}</td>
                             <td>{plan.week_limit}</td>
+                            <td>{plan.delete_limit}</td>
                             <td>
                               <FiX
                                 color="#fc384c"
