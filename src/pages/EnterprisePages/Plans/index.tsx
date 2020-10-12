@@ -13,7 +13,13 @@ import {
   FiArrowRight,
 } from 'react-icons/fi';
 import { Tooltip } from '@material-ui/core';
-import { formatDistance, getMonth, getYear, isAfter } from 'date-fns';
+import {
+  differenceInDays,
+  formatDistance,
+  getMonth,
+  getYear,
+  isAfter,
+} from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numeral from 'numeral';
 import NumberFormat from 'react-number-format';
@@ -37,6 +43,7 @@ import 'numeral/locales/pt-br';
 import { useSocket } from '../../../hooks/socket';
 import Button from '../../../components/Button';
 import { routes } from '../../../routes';
+import Select from '../../../components/Select';
 
 interface User {
   id: string;
@@ -98,6 +105,7 @@ const Plans: React.FC = () => {
   );
   const toast = useToast();
   const [searchValue, setSearchValue] = useState('');
+  const [selectValue, setSelectValue] = useState('0');
   const [openSolicitationSection, setOpenSolicitationSection] = useState(true);
   const [openActiveSection, setOpenActiveSection] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -658,29 +666,92 @@ const Plans: React.FC = () => {
             )}
             {openActiveSection && (
               <>
-                <div style={{ marginBottom: '10px' }}>
+                <div
+                  style={{
+                    marginBottom: '10px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                  }}
+                >
                   <InputDefault
+                    maxWidth="300px"
                     icon={FiSearch}
                     name="search"
                     type="text"
                     value={searchValue}
-                    placeholder="Filtrar usuários"
+                    placeholder="Filtrar por nome"
                     onChange={(e) => {
                       setSearchValue(e.target.value);
                     }}
                   />
+                  <Select
+                    maxWidth="300px"
+                    value={selectValue}
+                    onChange={(e) => setSelectValue(e.target.value)}
+                    name="selectValue"
+                  >
+                    <option style={{ background: 'lightblue' }} value="0">
+                      Todos
+                    </option>
+                    <option style={{ background: 'red' }} value="1">
+                      Plano expirado
+                    </option>
+                    <option style={{ background: 'yellow' }} value="2">
+                      7 dias para expirar
+                    </option>
+                    <option style={{ background: 'green' }} value="3">
+                      Plano ativo
+                    </option>
+                  </Select>
                 </div>
                 <div>
                   {allUsersEnterpriseAccepted &&
                     selectedSolicitation &&
                     allUsersEnterpriseAccepted
+                      .filter((invite) => {
+                        return selectValue === '1'
+                          ? differenceInDays(
+                              new Date(
+                                invite?.currentPlan?.expiration_at || 2000,
+                              ),
+                              new Date(),
+                            ) < 0
+                          : selectValue === '2'
+                          ? differenceInDays(
+                              new Date(
+                                invite?.currentPlan?.expiration_at || 2000,
+                              ),
+                              new Date(),
+                            ) < 7 &&
+                            differenceInDays(
+                              new Date(
+                                invite?.currentPlan?.expiration_at || 2000,
+                              ),
+                              new Date(),
+                            ) >= 0
+                          : selectValue === '3'
+                          ? differenceInDays(
+                              new Date(
+                                invite?.currentPlan?.expiration_at || 2000,
+                              ),
+                              new Date(),
+                            ) > 7
+                          : invite;
+                      })
                       .filter((invite) =>
                         invite.user.name
                           .toLowerCase()
                           .includes(searchValue.toLowerCase()),
                       )
                       .map((invite) => (
-                        <CardSolicitation>
+                        <CardSolicitation
+                          status={differenceInDays(
+                            new Date(
+                              invite?.currentPlan?.expiration_at || 2000,
+                            ),
+                            new Date(),
+                          )}
+                        >
                           <div>
                             <img
                               src={

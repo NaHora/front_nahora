@@ -4,6 +4,10 @@ interface PageProps {
   currentSection?: boolean;
 }
 
+interface StatusColor {
+  status?: number;
+}
+
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -67,7 +71,7 @@ export const Content = styled.div`
   }
 `;
 
-export const CardSolicitation = styled.div`
+export const CardSolicitation = styled.div<StatusColor>`
   width: 100%;
   border-radius: 5px;
   box-shadow: #000 0px 4px 6px;
@@ -79,7 +83,15 @@ export const CardSolicitation = styled.div`
   position: relative;
   overflow: scroll;
   flex-direction: column;
-
+  border: 1px solid
+    ${(props) =>
+      !props.status
+        ? 'none'
+        : props.status < 0
+        ? 'red'
+        : props.status < 7
+        ? 'yellow'
+        : 'green'};
   @media (min-width: 600px) {
     ::-webkit-scrollbar {
       display: none;
@@ -89,6 +101,7 @@ export const CardSolicitation = styled.div`
   > div {
     display: flex;
     align-items: center;
+
     margin: 12px 0;
     font-size: 20px;
     :first-child {
@@ -97,6 +110,7 @@ export const CardSolicitation = styled.div`
 
     > select {
       width: 100%;
+      max-width: 400px;
       margin: 0 8px;
       height: 100%;
       background: #232129;
