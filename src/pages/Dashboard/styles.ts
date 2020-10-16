@@ -79,7 +79,8 @@ export const Category = styled.main<PageColor>`
 
   > div {
     display: flex;
-    overflow-x: scroll;
+    overflow-x: auto;
+    scroll-behavior: smooth;
     width: 100%;
     padding: 0 0 10px;
     > span {
@@ -118,7 +119,9 @@ export const Category = styled.main<PageColor>`
 export const DivCategory = styled.div<PageColor>`
   margin-right: 16px;
   box-shadow: ${(props) => props.currentSelected && '#000 0px 4px 6px'};
+
   border-radius: 5px;
+  flex: none;
   white-space: nowrap;
   text-align: center;
   padding: 8px 15px;
@@ -209,31 +212,22 @@ export const Section = styled.aside<PageColor>`
     color: ${(props) => props.secondaryColor};
     cursor: pointer;
   }
-
-  > div {
-    padding: 0 0 10px;
+  > main {
     display: flex;
-    overflow-x: scroll;
-    width: 100%;
-    ::-webkit-scrollbar-track {
-      background-color: transparent;
-      border-radius: 20px;
-      width: 2px;
-    }
+    align-items: center;
+    > div {
+      display: flex;
+      overflow-x: scroll;
+      width: 100%;
 
-    ::-webkit-scrollbar {
-      width: 2px;
-      border-radius: 20px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background-color: ${(props) => props.secondaryColor};
-      border-radius: 20px;
-    }
-
-    @media (max-width: 600px) {
       ::-webkit-scrollbar {
         display: none;
+      }
+
+      @media (max-width: 600px) {
+        ::-webkit-scrollbar {
+          display: none;
+        }
       }
     }
   }
@@ -257,6 +251,7 @@ export const Section = styled.aside<PageColor>`
 
 export const Appointment = styled.aside<PageColor>`
   display: flex;
+
   box-shadow: ${(props) => props.currentSelected && '#000 0px 4px 6px'};
   align-items: center;
   opacity: ${(props) =>

@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import {
   FiClock,
   FiArrowLeft,
@@ -6,6 +12,8 @@ import {
   FiHome,
   FiX,
   FiCheckCircle,
+  FiChevronRight,
+  FiChevronLeft,
 } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { GoLocation } from 'react-icons/go';
@@ -119,12 +127,20 @@ interface AboutDays {
   disabledDays: number[];
 }
 
+interface LimitOptions {
+  [key: string]: boolean;
+}
+
 const Dashboard: React.FC = () => {
   const toast = useToast();
   const { user } = useAuth();
   const history = useHistory();
   // const { socket } = useSocket();
   const { start, stop } = useLoad();
+
+  const morningRef = useRef(null);
+  const afternoomRef = useRef(null);
+  const nightRef = useRef(null);
 
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
   const owner_enterprise = thisEnterprise.owner_id === user.id;
@@ -153,7 +169,12 @@ const Dashboard: React.FC = () => {
     '#ff9000',
   );
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [limits, setLimits] = useState({
+    leftmorning: true,
+    leftafternoom: true,
+    leftnight: true,
+  } as LimitOptions);
   const [allUsersEnterpriseAccepted, setAllUsersEnterpriseAccepted] = useState<
     Invite[]
   >([]);
@@ -439,6 +460,295 @@ const Dashboard: React.FC = () => {
       });
   }, [services]);
 
+  const scrollWhell = useCallback(
+    (e, ref, period) => {
+      const { scrollLeft } = ref.current;
+      const totalScrollRight =
+        ref.current.scrollWidth - ref.current.offsetWidth;
+      const scrollRight = totalScrollRight - ref.current.scrollLeft;
+      const nameLeft = `left${period}`;
+      const nameRight = `right${period}`;
+
+      if (scrollLeft === 0 && scrollRight === 0) {
+        setLimits({ ...limits, [nameLeft]: true, [nameRight]: true });
+      }
+      if (scrollLeft === 0 && scrollRight !== 0) {
+        setLimits({ ...limits, [nameLeft]: true, [nameRight]: false });
+      }
+      if (scrollLeft !== 0 && scrollRight === 0) {
+        setLimits({ ...limits, [nameLeft]: false, [nameRight]: true });
+      }
+      if (scrollLeft !== 0 && scrollRight !== 0) {
+        setLimits({ ...limits, [nameLeft]: false, [nameRight]: false });
+      }
+
+      if (e.deltaY > 0) {
+        ref?.current?.scrollBy(200, 0);
+      } else {
+        ref?.current?.scrollBy(-200, 0);
+      }
+    },
+    [limits],
+  );
+
+  const scrollClick = useCallback(
+    (ref, value, period) => {
+      const { scrollLeft } = ref.current;
+      const totalScrollRight =
+        ref.current.scrollWidth - ref.current.offsetWidth;
+      const scrollRight = totalScrollRight - ref.current.scrollLeft;
+      const nameLeft = `left${period}`;
+      const nameRight = `right${period}`;
+
+      if (scrollLeft === 0 && scrollRight === 0) {
+        setLimits({ ...limits, [nameLeft]: true, [nameRight]: true });
+      }
+      if (scrollLeft === 0 && scrollRight !== 0) {
+        setLimits({ ...limits, [nameLeft]: true, [nameRight]: false });
+      }
+      if (scrollLeft !== 0 && scrollRight === 0) {
+        setLimits({ ...limits, [nameLeft]: false, [nameRight]: true });
+      }
+      if (scrollLeft !== 0 && scrollRight !== 0) {
+        setLimits({ ...limits, [nameLeft]: false, [nameRight]: false });
+      }
+
+      if (value < 0 && scrollLeft !== 0) {
+        ref?.current?.scrollBy(value, 0);
+      } else if (value > 0 && scrollRight !== 0) {
+        ref?.current?.scrollBy(value, 0);
+      }
+    },
+    [limits],
+  );
+
+  // useEffect(() => {
+  //   if (morningRef.current !== null) {
+  //     if (morningRef?.current?.scrollLeft) {
+  //       if (morningRef?.current?.scrollLeft === 0) {
+  //         setLimits({ ...limits, leftmorning: true });
+  //       }
+  //     }
+  //   }
+  // }, [morningRef, limits]);
+
+  const showServices = useCallback(
+    (ref, array, period) => {
+      return array.length > 0 ? (
+        <main>
+          <FiChevronLeft
+            size={30}
+            style={limits[`left${period}`] ? { opacity: 0.3 } : { opacity: 1 }}
+            cursor="pointer"
+            onClick={() => scrollClick(ref, -100, period)}
+          />
+
+          <div ref={ref}>
+            {array.map((service: Service) => (
+              <Appointment
+                onWheel={(e) => scrollWhell(e, ref, period)}
+                primaryColor={primaryColor || '#28262e'}
+                disabled={service.disabled}
+                secondaryColor={secondaryColor || '#ff9000'}
+                key={service.id}
+                currentSelected={selectectedService?.id === service.id}
+              >
+                <div
+                  onClick={() => {
+                    if (!service.disabled || owner_enterprise) {
+                      setOpeModal({ [period]: true });
+                      setAppointments(service.appointments);
+                      setSelectectedService(service);
+                    } else {
+                      toast.addToast({
+                        type: 'error',
+                        title: 'Horário indisponível',
+                      });
+                    }
+                  }}
+                >
+                  <span style={{ marginRight: '16px' }}>
+                    <FiClock /> {service.start_hour}
+                  </span>
+                  <span>
+                    <FiUsers /> {service.appointments.length}/{service.capacity}
+                  </span>
+                </div>
+                {user.id === thisEnterprise.owner_id && (
+                  <span style={{ marginLeft: '8px' }}>
+                    <FiX
+                      cursor="pointer"
+                      onClick={() => handleOpen(service.id)}
+                    />
+                  </span>
+                )}
+              </Appointment>
+            ))}
+          </div>
+          <FiChevronRight
+            cursor="pointer"
+            size={30}
+            style={limits[`right${period}`] ? { opacity: 0.3 } : { opacity: 1 }}
+            onClick={() => scrollClick(ref, 100, period)}
+          />
+        </main>
+      ) : owner_enterprise ? (
+        <span>
+          Cadastre seus horários para este período,{' '}
+          <strong onClick={() => history.push(routes.enterpriseSchedule)}>
+            clique aqui
+          </strong>
+        </span>
+      ) : (
+        <p>Nenhum serviço neste período</p>
+      );
+    },
+    [
+      history,
+      primaryColor,
+      secondaryColor,
+      scrollWhell,
+      scrollClick,
+      owner_enterprise,
+      toast,
+      selectectedService,
+      thisEnterprise.owner_id,
+      user.id,
+      limits,
+    ],
+  );
+
+  const showServiceModal = useCallback(
+    (period) => {
+      return (
+        openModal[period] && (
+          <ModalUsers
+            primaryColor={primaryColor || '#28262e'}
+            secondaryColor={secondaryColor || '#ff9000'}
+          >
+            <FiX
+              onClick={() => setOpeModal({ [period]: false })}
+              cursor="pointer"
+              color={primaryColor || '#28262e'}
+              style={{ alignSelf: 'flex-end' }}
+            />
+            <span>
+              <FiHome />
+              {thisEnterprise.name}
+            </span>
+            <span>
+              <GoLocation />
+              {selectectedCategory?.name}
+            </span>
+            <span>
+              <FiClock />
+              {selectedDateAsText} {selectectedService?.start_hour}h
+            </span>
+            <br />
+            {owner_enterprise && (
+              <select
+                value={currentCustomer}
+                name="customer"
+                onChange={(e) => setCurrentCustomer(e.target.value)}
+              >
+                <option value="full-schedule-service">
+                  Ocupar todo horário
+                </option>
+                <option value="">Agendar em seu nome</option>
+                {allUsersEnterpriseAccepted &&
+                  allUsersEnterpriseAccepted.map((customer) => (
+                    <option value={customer.user.id}>
+                      {customer.user.name}
+                    </option>
+                  ))}
+              </select>
+            )}
+            <span>
+              {appointments.length > 0 ? (
+                <>
+                  <FiUsers />
+                  Usuários que marcaram horário:
+                </>
+              ) : (
+                <>Ninguém se agendou até o momento.</>
+              )}
+            </span>
+            <div>
+              {appointments.map((appointment) => (
+                <span key={appointment.id}>
+                  <img
+                    src={
+                      appointment.user.isPrivate
+                        ? `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                        : appointment.user.avatar_url ||
+                          `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
+                    }
+                    alt=""
+                  />
+                  {appointment.user.isPrivate && !owner_enterprise ? (
+                    <>Anônimo</>
+                  ) : (
+                    appointment.user.name
+                  )}
+                  {user.id === thisEnterprise.owner_id && (
+                    <>
+                      <a
+                        target="_blank"
+                        style={{
+                          cursor: 'pointer',
+                          textDecoration: 'none',
+                          color: 'inherit',
+                        }}
+                        href={`https://api.whatsapp.com/send?phone=55${removeMask(
+                          appointment.user.celphone,
+                        )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
+                          selectectedService?.start_hour
+                        }h%20${selectedDateAsText}%20na%20empresa%20${
+                          thisEnterprise.name
+                        }%2C%20posso%20confirmar%20seu%20agendamento%20%3F`}
+                      >
+                        <FaWhatsapp size={20} />
+                      </a>
+                      {appointment.user.celphone}
+                    </>
+                  )}
+                </span>
+              ))}
+            </div>
+            <ButtonContainer>
+              <Button
+                primaryColor={secondaryColor || '#ff9000'}
+                secondaryColor={primaryColor || '#28262e'}
+                onClick={() => handleAppointment(selectectedService?.id)}
+                loading={loading}
+              >
+                <FiCheckCircle />
+                Agendar
+              </Button>
+            </ButtonContainer>
+          </ModalUsers>
+        )
+      );
+    },
+    [
+      allUsersEnterpriseAccepted,
+      appointments,
+      currentCustomer,
+      loading,
+      handleAppointment,
+      openModal,
+      selectectedCategory,
+      selectedDateAsText,
+      primaryColor,
+      secondaryColor,
+      owner_enterprise,
+      selectectedService,
+      thisEnterprise.owner_id,
+      thisEnterprise.name,
+      user.id,
+    ],
+  );
+
   // useEffect(() => {
   //   if (thisEnterprise.id && selectectedCategory?.id && selectedDate) {
   //     socket.on(
@@ -568,6 +878,7 @@ const Dashboard: React.FC = () => {
           <img src={thisEnterprise.logo_url || EnterpriseImg} alt="NaHora" />
         </div>
       </header>
+
       <Category
         primaryColor={primaryColor || '#28262e'}
         secondaryColor={secondaryColor || '#ff9000'}
@@ -654,330 +965,16 @@ const Dashboard: React.FC = () => {
             secondaryColor={secondaryColor || '#ff9000'}
           >
             <strong>Manhã</strong>
-
-            {morningServices.length > 0 ? (
-              <div>
-                {morningServices.map((service) => (
-                  <Appointment
-                    disabled={service.disabled}
-                    primaryColor={primaryColor || '#28262e'}
-                    secondaryColor={secondaryColor || '#ff9000'}
-                    key={service.id}
-                    currentSelected={selectectedService?.id === service.id}
-                  >
-                    <div
-                      onClick={() => {
-                        if (!service.disabled || owner_enterprise) {
-                          setOpeModal({ morning: true });
-                          setAppointments(service.appointments);
-                          setSelectectedService(service);
-                        } else {
-                          toast.addToast({
-                            type: 'error',
-                            title: 'Horário indisponível',
-                          });
-                        }
-                      }}
-                    >
-                      <span style={{ marginRight: '16px' }}>
-                        <FiClock /> {service.start_hour}
-                      </span>
-                      <span>
-                        <FiUsers /> {service.appointments.length}/
-                        {service.capacity}
-                      </span>
-                    </div>
-                    {user.id === thisEnterprise.owner_id && (
-                      <span style={{ marginLeft: '8px' }}>
-                        <FiX
-                          cursor="pointer"
-                          onClick={() => handleOpen(service.id)}
-                        />
-                      </span>
-                    )}
-                  </Appointment>
-                ))}
-              </div>
-            ) : owner_enterprise ? (
-              <span>
-                Cadastre seus horários para este período,{' '}
-                <strong onClick={() => history.push(routes.enterpriseSchedule)}>
-                  clique aqui
-                </strong>
-              </span>
-            ) : (
-              <p>Nenhum serviço neste período</p>
-            )}
-
-            {openModal.morning && (
-              <ModalUsers
-                primaryColor={primaryColor || '#28262e'}
-                secondaryColor={secondaryColor || '#ff9000'}
-              >
-                <FiX
-                  onClick={() => setOpeModal({ morning: false })}
-                  cursor="pointer"
-                  color={primaryColor || '#28262e'}
-                  style={{ alignSelf: 'flex-end' }}
-                />
-                <span>
-                  <FiHome />
-                  {thisEnterprise.name}
-                </span>
-                <span>
-                  <GoLocation />
-                  {selectectedCategory?.name}
-                </span>
-                <span>
-                  <FiClock />
-                  {selectedDateAsText} {selectectedService?.start_hour}h
-                </span>
-                <br />
-                {owner_enterprise && (
-                  <select
-                    value={currentCustomer}
-                    name="customer"
-                    onChange={(e) => setCurrentCustomer(e.target.value)}
-                  >
-                    <option value="full-schedule-service">
-                      Ocupar todo horário
-                    </option>
-                    <option value="">Agendar em seu nome</option>
-                    {allUsersEnterpriseAccepted &&
-                      allUsersEnterpriseAccepted.map((customer) => (
-                        <option value={customer.user.id}>
-                          {customer.user.name}
-                        </option>
-                      ))}
-                  </select>
-                )}
-                <span>
-                  {appointments.length > 0 ? (
-                    <>
-                      <FiUsers />
-                      Usuários que marcaram horário:
-                    </>
-                  ) : (
-                    <>Ninguém se agendou até o momento.</>
-                  )}
-                </span>
-                <div>
-                  {appointments.map((appointment) => (
-                    <span key={appointment.id}>
-                      <img
-                        src={
-                          appointment.user.isPrivate
-                            ? `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
-                            : appointment.user.avatar_url ||
-                              `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
-                        }
-                        alt=""
-                      />
-                      {appointment.user.isPrivate && !owner_enterprise ? (
-                        <>Anônimo</>
-                      ) : (
-                        appointment.user.name
-                      )}
-                      {user.id === thisEnterprise.owner_id && (
-                        <>
-                          <a
-                            target="_blank"
-                            style={{
-                              cursor: 'pointer',
-                              textDecoration: 'none',
-                              color: 'inherit',
-                            }}
-                            href={`https://api.whatsapp.com/send?phone=55${removeMask(
-                              appointment.user.celphone,
-                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
-                              selectectedService?.start_hour
-                            }h%20${selectedDateAsText}%20na%20empresa%20${
-                              thisEnterprise.name
-                            }%2C%20posso%20confirmar%20seu%20agendamento%20%3F`}
-                          >
-                            <FaWhatsapp size={20} />
-                          </a>
-                          {appointment.user.celphone}
-                        </>
-                      )}
-                    </span>
-                  ))}
-                </div>
-                <ButtonContainer>
-                  <Button
-                    primaryColor={secondaryColor || '#ff9000'}
-                    secondaryColor={primaryColor || '#28262e'}
-                    onClick={() => handleAppointment(selectectedService?.id)}
-                    loading={loading}
-                  >
-                    <FiCheckCircle />
-                    Agendar
-                  </Button>
-                </ButtonContainer>
-              </ModalUsers>
-            )}
+            {showServices(morningRef, morningServices, 'morning')}
+            {showServiceModal('morning')}
           </Section>
           <Section
             primaryColor={primaryColor || '#28262e'}
             secondaryColor={secondaryColor || '#ff9000'}
           >
             <strong>Tarde</strong>
-
-            {afternoonServices.length > 0 ? (
-              <div>
-                {afternoonServices.map((service) => (
-                  <Appointment
-                    primaryColor={primaryColor || '#28262e'}
-                    disabled={service.disabled}
-                    secondaryColor={secondaryColor || '#ff9000'}
-                    key={service.id}
-                    currentSelected={selectectedService?.id === service.id}
-                  >
-                    <div
-                      onClick={() => {
-                        if (!service.disabled || owner_enterprise) {
-                          setOpeModal({ afternoon: true });
-                          setAppointments(service.appointments);
-                          setSelectectedService(service);
-                        } else {
-                          toast.addToast({
-                            type: 'error',
-                            title: 'Horário indisponível',
-                          });
-                        }
-                      }}
-                    >
-                      <span style={{ marginRight: '16px' }}>
-                        <FiClock /> {service.start_hour}
-                      </span>
-                      <span>
-                        <FiUsers /> {service.appointments.length}/
-                        {service.capacity}
-                      </span>
-                    </div>
-                    {user.id === thisEnterprise.owner_id && (
-                      <span style={{ marginLeft: '8px' }}>
-                        <FiX
-                          cursor="pointer"
-                          onClick={() => handleOpen(service.id)}
-                        />
-                      </span>
-                    )}
-                  </Appointment>
-                ))}
-              </div>
-            ) : owner_enterprise ? (
-              <span>
-                Cadastre seus horários para este período,{' '}
-                <strong onClick={() => history.push(routes.enterpriseSchedule)}>
-                  clique aqui
-                </strong>
-              </span>
-            ) : (
-              <p>Nenhum serviço neste período</p>
-            )}
-
-            {openModal.afternoon && (
-              <ModalUsers
-                primaryColor={primaryColor || '#28262e'}
-                secondaryColor={secondaryColor || '#ff9000'}
-              >
-                <span>
-                  <FiHome />
-                  {thisEnterprise.name}
-                </span>
-                <span>
-                  <GoLocation />
-                  {selectectedCategory?.name}
-                </span>
-                <span>
-                  <FiClock />
-                  {selectedDateAsText} {selectectedService?.start_hour}h
-                </span>
-                <br />
-                {owner_enterprise && (
-                  <select
-                    value={currentCustomer}
-                    name="customer"
-                    onChange={(e) => setCurrentCustomer(e.target.value)}
-                  >
-                    <option value="full-schedule-service">
-                      Ocupar todo horário
-                    </option>
-                    <option value="">Agendar em seu nome</option>
-                    {allUsersEnterpriseAccepted &&
-                      allUsersEnterpriseAccepted.map((customer) => (
-                        <option value={customer.user.id}>
-                          {customer.user.name}
-                        </option>
-                      ))}
-                  </select>
-                )}
-                <span>
-                  {appointments.length > 0 ? (
-                    <>
-                      <FiUsers />
-                      Usuários que marcaram horário:
-                    </>
-                  ) : (
-                    'Ninguém se agendou até o momento.'
-                  )}
-                </span>
-                <div>
-                  {appointments.map((appointment) => (
-                    <span key={appointment.id}>
-                      <img
-                        src={
-                          appointment.user.isPrivate
-                            ? `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
-                            : appointment.user.avatar_url ||
-                              `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
-                        }
-                        alt=""
-                      />
-                      {appointment.user.isPrivate && !owner_enterprise ? (
-                        <>Anônimo</>
-                      ) : (
-                        appointment.user.name
-                      )}
-                      {user.id === thisEnterprise.owner_id && (
-                        <>
-                          <a
-                            target="_blank"
-                            style={{
-                              cursor: 'pointer',
-                              textDecoration: 'none',
-                              color: 'inherit',
-                            }}
-                            href={`https://api.whatsapp.com/send?phone=55${removeMask(
-                              appointment.user.celphone,
-                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
-                              selectectedService?.start_hour
-                            }h%20${selectedDateAsText}%20na%20empresa%20${
-                              thisEnterprise.name
-                            }%2C%20posso%20confirmar%20seu%20agendamento%20%3F`}
-                          >
-                            <FaWhatsapp size={20} />
-                          </a>
-                          {appointment.user.celphone}
-                        </>
-                      )}
-                    </span>
-                  ))}
-                </div>
-                <ButtonContainer>
-                  <Button
-                    primaryColor={secondaryColor || '#ff9000'}
-                    secondaryColor={primaryColor || '#28262e'}
-                    onClick={() => handleAppointment(selectectedService?.id)}
-                    loading={loading}
-                  >
-                    <FiCheckCircle />
-                    Agendar
-                  </Button>
-                </ButtonContainer>
-              </ModalUsers>
-            )}
+            {showServices(afternoomRef, afternoonServices, 'afternoom')}
+            {showServiceModal('afternoom')}
           </Section>
 
           <Section
@@ -985,168 +982,8 @@ const Dashboard: React.FC = () => {
             secondaryColor={secondaryColor || '#ff9000'}
           >
             <strong>Noite</strong>
-
-            {nightServices.length > 0 ? (
-              <div>
-                {nightServices.map((service) => (
-                  <Appointment
-                    primaryColor={primaryColor || '#28262e'}
-                    disabled={service.disabled}
-                    secondaryColor={secondaryColor || '#ff9000'}
-                    key={service.id}
-                    currentSelected={selectectedService?.id === service.id}
-                  >
-                    <div
-                      onClick={() => {
-                        if (!service.disabled || owner_enterprise) {
-                          setOpeModal({ night: true });
-                          setAppointments(service.appointments);
-                          setSelectectedService(service);
-                        } else {
-                          toast.addToast({
-                            type: 'error',
-                            title: 'Horário indisponível',
-                          });
-                        }
-                      }}
-                    >
-                      <span style={{ marginRight: '16px' }}>
-                        <FiClock /> {service.start_hour}
-                      </span>
-                      <span>
-                        <FiUsers /> {service.appointments.length}/
-                        {service.capacity}
-                      </span>
-                    </div>
-                    {user.id === thisEnterprise.owner_id && (
-                      <span style={{ marginLeft: '8px' }}>
-                        <FiX
-                          cursor="pointer"
-                          onClick={() => handleOpen(service.id)}
-                        />
-                      </span>
-                    )}
-                  </Appointment>
-                ))}
-              </div>
-            ) : owner_enterprise ? (
-              <span>
-                Cadastre seus horários para este período,{' '}
-                <strong onClick={() => history.push(routes.enterpriseSchedule)}>
-                  clique aqui
-                </strong>
-              </span>
-            ) : (
-              <p>Nenhum serviço neste período</p>
-            )}
-
-            {openModal.night && (
-              <ModalUsers
-                primaryColor={primaryColor || '#28262e'}
-                secondaryColor={secondaryColor || '#ff9000'}
-              >
-                <FiX
-                  onClick={() => setOpeModal({ night: false })}
-                  cursor="pointer"
-                  color={primaryColor || '#28262e'}
-                  style={{ alignSelf: 'flex-end' }}
-                />
-                <span>
-                  <FiHome />
-                  {thisEnterprise.name}
-                </span>
-                <span>
-                  <GoLocation />
-                  {selectectedCategory?.name}
-                </span>
-                <span>
-                  <FiClock />
-                  {selectedDateAsText} {selectectedService?.start_hour}h
-                </span>
-                <br />
-                {owner_enterprise && (
-                  <select
-                    value={currentCustomer}
-                    name="customer"
-                    onChange={(e) => setCurrentCustomer(e.target.value)}
-                  >
-                    <option value="full-schedule-service">
-                      Ocupar todo horário
-                    </option>
-                    <option value="">Agendar em seu nome</option>
-                    {allUsersEnterpriseAccepted &&
-                      allUsersEnterpriseAccepted.map((customer) => (
-                        <option value={customer.user.id}>
-                          {customer.user.name}
-                        </option>
-                      ))}
-                  </select>
-                )}
-                <span>
-                  {appointments.length > 0 ? (
-                    <>
-                      <FiUsers />
-                      Usuários que marcaram horário:
-                    </>
-                  ) : (
-                    'Ninguém se agendou até o momento.'
-                  )}
-                </span>
-                <div>
-                  {appointments.map((appointment) => (
-                    <span key={appointment.id}>
-                      <img
-                        src={
-                          appointment.user.isPrivate
-                            ? `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
-                            : appointment.user.avatar_url ||
-                              `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
-                        }
-                        alt=""
-                      />
-                      {appointment.user.isPrivate && !owner_enterprise ? (
-                        <>Anônimo</>
-                      ) : (
-                        appointment.user.name
-                      )}
-                      {user.id === thisEnterprise.owner_id && (
-                        <>
-                          <a
-                            target="_blank"
-                            style={{
-                              cursor: 'pointer',
-                              textDecoration: 'none',
-                              color: 'inherit',
-                            }}
-                            href={`https://api.whatsapp.com/send?phone=55${removeMask(
-                              appointment.user.celphone,
-                            )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
-                              selectectedService?.start_hour
-                            }h%20${selectedDateAsText}%20na%20empresa%20${
-                              thisEnterprise.name
-                            }%2C%20posso%20confirmar%20seu%20agendamento%20%3F`}
-                          >
-                            <FaWhatsapp size={20} />
-                          </a>
-                          {appointment.user.celphone}
-                        </>
-                      )}
-                    </span>
-                  ))}
-                </div>
-                <ButtonContainer>
-                  <Button
-                    primaryColor={secondaryColor || '#ff9000'}
-                    secondaryColor={primaryColor || '#28262e'}
-                    onClick={() => handleAppointment(selectectedService?.id)}
-                    loading={loading}
-                  >
-                    <FiCheckCircle />
-                    Agendar
-                  </Button>
-                </ButtonContainer>
-              </ModalUsers>
-            )}
+            {showServices(nightRef, nightServices, 'night')}
+            {showServiceModal('night')}
           </Section>
         </Schedule>
       </Content>
