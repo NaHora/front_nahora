@@ -138,9 +138,9 @@ const Dashboard: React.FC = () => {
   // const { socket } = useSocket();
   const { start, stop } = useLoad();
 
-  const morningRef = useRef(null);
-  const afternoomRef = useRef(null);
-  const nightRef = useRef(null);
+  const morningRef = useRef<any>(null);
+  const afternoomRef = useRef<any>(null);
+  const nightRef = useRef<any>(null);
 
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
   const owner_enterprise = thisEnterprise.owner_id === user.id;
@@ -523,12 +523,19 @@ const Dashboard: React.FC = () => {
   );
 
   // useEffect(() => {
-  //   if (morningRef.current !== null) {
-  //     if (morningRef?.current?.scrollLeft) {
-  //       if (morningRef?.current?.scrollLeft === 0) {
-  //         setLimits({ ...limits, leftmorning: true });
-  //       }
-  //     }
+  //   console.log(morningRef);
+
+  //   const { scrollLeft } = morningRef.current;
+
+  //   const totalScrollRight =
+  //     morningRef.current.scrollWidth - morningRef.current.offsetWidth;
+
+  //   const scrollRight = totalScrollRight - morningRef.current.scrollLeft;
+
+  //   console.log(scrollRight);
+
+  //   if (scrollLeft === 0 && scrollRight === 0) {
+  //     setLimits({ ...limits, leftmorning: true, rightmorning: true });
   //   }
   // }, [morningRef, limits]);
 

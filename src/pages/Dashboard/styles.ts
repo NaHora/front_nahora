@@ -219,6 +219,7 @@ export const Section = styled.aside<PageColor>`
       display: flex;
       overflow-x: scroll;
       width: 100%;
+      scroll-behavior: smooth;
 
       ::-webkit-scrollbar {
         display: none;
