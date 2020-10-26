@@ -44,6 +44,7 @@ import { useSocket } from '../../../hooks/socket';
 import Button from '../../../components/Button';
 import { routes } from '../../../routes';
 import Select from '../../../components/Select';
+import Avatar from '../../../components/Avatar';
 
 interface User {
   id: string;
@@ -753,13 +754,12 @@ const Plans: React.FC = () => {
                           )}
                         >
                           <div>
-                            <img
-                              src={
-                                invite.user.avatar_url ||
-                                `https://api.adorable.io/avatars/285/${invite.user.id}.png`
-                              }
-                              alt=""
+                            <Avatar
+                              name={invite.user.name}
+                              isPrivate={false}
+                              avatarUrl={invite.user.avatar_url}
                             />
+
                             <span>{invite.user.name}</span>
                             <select
                               onChange={(e) =>
@@ -890,29 +890,43 @@ const Plans: React.FC = () => {
                   solicitations.map((solicitation) => {
                     return (
                       <CardSolicitation>
-                        <div>
-                          <img
-                            src={
-                              solicitation.user.avatar_url ||
-                              `https://api.adorable.io/avatars/285/${solicitation.user.id}.png`
-                            }
-                            alt=""
-                          />
-                          <span>{solicitation.user.name}</span>
-                        </div>
-                        <div>
-                          <FiCheck
-                            onClick={() => acceptUser(solicitation.id)}
-                            color="#1ec657"
-                            cursor="pointer"
-                            size={25}
-                          />
-                          <FiX
-                            onClick={() => recuseInvite(solicitation.id)}
-                            color="#fc384c"
-                            cursor="pointer"
-                            size={25}
-                          />
+                        <div style={{ justifyContent: 'space-between' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              width: '100%',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Avatar
+                              name={solicitation.user.name}
+                              isPrivate={false}
+                              avatarUrl={solicitation.user.avatar_url}
+                            />
+
+                            <span>{solicitation.user.name}</span>
+                          </div>
+                          <div
+                            style={{
+                              display: 'flex',
+                              width: '70px',
+                              alignItems: 'center',
+                              justifyContent: 'space-evenly',
+                            }}
+                          >
+                            <FiCheck
+                              onClick={() => acceptUser(solicitation.id)}
+                              color="#1ec657"
+                              cursor="pointer"
+                              size={25}
+                            />
+                            <FiX
+                              onClick={() => recuseInvite(solicitation.id)}
+                              color="#fc384c"
+                              cursor="pointer"
+                              size={25}
+                            />
+                          </div>
                         </div>
                       </CardSolicitation>
                     );

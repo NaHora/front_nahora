@@ -24,6 +24,7 @@ import { useToast } from '../../hooks/toast';
 import api from '../../services/api';
 import { useAuth } from '../../hooks/auth';
 import InputDefault from '../../components/InputDefault';
+import Avatar from '../../components/Avatar';
 
 interface ProfileFormData {
   name: string;
@@ -174,13 +175,14 @@ const Profile: React.FC = () => {
       <Content>
         <form onSubmit={handleSubmit}>
           <AvatarInput>
-            <img
-              src={
-                user.avatar_url ||
-                `https://api.adorable.io/avatars/285/${user.id}.png`
-              }
-              alt={user.name}
+            <Avatar
+              width="186px"
+              height="186px"
+              name={user.name}
+              isPrivate={false}
+              avatarUrl={user.avatar_url}
             />
+
             <label htmlFor="avatar">
               <FiCamera />
               <input type="file" onChange={handleAvatarChange} id="avatar" />

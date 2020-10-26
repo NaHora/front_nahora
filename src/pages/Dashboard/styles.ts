@@ -400,12 +400,12 @@ export const ModalUsers = styled.div<PageColor>`
     TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
   padding: 20px;
 
-  img {
+  /* img {
     border-radius: 50%;
     height: 30px;
     width: 30px;
     margin-right: 8px;
-  }
+  } */
 
   > div {
     overflow-y: scroll;

@@ -5,6 +5,7 @@ import logoImg from '../../assets/nahora.png';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
 import Menu from '../Menu';
+import Avatar from '../Avatar';
 
 function HeaderMenu() {
   const { user } = useAuth();
@@ -20,13 +21,14 @@ function HeaderMenu() {
         />
 
         <Profile>
-          <img
-            src={
-              user.avatar_url ||
-              `https://api.adorable.io/avatars/285/${user.id}.png`
-            }
-            alt={user.name}
+          <Avatar
+            width="56px"
+            height="56px"
+            name={user.name}
+            isPrivate={false}
+            avatarUrl={user.avatar_url}
           />
+
           <div>
             <span>Bem-vindo,</span>
             <Link to={routes.profile}>

@@ -21,6 +21,7 @@ import api from '../../services/api';
 import Button from '../../components/Button';
 import { useToast } from '../../hooks/toast';
 import { useLoad } from '../../hooks/load';
+import Avatar from '../../components/Avatar';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -303,15 +304,12 @@ const Enterprises: React.FC = () => {
                           (currentAppointment) => {
                             return (
                               <div>
-                                <img
-                                  src={
-                                    currentAppointment.user.isPrivate
-                                      ? 'https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png'
-                                      : currentAppointment.user.avatar_url ||
-                                        `https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png`
-                                  }
-                                  alt="User Logo"
+                                <Avatar
+                                  name={currentAppointment.user.name}
+                                  isPrivate={currentAppointment.user.isPrivate}
+                                  avatarUrl={currentAppointment.user.avatar_url}
                                 />
+
                                 <span>
                                   {currentAppointment.user.isPrivate
                                     ? 'Anônimo'
@@ -409,14 +407,10 @@ const Enterprises: React.FC = () => {
                           (currentAppointment) => {
                             return (
                               <div>
-                                <img
-                                  src={
-                                    currentAppointment.user.isPrivate
-                                      ? 'https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png'
-                                      : currentAppointment.user.avatar_url ||
-                                        `https://api.adorable.io/avatars/285/${currentAppointment.user.id}.png`
-                                  }
-                                  alt="User Logo"
+                                <Avatar
+                                  name={currentAppointment.user.name}
+                                  isPrivate={currentAppointment.user.isPrivate}
+                                  avatarUrl={currentAppointment.user.avatar_url}
                                 />
                                 <span>
                                   {currentAppointment.user.isPrivate

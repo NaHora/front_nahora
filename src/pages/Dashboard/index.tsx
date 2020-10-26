@@ -47,6 +47,7 @@ import { useAuth } from '../../hooks/auth';
 import { removeMask } from '../../utils';
 import { useSocket } from '../../hooks/socket';
 import { useLoad } from '../../hooks/load';
+import Avatar from '../../components/Avatar';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -683,15 +684,14 @@ const Dashboard: React.FC = () => {
             <div>
               {appointments.map((appointment) => (
                 <span key={appointment.id}>
-                  <img
-                    src={
-                      appointment.user.isPrivate
-                        ? `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
-                        : appointment.user.avatar_url ||
-                          `https://api.adorable.io/avatars/285/${appointment.user.id}.png`
-                    }
-                    alt=""
+                  <Avatar
+                    width="30px"
+                    height="30px"
+                    name={appointment.user.name}
+                    avatarUrl={appointment.user.avatar_url}
+                    isPrivate={appointment.user.isPrivate}
                   />
+
                   {appointment.user.isPrivate && !owner_enterprise ? (
                     <>Anônimo</>
                   ) : (

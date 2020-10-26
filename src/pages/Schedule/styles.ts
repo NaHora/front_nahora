@@ -85,12 +85,12 @@ export const Card = styled.div<CardAction>`
       display: flex;
       align-items: center;
       margin: 12px 0;
-      img {
+      /* img {
         width: 30px;
         height: 30px;
         border-radius: 50%;
         margin-right: 8px;
-      }
+      } */
     }
 
     > span {

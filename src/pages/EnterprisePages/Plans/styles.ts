@@ -124,12 +124,12 @@ export const CardSolicitation = styled.div<StatusColor>`
       }
     }
 
-    img {
+    /* img {
       width: 35px;
       height: 35px;
       border-radius: 50%;
       margin-right: 8px;
-    }
+    } */
 
     > svg {
       margin: 0 10px;
