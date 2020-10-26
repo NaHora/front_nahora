@@ -176,8 +176,8 @@ const Profile: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <AvatarInput>
             <Avatar
-              width="186px"
-              height="186px"
+              width={186}
+              height={186}
               name={user.name}
               isPrivate={false}
               avatarUrl={user.avatar_url}

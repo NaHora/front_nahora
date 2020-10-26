@@ -13,6 +13,7 @@ import api from '../../../services/api';
 import EnterpriseImg from '../../../assets/empresa.png';
 
 import { Container, UserInfo, DivCategory, Category } from './styles';
+import Avatar from '../../../components/Avatar';
 
 interface User {
   id: string;
@@ -165,6 +166,13 @@ const ClientDetail: React.FC = () => {
       </header>
       <div>
         <UserInfo>
+          <Avatar
+            width={35}
+            height={35}
+            name={user.name}
+            isPrivate={false}
+            avatarUrl={user.avatar_url}
+          />
           <img
             src={
               user.avatar_url ||

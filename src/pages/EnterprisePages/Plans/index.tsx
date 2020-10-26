@@ -757,6 +757,8 @@ const Plans: React.FC = () => {
                             <Avatar
                               name={invite.user.name}
                               isPrivate={false}
+                              width={35}
+                              height={35}
                               avatarUrl={invite.user.avatar_url}
                             />
 
@@ -901,6 +903,8 @@ const Plans: React.FC = () => {
                             <Avatar
                               name={solicitation.user.name}
                               isPrivate={false}
+                              width={35}
+                              height={35}
                               avatarUrl={solicitation.user.avatar_url}
                             />
 

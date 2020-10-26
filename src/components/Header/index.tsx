@@ -22,8 +22,8 @@ function HeaderMenu() {
 
         <Profile>
           <Avatar
-            width="56px"
-            height="56px"
+            width={56}
+            height={56}
             name={user.name}
             isPrivate={false}
             avatarUrl={user.avatar_url}

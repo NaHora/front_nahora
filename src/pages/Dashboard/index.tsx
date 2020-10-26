@@ -685,8 +685,8 @@ const Dashboard: React.FC = () => {
               {appointments.map((appointment) => (
                 <span key={appointment.id}>
                   <Avatar
-                    width="30px"
-                    height="30px"
+                    width={30}
+                    height={30}
                     name={appointment.user.name}
                     avatarUrl={appointment.user.avatar_url}
                     isPrivate={appointment.user.isPrivate}

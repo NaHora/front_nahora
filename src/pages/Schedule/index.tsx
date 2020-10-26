@@ -305,6 +305,8 @@ const Enterprises: React.FC = () => {
                             return (
                               <div>
                                 <Avatar
+                                  width={35}
+                                  height={35}
                                   name={currentAppointment.user.name}
                                   isPrivate={currentAppointment.user.isPrivate}
                                   avatarUrl={currentAppointment.user.avatar_url}
@@ -408,6 +410,8 @@ const Enterprises: React.FC = () => {
                             return (
                               <div>
                                 <Avatar
+                                  width={35}
+                                  height={35}
                                   name={currentAppointment.user.name}
                                   isPrivate={currentAppointment.user.isPrivate}
                                   avatarUrl={currentAppointment.user.avatar_url}

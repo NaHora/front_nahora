@@ -5,8 +5,8 @@ import { Container } from './styles';
 interface AvatarProps {
   avatarUrl?: string;
   name: string;
-  width?: string;
-  height?: string;
+  width: number;
+  height: number;
   primaryColor?: string;
   secondaryColor?: string;
   isPrivate: boolean;
@@ -16,8 +16,8 @@ interface AvatarProps {
 const Avatar: React.FC<AvatarProps> = ({
   avatarUrl,
   name,
-  width = '35px',
-  height = '35px',
+  width = 35,
+  height = 35,
   isPrivate,
   secondaryColor = '#ff9000',
   primaryColor = '#28262e',
