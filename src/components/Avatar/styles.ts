@@ -37,5 +37,6 @@ export const Container = styled.main<AvatarProps>`
     margin: 0;
     font-size: ${(props) => Number(props.height) / 2}px;
     padding: 20px;
+    color: ${(props) => props.secondaryColor};
   }
 `;

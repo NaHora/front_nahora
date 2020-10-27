@@ -39,7 +39,7 @@ const Avatar: React.FC<AvatarProps> = ({
       height={height}
       noMargin={noMargin}
     >
-      {avatarUrl ? (
+      {!isPrivate && avatarUrl ? (
         <img src={avatarUrl} alt={name} />
       ) : (
         <span>{nameInitials(isPrivate ? 'Anônimo' : name)}</span>
