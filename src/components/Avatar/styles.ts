@@ -20,14 +20,16 @@ export const Container = styled.main<AvatarProps>`
   align-items: center;
 
   > img {
-    height: ${(props) => props.height}px;
-    width: ${(props) => props.width}px;
+    max-height: ${(props) => props.height}px;
+    max-height: ${(props) => props.height}px;
+    min-width: ${(props) => props.width}px;
+    min-width: ${(props) => props.width}px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 0;
-    padding: 0;
+    padding: 1px;
   }
 
   > span {

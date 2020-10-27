@@ -79,12 +79,14 @@ export const UserInfo = styled.div`
   @media (max-width: 600px) {
     width: 100%;
   }
-  > img {
+  > main {
     margin: 0px auto 24px;
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    padding: 9px;
+    img {
+      width: 180px;
+      height: 180px;
+      padding: 9px;
+    }
+
     border: 4px solid #ff9000;
   }
 

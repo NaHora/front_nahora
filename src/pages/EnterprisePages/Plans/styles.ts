@@ -83,7 +83,7 @@ export const CardSolicitation = styled.div<StatusColor>`
   position: relative;
   overflow: scroll;
   flex-direction: column;
-  border: 1px solid
+  border-left: 2px solid
     ${(props) =>
       !props.status
         ? 'none'

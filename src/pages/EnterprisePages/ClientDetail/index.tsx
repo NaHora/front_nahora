@@ -59,7 +59,9 @@ const ClientDetail: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [selectectedDay, setSelectectedDay] = useState<number>(0);
-  const [user, setUser] = useState<User>({} as User);
+  const [user, setUser] = useState<User>({
+    name: '',
+  } as User);
   const [categories, setCategories] = useState<Category[]>([]);
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [selectectedService, setSelectectedService] = useState<Service>(
@@ -167,19 +169,20 @@ const ClientDetail: React.FC = () => {
       <div>
         <UserInfo>
           <Avatar
-            width={35}
-            height={35}
+            width={180}
+            height={180}
             name={user.name}
             isPrivate={false}
             avatarUrl={user.avatar_url}
+            noMargin
           />
-          <img
+          {/* <img
             src={
               user.avatar_url ||
               `https://api.adorable.io/avatars/285/${user.id}.png`
             }
             alt=""
-          />
+          /> */}
           <h2>{user.name}</h2>
           <hr />
           <span>Email: </span>
