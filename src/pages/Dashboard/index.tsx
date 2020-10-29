@@ -162,6 +162,7 @@ const Dashboard: React.FC = () => {
   const [primaryColor, setPrimaryColor] = useState<string | null>('#28262e');
   const [loading, setLoading] = useState(false);
   const [currentService, setCurrentService] = useState('');
+  const [currentAppointment, setCurrentAppointment] = useState('');
   const [aboutDays, setAboutDays] = useState<AboutDays>({
     availableDays: [],
     disabledDays: [],
@@ -172,6 +173,7 @@ const Dashboard: React.FC = () => {
   );
   const classes = useStyles();
   const [open, setOpen] = useState(false);
+  const [openUser, setOpenUser] = useState(false);
   const [limits, setLimits] = useState({
     leftmorning: true,
     leftafternoom: true,
@@ -186,8 +188,17 @@ const Dashboard: React.FC = () => {
     setOpen(true);
   };
 
+  const handleOpenUser = (appointment_id: string) => {
+    setCurrentAppointment(appointment_id);
+    setOpenUser(true);
+  };
+
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleCloseUser = () => {
+    setOpenUser(false);
   };
 
   useEffect(() => {
@@ -355,6 +366,41 @@ const Dashboard: React.FC = () => {
       }
     },
     [thisEnterprise.id, toast, selectedDate, history, currentCustomer],
+  );
+
+  const deleteSchedule = useCallback(
+    async (appointment_id: string | undefined) => {
+      setLoading(true);
+
+      try {
+        await api.delete(`/appointments/${appointment_id}`);
+        handleServices();
+        setOpeModal({});
+        handleCloseUser();
+
+        toast.addToast({
+          title: 'Agendamento Deletado',
+          type: 'success',
+        });
+      } catch (err) {
+        if (err.response) {
+          toast.addToast({
+            type: 'error',
+            title:
+              err.response.data.message ||
+              'Ocorreu um erro ao deletar o agendamento, tente novamente',
+          });
+        } else {
+          toast.addToast({
+            type: 'error',
+            title: 'Ocorreu um erro ao deletar o agendamento, tente novamente',
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast, handleServices],
   );
 
   const deleteAppointment = useCallback(
@@ -685,7 +731,6 @@ const Dashboard: React.FC = () => {
             <div>
               {appointments.map((appointment, index) => (
                 <span key={appointment.id}>
-                  {index + 1}-{'  '}
                   <Avatar
                     width={30}
                     height={30}
@@ -718,6 +763,11 @@ const Dashboard: React.FC = () => {
                         <FaWhatsapp size={20} />
                       </a>
                       {appointment.user.celphone}
+
+                      <FiX
+                        cursor="pointer"
+                        onClick={() => handleOpenUser(appointment.id)}
+                      />
                     </>
                   )}
                 </span>
@@ -754,6 +804,7 @@ const Dashboard: React.FC = () => {
       thisEnterprise.owner_id,
       thisEnterprise.name,
       user.id,
+      handleOpenUser,
     ],
   );
 
@@ -869,6 +920,48 @@ const Dashboard: React.FC = () => {
                 primaryColor={secondaryColor || '#ff9000'}
                 secondaryColor={primaryColor || '#28262e'}
                 onClick={() => deleteAppointment(currentService)}
+                loading={loading}
+              >
+                <FiCheckCircle />
+                Excluir
+              </Button>
+            </div>
+          </div>
+        </Fade>
+      </Modal>
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        className={classes.modal}
+        open={openUser}
+        onClose={handleCloseUser}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={openUser}>
+          <div className={classes.paper}>
+            <h2 id="transition-modal-title">Deseja excluir o agendamento?</h2>
+            <p id="transition-modal-description">
+              se você confirmar o agendamento será excluído.
+            </p>
+            <div className={classes.divButton}>
+              <Button
+                primaryColor={secondaryColor || '#ff9000'}
+                secondaryColor={primaryColor || '#28262e'}
+                onClick={handleCloseUser}
+                loading={loading}
+                transparent
+              >
+                <FiCheckCircle />
+                Cancelar
+              </Button>
+              <Button
+                primaryColor={secondaryColor || '#ff9000'}
+                secondaryColor={primaryColor || '#28262e'}
+                onClick={() => deleteSchedule(currentAppointment)}
                 loading={loading}
               >
                 <FiCheckCircle />
