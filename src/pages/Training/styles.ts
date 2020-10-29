@@ -9,6 +9,21 @@ interface PageColor {
   currentSelected?: boolean;
 }
 
+export const SelectDefault = styled.select`
+  width: 180px;
+  background: #232129;
+  border: none;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: 2px solid #232129;
+  border-radius: 10px;
+
+  :focus {
+    outline: none;
+  }
+`;
+
 export const Container = styled.div<PageColor>`
   background: ${(props) =>
     TinyColor(props.primaryColor).isLight()
@@ -16,88 +31,23 @@ export const Container = styled.div<PageColor>`
       : lighten(0.03, props.primaryColor)};
   min-height: 100vh;
   width: 100%;
-`;
-
-export const Category = styled.main<PageColor>`
-  width: 100%;
-  overflow: hidden;
   display: flex;
-  flex-direction: column;
-  padding: 15px 20px;
-  max-width: 1120px;
-  margin: 12px auto;
 
-  > span {
-    color: ${(props) =>
-      TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
-    margin-bottom: 16px;
-    font-size: 36px;
-  }
+  flex-direction: column;
 
   > div {
-    display: flex;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    width: 100%;
-    padding: 0 0 10px;
-    > span {
-      color: ${(props) =>
-        TinyColor(props.primaryColor).isLight() ? '#3e3b47' : '#f4ede8'};
-    }
-    strong {
-      cursor: pointer;
-      color: ${(props) => props.secondaryColor};
-    }
-    ::-webkit-scrollbar-track {
-      background-color: transparent;
-      border-radius: 20px;
-      width: 2px;
-    }
-
-    ::-webkit-scrollbar {
-      width: 2px;
-      border-radius: 20px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background-color: ${(props) => props.secondaryColor};
-      border-radius: 20px;
-      width: 1px;
-    }
-
-    @media (max-width: 600px) {
-      ::-webkit-scrollbar {
-        display: none;
-      }
-    }
-  }
-`;
-
-export const DivCategory = styled.div<PageColor>`
-  margin-right: 16px;
-  box-shadow: ${(props) => props.currentSelected && '#000 0px 4px 6px'};
-
-  border-radius: 5px;
-  flex: none;
-  white-space: nowrap;
-  text-align: center;
-  padding: 8px 15px;
-  font-size: 20px;
-  opacity: ${(props) => (props.currentSelected ? '1' : '0.7')};
-  background: ${(props) => props.secondaryColor};
-  color: ${(props) =>
-    TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
-  cursor: pointer;
-`;
-
-export const ButtonContainer = styled.main`
-  width: 300px;
-  margin: 0 auto;
-  padding-bottom: 10px;
-
-  @media (max-width: 600px) {
+    max-width: 1120px;
+    align-self: center;
     width: 100%;
     padding: 10px;
+
+    > header {
+      display: flex;
+      margin-top: 40px;
+      @media (max-width: 600px) {
+        flex-direction: column;
+      }
+    }
   }
 `;
 

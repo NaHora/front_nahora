@@ -19,10 +19,12 @@ import Financial from '../pages/EnterprisePages/Financial';
 import PolicyPrivate from '../pages/PolicyPrivate';
 import TermsUse from '../pages/TermsUse';
 import ClientDetail from '../pages/EnterprisePages/ClientDetail';
+import Training from '../pages/Training';
 
 export const routes = {
   dashboard: '/dashboard',
   profile: '/profile',
+  training: '/training',
   signup: '/signup',
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
@@ -48,6 +50,7 @@ const Routes: React.FC = () => {
       <Route path={routes.enterprise} component={Enterprises} isPrivate />
       <Route path={routes.clientDetail} component={ClientDetail} isPrivate />
       <Route path={routes.schedule} component={Schedule} isPrivate />
+      <Route path={routes.training} component={Training} isPrivate />
       <Route path={routes.profile} component={Profile} isPrivate />
       <Route path={routes.plan} component={Plans} isPrivate />
       <Route path={routes.success} component={SuccessPage} isPrivate />

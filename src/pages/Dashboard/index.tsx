@@ -48,6 +48,7 @@ import { removeMask } from '../../utils';
 import { useSocket } from '../../hooks/socket';
 import { useLoad } from '../../hooks/load';
 import Avatar from '../../components/Avatar';
+import EnterpriseHeader from '../../components/EnterpriseHeader';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -682,8 +683,9 @@ const Dashboard: React.FC = () => {
               )}
             </span>
             <div>
-              {appointments.map((appointment) => (
+              {appointments.map((appointment, index) => (
                 <span key={appointment.id}>
+                  {index + 1}-{'  '}
                   <Avatar
                     width={30}
                     height={30}
@@ -691,7 +693,6 @@ const Dashboard: React.FC = () => {
                     avatarUrl={appointment.user.avatar_url}
                     isPrivate={appointment.user.isPrivate}
                   />
-
                   {appointment.user.isPrivate && !owner_enterprise ? (
                     <>Anônimo</>
                   ) : (
@@ -755,6 +756,16 @@ const Dashboard: React.FC = () => {
       user.id,
     ],
   );
+
+  const findCategory = useCallback(() => {
+    const categoryexist = categories.find((category) => {
+      return category.name.toLocaleLowerCase() === 'crossfit';
+    });
+    if (categoryexist) {
+      return true;
+    }
+    return false;
+  }, [categories]);
 
   // useEffect(() => {
   //   if (thisEnterprise.id && selectectedCategory?.id && selectedDate) {
@@ -867,24 +878,13 @@ const Dashboard: React.FC = () => {
           </div>
         </Fade>
       </Modal>
-      <header>
-        <div>
-          <Link to={routes.enterprise}>
-            <FiArrowLeft />
-          </Link>
-          <span
-            onClick={() => {
-              if (user.id === thisEnterprise.owner_id) {
-                setPrimaryColor(secondaryColor);
-                setSecondaryColor(primaryColor);
-              }
-            }}
-          >
-            {thisEnterprise && thisEnterprise.name}
-          </span>
-          <img src={thisEnterprise.logo_url || EnterpriseImg} alt="NaHora" />
-        </div>
-      </header>
+      <EnterpriseHeader
+        service={findCategory()}
+        primaryColor={primaryColor || '#28262e'}
+        secondaryColor={secondaryColor || '#ff9000'}
+        name={thisEnterprise.name}
+        logo_url={thisEnterprise.logo_url}
+      />
 
       <Category
         primaryColor={primaryColor || '#28262e'}
