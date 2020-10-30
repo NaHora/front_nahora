@@ -73,6 +73,7 @@ interface User {
   avatar_url: string;
   name: string;
   celphone: string;
+  gender?: string;
   isPrivate: boolean;
 }
 

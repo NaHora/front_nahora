@@ -39,6 +39,22 @@ const appearFromRight = keyframes`
   }
 `;
 
+export const SelectDefault = styled.select`
+  width: 100%;
+  background: #232129;
+  border: none;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: 2px solid #232129;
+  border-radius: 10px;
+  margin: 8px 0;
+
+  :focus {
+    outline: none;
+  }
+`;
+
 export const AnimationContainer = styled.div`
   display: flex;
   flex-direction: column;

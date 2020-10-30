@@ -23,6 +23,7 @@ import {
   Background,
   AnimationContainer,
   GoogleLoginStyled,
+  SelectDefault,
 } from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -38,6 +39,7 @@ interface SignUpFormData {
   password: string;
   celphone?: string;
   photoUrl?: string;
+  gender?: string;
 }
 
 const SignUp: React.FC = () => {
@@ -46,10 +48,13 @@ const SignUp: React.FC = () => {
   const { addToast } = useToast();
   const { signInSocial } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [values, setValues] = useState({} as SignUpFormData);
+  const [values, setValues] = useState({
+    gender: 'm',
+  } as SignUpFormData);
 
   const handleAccount = useCallback(
     async (data: SignUpFormData) => {
+      console.log(data);
       setLoading(true);
       try {
         const schema = Yup.object().shape({
@@ -77,6 +82,7 @@ const SignUp: React.FC = () => {
           name: data.name,
           celphone: data.celphone,
           photoUrl: values?.photoUrl,
+          gender: values?.gender,
         });
 
         addToast({
@@ -136,7 +142,6 @@ const SignUp: React.FC = () => {
         <AnimationContainer>
           <Form initialData={values} ref={formRef} onSubmit={handleAccount}>
             <img src={logoImg} alt="" />
-
             <h1>Complete seu cadastro</h1>
             <Input icon={FiUser} name="name" type="text" placeholder="Nome" />
             <NumberFormat
@@ -150,12 +155,6 @@ const SignUp: React.FC = () => {
               mask="_"
               placeholder="Telefone"
             />
-            {/* <Input
-              name="celphone"
-              icon={FiPhone}
-              type="text"
-              placeholder="Telefone"
-            /> */}
             <Input
               icon={FiMail}
               name="email"
@@ -168,6 +167,17 @@ const SignUp: React.FC = () => {
               type="password"
               placeholder="Senha"
             />
+            <SelectDefault
+              value={values.gender}
+              onChange={(e) =>
+                setValues({ ...values, [e.target.name]: e.target.value })
+              }
+              name="gender"
+              placeholder="Gênero"
+            >
+              <option value="m">Masculino</option>
+              <option value="f">Feminino</option>
+            </SelectDefault>
             <Button loading={loading} type="submit">
               Cadastrar
             </Button>
@@ -186,7 +196,6 @@ const SignUp: React.FC = () => {
               onFailure={responseGoogle}
               cookiePolicy="single_host_origin"
             />
-
             <FacebookLogin
               appId="330940161588292"
               // redirectUri="https://nahora.app.br"

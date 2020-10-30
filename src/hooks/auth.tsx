@@ -10,6 +10,7 @@ interface User {
   isPrivate: boolean;
   email: string;
   avatar_url: string;
+  gender: string;
 }
 
 interface AuthState {
@@ -28,6 +29,7 @@ interface SignInCredentialsSocial {
   name: string;
   celphone?: string;
   photoUrl?: string;
+  gender?: string;
 }
 
 interface AuthContextData {
@@ -72,13 +74,14 @@ export const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const signInSocial = useCallback(
-    async ({ name, email, password, celphone, photoUrl }) => {
+    async ({ name, email, password, celphone, photoUrl, gender }) => {
       const response = await api.post('users/social', {
         name,
         email,
         password,
         celphone,
         photoUrl,
+        gender,
       });
 
       const { token, user } = response.data;
