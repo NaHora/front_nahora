@@ -42,12 +42,24 @@ export const Container = styled.div<PageColor>`
     padding: 10px;
 
     > main {
+      margin: 24px 0;
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
+
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+      }
       > label {
         display: flex;
-
+        margin: 8px 0 0;
         flex-direction: column;
+        @media (max-width: 600px) {
+          width: 100%;
+
+          > div {
+            width: 100%;
+          }
+        }
       }
     }
   }

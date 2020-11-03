@@ -20,6 +20,7 @@ import { routes } from '../../routes';
 import api from '../../services/api';
 import Button from '../../components/Button';
 import NumberFormat from 'react-number-format';
+import Avatar from '../../components/Avatar';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -64,11 +65,12 @@ const Ranking = () => {
 
   const [secondaryColor, setSecondaryColor] = useState('#ff9000');
   const [values, setValues] = useState({
-    category: 'rx',
+    category: '3',
   });
 
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [training, setTraining] = useState({});
+  const [ranking, setRanking] = useState([]);
 
   const getTraining = useCallback(async () => {
     try {
@@ -81,9 +83,25 @@ const Ranking = () => {
     } catch {}
   }, [date, thisEnterprise]);
 
+  const getRanking = useCallback(async () => {
+    try {
+      const response = await api.get(
+        `/training/training/${training.id}/enterprise/${thisEnterprise.id}`,
+      );
+      setRanking(response.data);
+    } catch {}
+  }, [training, thisEnterprise]);
+
   useEffect(() => {
     getTraining();
   }, [date]);
+
+  useEffect(() => {
+    if (training) {
+      getRanking();
+    }
+  }, [training]);
+
   useEffect(() => {
     setPrimaryColor(thisEnterprise.primary_color);
     setSecondaryColor(thisEnterprise.secondary_color);
@@ -101,6 +119,7 @@ const Ranking = () => {
       };
       const response = await api.post(`/training/wod`, body);
       toast.addToast({ type: 'success', title: 'score adicionado!' });
+      getRanking();
     } catch (err) {
       if (err.response) {
         toast.addToast({
@@ -169,7 +188,7 @@ const Ranking = () => {
                     onValueChange={(e) => {
                       setValues({
                         ...values,
-                        score: e.value,
+                        score: e.formattedValue,
                       });
                     }}
                   />
@@ -200,9 +219,9 @@ const Ranking = () => {
                     setValues({ ...values, [e.target.name]: e.target.value });
                   }}
                 >
-                  <option value="rx">Rx</option>
-                  <option value="int">Intermediate</option>
-                  <option value="scl">Scale</option>
+                  <option value="3">Rx</option>
+                  <option value="2">Intermediate</option>
+                  <option value="1">Scale</option>
                 </SelectDefault>
               </label>
               <Button
@@ -229,12 +248,35 @@ const Ranking = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Augusto Telles Francisco</td>
-                <td>17:47</td>
-                <td>Int</td>
-              </tr>
+              {ranking.length > 0 ? (
+                ranking.map((rank, index) => (
+                  <tr>
+                    <td>{index + 1}</td>
+                    <td style={{ display: 'flex', alignItems: 'center' }}>
+                      {
+                        <Avatar
+                          isPrivate={rank.user.isPrivate}
+                          name={rank.user.name}
+                          avatarUrl={rank.user.avatar_url}
+                        />
+                      }
+                      {rank.user.isPrivate ? 'Anônimo' : rank.user.name}
+                    </td>
+                    <td>{rank.score}</td>
+                    <td>
+                      {rank.type === '3'
+                        ? 'Rx'
+                        : rank.type === '2'
+                        ? 'Int'
+                        : 'Scl'}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4">Nenhum treino registrado.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}
