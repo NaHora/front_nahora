@@ -25,11 +25,13 @@ import api from '../../services/api';
 import { useAuth } from '../../hooks/auth';
 import InputDefault from '../../components/InputDefault';
 import Avatar from '../../components/Avatar';
+import { SelectDefault } from '../SignUp/styles';
 
 interface ProfileFormData {
   name: string;
   celphone: string | undefined;
   email: string;
+  gender?: string;
   isPrivate: boolean;
   password: any;
   password_confirmation: any;
@@ -51,6 +53,7 @@ const Profile: React.FC = () => {
     password: '',
     password_confirmation: '',
     old_password: '',
+    gender: user.gender || '',
   });
   const [errors, setErrors] = useState<any>({
     celphone: !data.celphone && 'Cadastre seu celular',
@@ -95,6 +98,7 @@ const Profile: React.FC = () => {
           old_password,
           password,
           password_confirmation,
+          gender,
         } = data;
 
         const formData = {
@@ -102,6 +106,7 @@ const Profile: React.FC = () => {
           email,
           isPrivate: !!isPrivate,
           celphone,
+          gender,
           ...(data.old_password
             ? {
                 old_password,
@@ -234,6 +239,20 @@ const Profile: React.FC = () => {
             type="email"
             placeholder="E-mail"
           />
+          <SelectDefault
+            value={data.gender}
+            onChange={(e) =>
+              setData({ ...data, [e.target.name]: e.target.value })
+            }
+            name="gender"
+            placeholder="Gênero"
+          >
+            <option disabled value="">
+              -
+            </option>
+            <option value="m">Masculino</option>
+            <option value="f">Feminino</option>
+          </SelectDefault>
           <div>
             Perfil Anônimo:{' '}
             <Switch

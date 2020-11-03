@@ -78,6 +78,22 @@ const MenuEnterprise: React.FC<MenuEnterpriseProps> = ({
             >
               Treino do dia
             </Span>
+            <Span
+              primaryColor={primaryColor || '#28262e'}
+              secondaryColor={secondaryColor || '#ff9000'}
+              currentPage={history.location.pathname === routes.ranking}
+              onClick={() => history.push(routes.ranking)}
+            >
+              Ranking
+            </Span>
+            <Span
+              primaryColor={primaryColor || '#28262e'}
+              secondaryColor={secondaryColor || '#ff9000'}
+              currentPage={history.location.pathname === routes.pr}
+              onClick={() => history.push(routes.pr)}
+            >
+              Recordes Pessoais
+            </Span>
             <hr />
 
             <Span

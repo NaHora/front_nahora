@@ -20,11 +20,15 @@ import PolicyPrivate from '../pages/PolicyPrivate';
 import TermsUse from '../pages/TermsUse';
 import ClientDetail from '../pages/EnterprisePages/ClientDetail';
 import Training from '../pages/Training';
+import Ranking from '../pages/Ranking';
+import Benchmark from '../pages/Benchmark';
 
 export const routes = {
   dashboard: '/dashboard',
   profile: '/profile',
   training: '/training',
+  pr: '/pr',
+  ranking: '/ranking',
   signup: '/signup',
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
@@ -51,6 +55,8 @@ const Routes: React.FC = () => {
       <Route path={routes.clientDetail} component={ClientDetail} isPrivate />
       <Route path={routes.schedule} component={Schedule} isPrivate />
       <Route path={routes.training} component={Training} isPrivate />
+      <Route path={routes.pr} component={Benchmark} isPrivate />
+      <Route path={routes.ranking} component={Ranking} isPrivate />
       <Route path={routes.profile} component={Profile} isPrivate />
       <Route path={routes.plan} component={Plans} isPrivate />
       <Route path={routes.success} component={SuccessPage} isPrivate />
