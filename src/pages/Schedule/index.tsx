@@ -224,108 +224,114 @@ const Enterprises: React.FC = () => {
         <div>
           <span>Próximos Agendamentos:</span>
           {myAppointments && myAppointments.futureAppointments.length > 0 ? (
-            myAppointments.futureAppointments.map((appointment) => {
-              return (
-                <Card>
-                  <div>
-                    <div
-                      onClick={() =>
-                        setOpenShedule({
-                          ...openShedule,
-                          [appointment.id]: !openShedule[appointment.id],
-                        })
-                      }
-                    >
-                      {!openShedule[appointment.id] ? (
-                        <FiChevronDown
-                          style={{ marginRight: '8px' }}
-                          onClick={() =>
-                            setOpenShedule({
-                              ...openShedule,
-                              [appointment.id]: true,
-                            })
-                          }
-                          cursor="pointer"
-                          size={20}
-                          color="#ff9000"
+            myAppointments.futureAppointments
+              .filter((appointment) => appointment.service !== null)
+              .map((appointment) => {
+                return (
+                  <Card>
+                    <div>
+                      <div
+                        onClick={() =>
+                          setOpenShedule({
+                            ...openShedule,
+                            [appointment.id]: !openShedule[appointment.id],
+                          })
+                        }
+                      >
+                        {!openShedule[appointment.id] ? (
+                          <FiChevronDown
+                            style={{ marginRight: '8px' }}
+                            onClick={() =>
+                              setOpenShedule({
+                                ...openShedule,
+                                [appointment.id]: true,
+                              })
+                            }
+                            cursor="pointer"
+                            size={20}
+                            color="#ff9000"
+                          />
+                        ) : (
+                          <FiChevronUp
+                            style={{ marginRight: '8px' }}
+                            onClick={() =>
+                              setOpenShedule({
+                                ...openShedule,
+                                [appointment.id]: false,
+                              })
+                            }
+                            cursor="pointer"
+                            size={20}
+                            color="#ff9000"
+                          />
+                        )}
+                        <img
+                          src={appointment.enterprise.logo_url || EnterpriseImg}
+                          alt="logo empresa"
                         />
-                      ) : (
-                        <FiChevronUp
-                          style={{ marginRight: '8px' }}
-                          onClick={() =>
-                            setOpenShedule({
-                              ...openShedule,
-                              [appointment.id]: false,
-                            })
-                          }
-                          cursor="pointer"
-                          size={20}
-                          color="#ff9000"
-                        />
-                      )}
-                      <img
-                        src={appointment.enterprise.logo_url || EnterpriseImg}
-                        alt="logo empresa"
+                        <span>{appointment.enterprise.name}</span>
+                        <span style={{ fontSize: '14px' }}>
+                          {format(
+                            new Date(appointment.date),
+                            "HH:mm'h' dd/MM/yyyy",
+                            {
+                              locale: ptBr,
+                            },
+                          )}
+                        </span>
+                      </div>
+                      <MdDeleteForever
+                        onClick={() => {
+                          setCurrentAppointment(appointment);
+                          handleOpen();
+                        }}
+                        color="#c53030"
                       />
-                      <span>{appointment.enterprise.name}</span>
-                      <span style={{ fontSize: '14px' }}>
-                        {format(
-                          new Date(appointment.date),
-                          "HH:mm'h' dd/MM/yyyy",
-                          {
-                            locale: ptBr,
-                          },
-                        )}
-                      </span>
                     </div>
-                    <MdDeleteForever
-                      onClick={() => {
-                        setCurrentAppointment(appointment);
-                        handleOpen();
-                      }}
-                      color="#c53030"
-                    />
-                  </div>
-                  {openShedule[appointment.id] && (
-                    <main>
-                      <hr />
-                      <span>
-                        <GoLocation size={20} color="#ff9000" />
-                        {appointment.enterprise.address}
-                      </span>
-                      <span>
-                        <FiUsers size={20} color="#ff9000" />
-                        Usuários agendados:
-                        {appointment.service.appointments.length}/
-                        {appointment.service.capacity}
-                      </span>
-                      {appointment.service.appointments &&
-                        appointment.service.appointments.map(
-                          (currentAppointment) => {
-                            return (
-                              <div>
-                                <Avatar
-                                  width={35}
-                                  height={35}
-                                  name={currentAppointment.user.name}
-                                  isPrivate={currentAppointment.user.isPrivate}
-                                  avatarUrl={currentAppointment.user.avatar_url}
-                                />
+                    {openShedule[appointment.id] && (
+                      <main>
+                        <hr />
+                        <span>
+                          <GoLocation size={20} color="#ff9000" />
+                          {appointment.enterprise.address}
+                        </span>
+                        <span>
+                          <FiUsers size={20} color="#ff9000" />
+                          Usuários agendados:
+                          {appointment.service.appointments.length}/
+                          {appointment.service.capacity}
+                        </span>
+                        {appointment.service.appointments &&
+                          appointment.service.appointments.map(
+                            (currentAppointment) => {
+                              return (
+                                <div>
+                                  <Avatar
+                                    width={35}
+                                    height={35}
+                                    name={currentAppointment.user.name}
+                                    isPrivate={
+                                      currentAppointment.user.isPrivate
+                                    }
+                                    avatarUrl={
+                                      currentAppointment.user.avatar_url
+                                    }
+                                  />
 
-                                <span>
-                                  {currentAppointment.user.isPrivate
-                                    ? 'Anônimo'
-                                    : currentAppointment.user.name}
-                                </span>
-                              </div>
-                            );
-                          },
-                        )}
-                    </main>
-                  )}
-                </Card>
-              );
-            })
+                                  <span>
+                                    {currentAppointment.user.isPrivate
+                                      ? 'Anônimo'
+                                      : currentAppointment.user.name}
+                                  </span>
+                                </div>
+                              );
+                            },
+                          )}
+                      </main>
+                    )}
+                  </Card>
+                );
+              })
           ) : (
             <>
               <br />
@@ -337,99 +343,105 @@ const Enterprises: React.FC = () => {
         <div>
           <span>Agendamentos Passados:</span>
           {myAppointments && myAppointments.pastAppointments.length > 0 ? (
-            myAppointments.pastAppointments.map((appointment) => {
-              return (
-                <Card
-                  past
-                  onClick={() =>
-                    setOpenShedule({
-                      ...openShedule,
-                      [appointment.id]: !openShedule[appointment.id],
-                    })
-                  }
-                >
-                  <div>
+            myAppointments.pastAppointments
+              .filter((appointment) => appointment.service !== null)
+              .map((appointment) => {
+                return (
+                  <Card
+                    past
+                    onClick={() =>
+                      setOpenShedule({
+                        ...openShedule,
+                        [appointment.id]: !openShedule[appointment.id],
+                      })
+                    }
+                  >
                     <div>
-                      <img
-                        src={appointment.enterprise.logo_url || EnterpriseImg}
-                        alt="logo empresa"
-                      />
-                      <span>{appointment.enterprise.name}</span>
-                      <span style={{ fontSize: '14px' }}>
-                        {format(
-                          new Date(appointment.date),
-                          "HH:mm'h' dd/MM/yyyy",
-                          {
-                            locale: ptBr,
-                          },
-                        )}
-                      </span>
+                      <div>
+                        <img
+                          src={appointment.enterprise.logo_url || EnterpriseImg}
+                          alt="logo empresa"
+                        />
+                        <span>{appointment.enterprise.name}</span>
+                        <span style={{ fontSize: '14px' }}>
+                          {format(
+                            new Date(appointment.date),
+                            "HH:mm'h' dd/MM/yyyy",
+                            {
+                              locale: ptBr,
+                            },
+                          )}
+                        </span>
+                      </div>
+                      {!openShedule[appointment.id] ? (
+                        <FiChevronDown
+                          onClick={() =>
+                            setOpenShedule({
+                              ...openShedule,
+                              [appointment.id]: !openShedule[appointment.id],
+                            })
+                          }
+                          cursor="pointer"
+                          size={20}
+                          color="#ff9000"
+                        />
+                      ) : (
+                        <FiChevronUp
+                          onClick={() =>
+                            setOpenShedule({
+                              ...openShedule,
+                              [appointment.id]: false,
+                            })
+                          }
+                          cursor="pointer"
+                          size={20}
+                          color="#ff9000"
+                        />
+                      )}
                     </div>
-                    {!openShedule[appointment.id] ? (
-                      <FiChevronDown
-                        onClick={() =>
-                          setOpenShedule({
-                            ...openShedule,
-                            [appointment.id]: !openShedule[appointment.id],
-                          })
-                        }
-                        cursor="pointer"
-                        size={20}
-                        color="#ff9000"
-                      />
-                    ) : (
-                      <FiChevronUp
-                        onClick={() =>
-                          setOpenShedule({
-                            ...openShedule,
-                            [appointment.id]: false,
-                          })
-                        }
-                        cursor="pointer"
-                        size={20}
-                        color="#ff9000"
-                      />
+                    {openShedule[appointment.id] && (
+                      <main>
+                        <hr />
+                        <span>
+                          <GoLocation size={20} color="#ff9000" />
+                          {appointment.enterprise.address}
+                        </span>
+                        <span>
+                          <FiUsers size={20} color="#ff9000" />
+                          Usuários agendados:{' '}
+                          {appointment.service.appointments.length}/
+                          {appointment.service.capacity}
+                        </span>
+                        {appointment.service.appointments &&
+                          appointment.service.appointments.map(
+                            (currentAppointment) => {
+                              return (
+                                <div>
+                                  <Avatar
+                                    width={35}
+                                    height={35}
+                                    name={currentAppointment.user.name}
+                                    isPrivate={
+                                      currentAppointment.user.isPrivate
+                                    }
+                                    avatarUrl={
+                                      currentAppointment.user.avatar_url
+                                    }
+                                  />
+                                  <span>
+                                    {currentAppointment.user.isPrivate
+                                      ? 'Anônimo'
+                                      : currentAppointment.user.name}
+                                  </span>
+                                </div>
+                              );
+                            },
+                          )}
+                      </main>
                     )}
-                  </div>
-                  {openShedule[appointment.id] && (
-                    <main>
-                      <hr />
-                      <span>
-                        <GoLocation size={20} color="#ff9000" />
-                        {appointment.enterprise.address}
-                      </span>
-                      <span>
-                        <FiUsers size={20} color="#ff9000" />
-                        Usuários agendados:{' '}
-                        {appointment.service.appointments.length}/
-                        {appointment.service.capacity}
-                      </span>
-                      {appointment.service.appointments &&
-                        appointment.service.appointments.map(
-                          (currentAppointment) => {
-                            return (
-                              <div>
-                                <Avatar
-                                  width={35}
-                                  height={35}
-                                  name={currentAppointment.user.name}
-                                  isPrivate={currentAppointment.user.isPrivate}
-                                  avatarUrl={currentAppointment.user.avatar_url}
-                                />
-                                <span>
-                                  {currentAppointment.user.isPrivate
-                                    ? 'Anônimo'
-                                    : currentAppointment.user.name}
-                                </span>
-                              </div>
-                            );
-                          },
-                        )}
-                    </main>
-                  )}
-                </Card>
-              );
-            })
+                  </Card>
+                );
+              })
           ) : (
             <>
               <br />
