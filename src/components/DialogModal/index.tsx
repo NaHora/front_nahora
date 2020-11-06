@@ -32,13 +32,13 @@ interface ComponentProps {
   openModal: boolean;
 }
 
-const DialogModal: React.FC<ComponentProps> = ({
+function DialogModal({
   text = '',
   title = '',
   onSubmit,
   setOpenModal,
   openModal,
-}) => {
+}: ComponentProps) {
   const classes = useStyles();
 
   return (
@@ -72,7 +72,10 @@ const DialogModal: React.FC<ComponentProps> = ({
             <Button
               primaryColor="#ff9000"
               secondaryColor="#28262e"
-              onClick={onSubmit}
+              onClick={() => {
+                onSubmit();
+                setOpenModal(false);
+              }}
               // loading={loading}
             >
               Excluir
@@ -82,6 +85,6 @@ const DialogModal: React.FC<ComponentProps> = ({
       </Fade>
     </Modal>
   );
-};
+}
 
 export default DialogModal;

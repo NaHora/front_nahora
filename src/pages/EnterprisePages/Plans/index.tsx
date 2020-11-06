@@ -11,6 +11,7 @@ import {
   FiMail,
   FiAlertTriangle,
   FiArrowRight,
+  FiTrash2,
 } from 'react-icons/fi';
 import { Tooltip } from '@material-ui/core';
 import {
@@ -45,6 +46,7 @@ import Button from '../../../components/Button';
 import { routes } from '../../../routes';
 import Select from '../../../components/Select';
 import Avatar from '../../../components/Avatar';
+import DialogModal from '../../../components/DialogModal';
 
 interface User {
   id: string;
@@ -125,6 +127,8 @@ const Plans: React.FC = () => {
   const [planData, setPlanData] = useState<Plan | any>({
     type_expiration: 'month',
   });
+  const [currentInviteId, setCurrentInviteId] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
   // const [totalMoney, setTotalMoney] = useState(0);
 
   const [selectedSolicitation, setSelectionSolicitation] = useState<
@@ -466,6 +470,7 @@ const Plans: React.FC = () => {
           title: 'Você recusou a solicitação.',
         });
 
+        getAllEnterpriseAcceptedInvites();
         getSolicitations();
       } catch (err) {
         if (err.response) {
@@ -483,7 +488,7 @@ const Plans: React.FC = () => {
         }
       }
     },
-    [toast, getSolicitations],
+    [toast, getSolicitations, getAllEnterpriseAcceptedInvites],
   );
 
   const cancelUserPlan = useCallback(
@@ -541,6 +546,13 @@ const Plans: React.FC = () => {
 
   return (
     <Container>
+      <DialogModal
+        text="Ao confirmar, este usuário deixará de seguir sua empresa, mesmo com um plano ativo."
+        title="Tem certeza que deseja excluir este cliente ?"
+        onSubmit={() => recuseInvite(currentInviteId)}
+        setOpenModal={setOpenDialog}
+        openModal={openDialog}
+      />
       <HeaderMenu />
       <div>
         <Content>
@@ -624,8 +636,7 @@ const Plans: React.FC = () => {
                     setInviteData({
                       ...inviteData,
                       [e.target.name]: e.target.value,
-                    })
-                  }
+                    })}
                   placeholder="Nome"
                 />
                 <NumberFormat
@@ -643,8 +654,7 @@ const Plans: React.FC = () => {
                     setInviteData({
                       ...inviteData,
                       celphone: text.value,
-                    })
-                  }
+                    })}
                 />
 
                 <InputDefault
@@ -657,8 +667,7 @@ const Plans: React.FC = () => {
                     setInviteData({
                       ...inviteData,
                       [e.target.name]: e.target.value,
-                    })
-                  }
+                    })}
                 />
                 <Button loading={loading} onClick={inviteUser}>
                   Convidar
@@ -768,8 +777,7 @@ const Plans: React.FC = () => {
                                 setSelectionSolicitation({
                                   ...selectedSolicitation,
                                   [invite.user.id]: e.target.value,
-                                })
-                              }
+                                })}
                               name="selectedSolicitation"
                               value={selectedSolicitation[invite.user.id]}
                             >
@@ -792,9 +800,18 @@ const Plans: React.FC = () => {
                                   invite.user.id,
                                   selectedSolicitation[invite.user.id],
                                   invite.currentPlan?.id,
-                                )
-                              }
+                                )}
                               color="#1ec657"
+                              cursor="pointer"
+                              size={25}
+                            />
+
+                            <FiTrash2
+                              onClick={() => {
+                                setOpenDialog(true);
+                                setCurrentInviteId(invite.id);
+                              }}
+                              color="#fc384c"
                               cursor="pointer"
                               size={25}
                             />
@@ -834,8 +851,7 @@ const Plans: React.FC = () => {
                                 onClick={() =>
                                   history.push(
                                     `${routes.clientDetailNoParams}/${invite.user.id}`,
-                                  )
-                                }
+                                  )}
                                 style={{
                                   color: '#ff9000',
                                   display: 'flex',
@@ -866,8 +882,7 @@ const Plans: React.FC = () => {
           <SolicitationSection>
             <span
               onClick={() =>
-                setOpenSolicitationSection(!openSolicitationSection)
-              }
+                setOpenSolicitationSection(!openSolicitationSection)}
             >
               {!openSolicitationSection ? (
                 <FiChevronDown
@@ -990,8 +1005,7 @@ const Plans: React.FC = () => {
                       setRestrictData({
                         ...restrictData,
                         [e.target.name]: e.target.value,
-                      })
-                    }
+                      })}
                     name="plan_id"
                   >
                     {' '}
@@ -1013,8 +1027,7 @@ const Plans: React.FC = () => {
                       setRestrictData({
                         ...restrictData,
                         [e.target.name]: e.target.value,
-                      })
-                    }
+                      })}
                     name="category_id"
                   >
                     <option value="">-</option>
@@ -1097,8 +1110,7 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })
-                          }
+                            })}
                           placeholder="Nome"
                           type="text"
                         />
@@ -1111,8 +1123,7 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })
-                          }
+                            })}
                           placeholder="Valor"
                           type="text"
                         />
@@ -1126,8 +1137,7 @@ const Plans: React.FC = () => {
                               setPlanData({
                                 ...planData,
                                 [e.target.name]: e.target.value,
-                              })
-                            }
+                              })}
                             style={{ borderRadius: '5px 0 0 5px' }}
                             name="days_to_expire"
                             placeholder="Expiração"
@@ -1139,8 +1149,7 @@ const Plans: React.FC = () => {
                               setPlanData({
                                 ...planData,
                                 [e.target.name]: e.target.value,
-                              })
-                            }
+                              })}
                             name="type_expiration"
                           >
                             <option value="day">Dia</option>
@@ -1155,8 +1164,7 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })
-                          }
+                            })}
                           name="schedule_limit"
                           placeholder="Limite"
                           type="number"
@@ -1169,8 +1177,7 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })
-                          }
+                            })}
                           name="week_limit"
                           placeholder="Limite Semanal"
                           type="number"
@@ -1183,8 +1190,7 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })
-                          }
+                            })}
                           name="delete_limit"
                           placeholder="Limite de Cancelamento"
                           type="number"
