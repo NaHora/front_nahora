@@ -7,6 +7,8 @@ import {
   MdFormatBold,
   MdFormatItalic,
   MdSave,
+  MdFullscreen,
+  MdFullscreenExit,
 } from 'react-icons/md';
 import PropTypes from 'prop-types';
 import {
@@ -17,7 +19,7 @@ import {
 } from 'draftail';
 import 'draft-js/dist/Draft.css';
 import 'draftail/dist/draftail.css';
-import './styles.css';
+import './styles.js';
 import { EditorState } from 'draft-js';
 import { convertToHTML } from 'draft-convert';
 import { convertFromRaw } from 'draft-js';
@@ -26,6 +28,9 @@ import InputDefault from '../InputDefault';
 import { useToast } from '../../hooks/toast';
 import api from '../../services/api';
 import { createEditorStateFromRaw, serialiseEditorStateToRaw } from 'draftail';
+import { Container } from './styles';
+import { Avatar } from '@material-ui/core';
+import EnterpriseImg from '../../assets/nahora192.png';
 const exporterConfig = {
   blockToHTML: (block) => {
     if (block.type === BLOCK_TYPE.BLOCKQUOTE) {
@@ -67,6 +72,8 @@ function RichTextEditor({
   date,
   type,
   thisEnterprise,
+  fullScreen,
+  setFullScreen,
 }) {
   const toast = useToast();
   const [values, setValues] = useState(null);
@@ -93,7 +100,140 @@ function RichTextEditor({
 
   useEffect(() => {
     getTraining();
-    setEditorState(createEditorStateFromRaw(null));
+    setEditorState(
+      createEditorStateFromRaw(
+        !readOnly
+          ? {
+              blocks: [
+                {
+                  key: '6qiqi',
+                  text: 'MOBILITY ',
+                  type: 'unstyled',
+                  depth: 0,
+                  inlineStyleRanges: [
+                    { offset: 0, length: 8, style: 'BOLD' },
+                    { offset: 0, length: 8, style: 'ITALIC' },
+                    { offset: 0, length: 8, style: 'UNDERLINE' },
+                  ],
+                  entityRanges: [],
+                  data: {},
+                },
+                {
+                  key: 'cvbr6',
+                  text: '',
+                  type: 'unordered-list-item',
+                  depth: 0,
+                  inlineStyleRanges: [],
+                  entityRanges: [],
+                  data: {},
+                },
+                {
+                  key: 'e9idi',
+                  text: 'WARMP UP ',
+                  type: 'unstyled',
+                  depth: 0,
+                  inlineStyleRanges: [
+                    { offset: 0, length: 8, style: 'BOLD' },
+                    { offset: 0, length: 8, style: 'ITALIC' },
+                    { offset: 0, length: 8, style: 'UNDERLINE' },
+                  ],
+                  entityRanges: [],
+                  data: {},
+                },
+                {
+                  key: 'e3v2h',
+                  text: '',
+                  type: 'unordered-list-item',
+                  depth: 0,
+                  inlineStyleRanges: [],
+                  entityRanges: [],
+                  data: {},
+                },
+                {
+                  key: 'cqctj',
+                  text: 'SKILL / STRENGHT ',
+                  type: 'unstyled',
+                  depth: 0,
+                  inlineStyleRanges: [
+                    { offset: 0, length: 16, style: 'BOLD' },
+                    { offset: 0, length: 16, style: 'ITALIC' },
+                    { offset: 0, length: 16, style: 'UNDERLINE' },
+                  ],
+                  entityRanges: [],
+                  data: {},
+                },
+                {
+                  key: '8t37q',
+                  text: '',
+                  type: 'unordered-list-item',
+                  depth: 0,
+                  inlineStyleRanges: [],
+                  entityRanges: [],
+                  data: {},
+                },
+                {
+                  key: '551pf',
+                  text: 'WOD ',
+                  type: 'unstyled',
+                  depth: 0,
+                  inlineStyleRanges: [
+                    { offset: 0, length: 3, style: 'UNDERLINE' },
+                    { offset: 0, length: 3, style: 'ITALIC' },
+                    { offset: 0, length: 3, style: 'BOLD' },
+                  ],
+                  entityRanges: [],
+                  data: {},
+                },
+                {
+                  key: 'ejddu',
+                  text: '',
+                  type: 'unordered-list-item',
+                  depth: 0,
+                  inlineStyleRanges: [],
+                  entityRanges: [],
+                  data: {},
+                },
+                {
+                  key: 'cd9jb',
+                  text: 'EXTRA ',
+                  type: 'unstyled',
+                  depth: 0,
+                  inlineStyleRanges: [
+                    { offset: 0, length: 5, style: 'ITALIC' },
+                    { offset: 0, length: 5, style: 'BOLD' },
+                    { offset: 0, length: 5, style: 'UNDERLINE' },
+                  ],
+                  entityRanges: [],
+                  data: {},
+                },
+                {
+                  key: '1b78p',
+                  text: '',
+                  type: 'unordered-list-item',
+                  depth: 0,
+                  inlineStyleRanges: [],
+                  entityRanges: [],
+                  data: {},
+                },
+              ],
+              entityMap: {},
+            }
+          : {
+              blocks: [
+                {
+                  key: '6qiqi',
+                  text: 'Nenhum treino registrado até o momento.',
+                  type: 'unstyled',
+                  depth: 0,
+                  inlineStyleRanges: [],
+                  entityRanges: [],
+                  data: {},
+                },
+              ],
+              entityMap: {},
+            },
+      ),
+    );
   }, [date]);
 
   useEffect(() => {
@@ -137,49 +277,61 @@ function RichTextEditor({
   }, [values, date, type]);
 
   return (
-    <DraftailEditor
-      editorState={editorState}
-      onChange={test}
-      // rawContentState={values && JSON.parse(values)}
-      // onSave={onSave}
-      blockTypes={[
-        { type: BLOCK_TYPE.HEADER_THREE, icon: <MdTitle /> },
-        {
-          type: BLOCK_TYPE.UNORDERED_LIST_ITEM,
-          icon: <MdFormatListBulleted />,
-          description: 'Marcadores',
-        },
-        {
-          type: BLOCK_TYPE.ORDERED_LIST_ITEM,
-          icon: <MdFormatListNumbered />,
-          description: 'Numeração',
-        },
+    <Container fullScreen={fullScreen}>
+      {fullScreen && <img src={EnterpriseImg} alt="NaHora" />}
+      {fullScreen ? (
+        <MdFullscreenExit
+          cursor="pointer"
+          onClick={() => setFullScreen(!fullScreen)}
+        />
+      ) : (
+        <MdFullscreen
+          cursor="pointer"
+          onClick={() => setFullScreen(!fullScreen)}
+        />
+      )}
+      <DraftailEditor
+        editorState={editorState}
+        onChange={test}
+        blockTypes={[
+          { type: BLOCK_TYPE.HEADER_THREE, icon: <MdTitle /> },
+          {
+            type: BLOCK_TYPE.UNORDERED_LIST_ITEM,
+            icon: <MdFormatListBulleted />,
+            description: 'Marcadores',
+          },
+          {
+            type: BLOCK_TYPE.ORDERED_LIST_ITEM,
+            icon: <MdFormatListNumbered />,
+            description: 'Numeração',
+          },
 
-        {
-          type: INLINE_STYLE.SAVE,
-          icon: <MdSave onClick={saveText} />,
-          description: 'Salvar',
-        },
-      ]}
-      inlineStyles={[
-        {
-          type: INLINE_STYLE.BOLD,
-          icon: <MdFormatBold />,
-          description: 'Negrito',
-        },
-        {
-          type: INLINE_STYLE.ITALIC,
-          icon: <MdFormatItalic />,
-          description: 'Itálico',
-        },
-        {
-          type: INLINE_STYLE.UNDERLINE,
-          icon: <MdFormatUnderlined />,
-          description: 'Sublinhado',
-        },
-      ]}
-      readOnly={readOnly}
-    />
+          {
+            type: INLINE_STYLE.SAVE,
+            icon: <MdSave onClick={saveText} />,
+            description: 'Salvar',
+          },
+        ]}
+        inlineStyles={[
+          {
+            type: INLINE_STYLE.BOLD,
+            icon: <MdFormatBold />,
+            description: 'Negrito',
+          },
+          {
+            type: INLINE_STYLE.ITALIC,
+            icon: <MdFormatItalic />,
+            description: 'Itálico',
+          },
+          {
+            type: INLINE_STYLE.UNDERLINE,
+            icon: <MdFormatUnderlined />,
+            description: 'Sublinhado',
+          },
+        ]}
+        readOnly={readOnly}
+      />
+    </Container>
   );
 }
 

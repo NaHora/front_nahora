@@ -23,6 +23,7 @@ const Training = () => {
   const [primaryColor, setPrimaryColor] = useState('#28262e');
 
   const [secondaryColor, setSecondaryColor] = useState('#ff9000');
+  const [fullScreen, setFullScreen] = useState(false);
 
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [type, setType] = useState('time');
@@ -32,7 +33,16 @@ const Training = () => {
     setSecondaryColor(thisEnterprise.secondary_color);
   }, []);
 
-  return (
+  return fullScreen ? (
+    <RichTextEditor
+      setFullScreen={setFullScreen}
+      fullScreen={fullScreen}
+      thisEnterprise={thisEnterprise.id}
+      readOnly={!owner_enterprise}
+      date={date}
+      type={type}
+    />
+  ) : (
     <Container
       primaryColor={primaryColor || '#28262e'}
       secondaryColor={secondaryColor || '#ff9000'}
@@ -61,6 +71,7 @@ const Training = () => {
           {owner_enterprise && (
             <SelectDefault
               name="type"
+              style={{ marginLeft: '8px' }}
               value={type}
               placeholder="Tipo"
               onChange={(e) => {
@@ -74,6 +85,8 @@ const Training = () => {
         </header>
 
         <RichTextEditor
+          setFullScreen={setFullScreen}
+          fullScreen={fullScreen}
           thisEnterprise={thisEnterprise.id}
           readOnly={!owner_enterprise}
           date={date}
