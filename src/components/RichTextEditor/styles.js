@@ -6,7 +6,7 @@ export const Container = styled.div`
     position: ${(props) => (props.fullScreen ? 'fixed' : 'absolute')};
     top: ${(props) => (props.fullScreen ? '32px' : '15px')};
     right: 22px;
-    z-index: 9;
+    z-index: 1;
   }
 
   > img {

@@ -281,6 +281,7 @@ function RichTextEditor({
       {fullScreen && <img src={EnterpriseImg} alt="NaHora" />}
       {fullScreen ? (
         <MdFullscreenExit
+          size={25}
           cursor="pointer"
           onClick={() => setFullScreen(!fullScreen)}
         />
