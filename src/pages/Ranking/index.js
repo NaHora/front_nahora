@@ -71,6 +71,8 @@ const Ranking = () => {
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [training, setTraining] = useState({});
   const [ranking, setRanking] = useState([]);
+  const [rankType, setRankType] = useState('wod');
+  const [benchmarkType, setBenchmarType] = useState('backsquat');
 
   const getTraining = useCallback(async () => {
     try {
@@ -92,15 +94,28 @@ const Ranking = () => {
     } catch {}
   }, [training, thisEnterprise]);
 
+  const getPrRanking = useCallback(async () => {
+    try {
+      const response = await api.get(
+        `/training/rank/${benchmarkType}/benchmark/enterprise/${thisEnterprise.id}`,
+      );
+      setRanking(response.data);
+    } catch {}
+  }, [thisEnterprise, benchmarkType]);
+
   useEffect(() => {
     getTraining();
   }, [date]);
 
   useEffect(() => {
-    if (training) {
-      getRanking();
+    if (rankType === 'wod') {
+      if (training) {
+        getRanking();
+      }
+    } else if (rankType === 'pr') {
+      getPrRanking();
     }
-  }, [training]);
+  }, [training, rankType, benchmarkType]);
 
   useEffect(() => {
     setPrimaryColor(thisEnterprise.primary_color);
@@ -152,105 +167,73 @@ const Ranking = () => {
         logo_url={thisEnterprise.logo_url}
       />
       <div>
-        <h2>Adicione seu treino:</h2>
-        <header>
+        <div>
           <label htmlFor="">
-            Data do treino
-            <InputDefault
-              name="date"
-              maxWidth="180px"
-              margin={false}
-              type="date"
-              value={date}
-              placeholder="Data"
+            Rankear por:
+            <SelectDefault
+              name="rankType"
+              value={rankType}
+              placeholder="Tipo de Rank"
               onChange={(e) => {
-                setDate(e.target.value);
+                setRankType(e.target.value);
               }}
-            />
+            >
+              <option value="wod">Treino do dia</option>
+              <option value="pr">Recordes Pessoais</option>
+            </SelectDefault>
           </label>
-          {training && (
-            <>
-              <label htmlFor="">
-                Score
-                {training.type === 'time' ? (
-                  <NumberFormat
-                    customInput={InputDefault}
-                    type="text"
-                    format="##:##"
-                    name="score"
-                    margin={false}
-                    allowLeadingZeros
-                    allowEmptyFormatting
-                    mask="_"
-                    maxWidth="160px"
-                    placeholder="Score"
-                    value={values.score}
-                    onValueChange={(e) => {
-                      setValues({
-                        ...values,
-                        score: e.formattedValue,
-                      });
-                    }}
-                  />
-                ) : (
-                  <InputDefault
-                    name="score"
-                    maxWidth="180px"
-                    margin={false}
-                    placeholder="Score"
-                    type="number"
-                    value={values.score}
-                    onChange={(e) =>
-                      setValues({
-                        ...values,
-                        [e.target.name]: e.target.value,
-                      })
-                    }
-                  />
-                )}
-              </label>
-              <label htmlFor="">
-                Categoria
-                <SelectDefault
-                  name="category"
-                  value={values.category}
-                  placeholder="Categoria"
-                  onChange={(e) => {
-                    setValues({ ...values, [e.target.name]: e.target.value });
-                  }}
-                >
-                  <option value="3">Rx</option>
-                  <option value="2">Intermediate</option>
-                  <option value="1">Scale</option>
-                </SelectDefault>
-              </label>
-              <Button
-                primaryColor={primaryColor || '#28262e'}
-                secondaryColor={secondaryColor || '#ff9000'}
-                onClick={handleScore}
+          {rankType === 'pr' && (
+            <label htmlFor="">
+              Movimento:
+              <SelectDefault
+                name="benchmarkType"
+                value={benchmarkType}
+                placeholder="Movimento"
+                onChange={(e) => {
+                  setBenchmarType(e.target.value);
+                }}
               >
-                adicionar
-              </Button>
-            </>
+                <option value="backsquat">Back Squat</option>
+                <option value="benchpress">Bench Press</option>
+                <option value="deadlift">Deadlift</option>
+                <option value="frontsquat">Front Squat</option>
+                <option value="overheadsquat">Overhead Squat</option>
+                <option value="pushpress">Push Press</option>
+                <option value="shoulderpress">Shouder Press</option>
+                <option value="thruster">Thruster</option>
+                <option value="clean">Clean</option>
+                <option value="cleanjerk">Clean & Jerk</option>
+                <option value="cluster">Cluster</option>
+                <option value="hangpowerclean">Hang Power Clean</option>
+                <option value="hangpowersnatch">Hang Power Snatch</option>
+                <option value="handsquatsnatch">Hang Squat Snatch</option>
+                <option value="hangsquatclean">Hang Squat Clean</option>
+                <option value="powerclean">Power Clean</option>
+                <option value="powersnatch">Power Snatch</option>
+                <option value="pushjerk">Push Jerk</option>
+                <option value="snatch">Snatch</option>
+                <option value="snatchbalance">Snatch Balance</option>
+                <option value="splitjerk">Split Jerk</option>
+                <option value="squatclean">Squat Clean</option>
+                <option value="squatsnatch">Squat Snatch</option>
+              </SelectDefault>
+            </label>
           )}
-        </header>
-
-        {!training ? (
-          <span>Nenhum treino cadastrado neste dia</span>
-        ) : (
+        </div>
+        {rankType === 'pr' && (
           <table>
             <thead>
               <tr>
                 <th>#</th>
                 <th>Nome</th>
                 <th>Score</th>
-                <th>Categoria</th>
+                <th>Gênero</th>
               </tr>
             </thead>
             <tbody>
               {ranking.length > 0 ? (
                 ranking.map((rank, index) => (
-                  <tr>
+                  <tr key={rank.id}>
                     <td>{index + 1}</td>
                     <td style={{ display: 'flex', alignItems: 'center' }}>
                       {
@@ -262,23 +245,158 @@ const Ranking = () => {
                       }
                       {rank.user.isPrivate ? 'Anônimo' : rank.user.name}
                     </td>
-                    <td>{rank.score}</td>
+                    <td>{rank[benchmarkType]}</td>
                     <td>
-                      {rank.type === '3'
-                        ? 'Rx'
-                        : rank.type === '2'
-                        ? 'Int'
-                        : 'Scl'}
+                      {rank.user.gender === 'm'
+                        ? 'Masculino'
+                        : rank.user.gender === 'f'
+                        ? 'Feminino'
+                        : 'Indefinido'}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4">Nenhum treino registrado.</td>
+                  <td colSpan="4">Nenhum recorde pessoal registrado.</td>
                 </tr>
               )}
             </tbody>
           </table>
+        )}
+        {rankType === 'wod' && (
+          <>
+            {training && <h2>Adicione seu treino:</h2>}
+            <header>
+              <label htmlFor="">
+                Data do treino
+                <InputDefault
+                  name="date"
+                  maxWidth="180px"
+                  margin={false}
+                  type="date"
+                  value={date}
+                  placeholder="Data"
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                  }}
+                />
+              </label>
+              {training && (
+                <>
+                  <label htmlFor="">
+                    Score
+                    {training.type === 'time' ? (
+                      <NumberFormat
+                        customInput={InputDefault}
+                        type="text"
+                        format="##:##"
+                        name="score"
+                        margin={false}
+                        allowLeadingZeros
+                        allowEmptyFormatting
+                        mask="_"
+                        maxWidth="160px"
+                        placeholder="Score"
+                        value={values.score}
+                        onValueChange={(e) => {
+                          setValues({
+                            ...values,
+                            score: e.formattedValue,
+                          });
+                        }}
+                      />
+                    ) : (
+                      <InputDefault
+                        name="score"
+                        maxWidth="180px"
+                        margin={false}
+                        placeholder="Score"
+                        type="number"
+                        value={values.score}
+                        onChange={(e) =>
+                          setValues({
+                            ...values,
+                            [e.target.name]: e.target.value,
+                          })
+                        }
+                      />
+                    )}
+                  </label>
+                  <label htmlFor="">
+                    Categoria
+                    <SelectDefault
+                      name="category"
+                      value={values.category}
+                      placeholder="Categoria"
+                      onChange={(e) => {
+                        setValues({
+                          ...values,
+                          [e.target.name]: e.target.value,
+                        });
+                      }}
+                    >
+                      <option value="3">Rx</option>
+                      <option value="2">Intermediate</option>
+                      <option value="1">Scale</option>
+                    </SelectDefault>
+                  </label>
+                  <Button
+                    primaryColor={primaryColor || '#28262e'}
+                    secondaryColor={secondaryColor || '#ff9000'}
+                    onClick={handleScore}
+                  >
+                    adicionar
+                  </Button>
+                </>
+              )}
+            </header>
+
+            {!training ? (
+              <span>Nenhum treino cadastrado neste dia</span>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>Score</th>
+                    <th>Categoria</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ranking.length > 0 ? (
+                    ranking.map((rank, index) => (
+                      <tr>
+                        <td>{index + 1}</td>
+                        <td style={{ display: 'flex', alignItems: 'center' }}>
+                          {
+                            <Avatar
+                              isPrivate={rank.user.isPrivate}
+                              name={rank.user.name}
+                              avatarUrl={rank.user.avatar_url}
+                            />
+                          }
+                          {rank.user.isPrivate ? 'Anônimo' : rank.user.name}
+                        </td>
+                        <td>{rank.score}</td>
+                        <td>
+                          {rank.type === '3'
+                            ? 'Rx'
+                            : rank.type === '2'
+                            ? 'Int'
+                            : 'Scl'}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4">Nenhum treino registrado.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+          </>
         )}
       </div>
     </Container>

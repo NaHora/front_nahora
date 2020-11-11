@@ -38,7 +38,7 @@ export const Container = styled.div`
     min-height: 47px;
   }
   .DraftEditor-root {
-    font-size: ${(props) => props.fullScreen && '2.9vh'};
+    font-size: ${(props) => props.fullScreen && '50px'};
 
     color: #fff !important;
     min-height: ${(props) => (props.fullScreen ? '100vh' : '400px')};

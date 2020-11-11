@@ -10,7 +10,7 @@ interface PageColor {
 }
 
 export const SelectDefault = styled.select`
-  width: 180px;
+  width: 200px;
   background: #232129;
   border: none;
   color: white;
@@ -40,6 +40,19 @@ export const Container = styled.div<PageColor>`
     align-self: center;
     width: 100%;
     padding: 10px;
+
+    > div {
+      display: flex;
+      @media (max-width: 600px) {
+        flex-direction: column;
+      }
+      > label {
+        display: flex;
+        margin: 0 8px 0;
+
+        flex-direction: column;
+      }
+    }
 
     > table {
       margin-top: 32px;
