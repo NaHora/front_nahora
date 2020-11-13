@@ -49,6 +49,7 @@ import { useSocket } from '../../hooks/socket';
 import { useLoad } from '../../hooks/load';
 import Avatar from '../../components/Avatar';
 import EnterpriseHeader from '../../components/EnterpriseHeader';
+import AlertToast from '../../components/AlertToast';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -134,6 +135,13 @@ interface LimitOptions {
   [key: string]: boolean;
 }
 
+interface Alert {
+  id: string;
+  title?: string;
+  description?: string;
+  enterprise_id: string;
+}
+
 const Dashboard: React.FC = () => {
   const toast = useToast();
   const { user } = useAuth();
@@ -183,11 +191,20 @@ const Dashboard: React.FC = () => {
   const [allUsersEnterpriseAccepted, setAllUsersEnterpriseAccepted] = useState<
     Invite[]
   >([]);
+  const [currentAlert, setCurrentAlert] = useState<Alert | any>({});
 
   const handleOpen = (service_id: string) => {
     setCurrentService(service_id);
     setOpen(true);
   };
+
+  const getMyAlerts = useCallback(async () => {
+    try {
+      const response = await api.get(`/alert/${thisEnterprise.id}`);
+
+      setCurrentAlert(response.data);
+    } catch (err) {}
+  }, [thisEnterprise]);
 
   const handleOpenUser = (appointment_id: string) => {
     setCurrentAppointment(appointment_id);
@@ -205,6 +222,10 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     setPrimaryColor(thisEnterprise.primary_color);
     setSecondaryColor(thisEnterprise.secondary_color);
+  }, []);
+
+  useEffect(() => {
+    getMyAlerts();
   }, []);
 
   const getAllEnterpriseAcceptedInvites = useCallback(async () => {
@@ -888,6 +909,12 @@ const Dashboard: React.FC = () => {
       primaryColor={primaryColor || '#28262e'}
       secondaryColor={secondaryColor || '#ff9000'}
     >
+      {currentAlert.id && (
+        <AlertToast
+          title={currentAlert.title}
+          description={currentAlert.description}
+        />
+      )}
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"

@@ -19,6 +19,7 @@ import Financial from '../pages/EnterprisePages/Financial';
 import PolicyPrivate from '../pages/PolicyPrivate';
 import TermsUse from '../pages/TermsUse';
 import ClientDetail from '../pages/EnterprisePages/ClientDetail';
+import Alert from '../pages/EnterprisePages/Alert';
 import Training from '../pages/Training';
 import Ranking from '../pages/Ranking';
 import Benchmark from '../pages/Benchmark';
@@ -29,6 +30,7 @@ export const routes = {
   training: '/training',
   pr: '/pr',
   ranking: '/ranking',
+  alert: '/alert',
   signup: '/signup',
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
@@ -52,6 +54,7 @@ const Routes: React.FC = () => {
     <Switch>
       <Route path={routes.dashboard} component={Dashboard} isPrivate />
       <Route path={routes.enterprise} component={Enterprises} isPrivate />
+      <Route path={routes.alert} component={Alert} isPrivate />
       <Route path={routes.clientDetail} component={ClientDetail} isPrivate />
       <Route path={routes.schedule} component={Schedule} isPrivate />
       <Route path={routes.training} component={Training} isPrivate />

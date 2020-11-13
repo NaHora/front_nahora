@@ -146,6 +146,12 @@ const Menu: React.FC = () => {
                 Gestão de horários
               </Span>
               <Span
+                currentPage={history.location.pathname === routes.alert}
+                onClick={() => history.push(routes.alert)}
+              >
+                Gestão de Alertas
+              </Span>
+              <Span
                 currentPage={
                   history.location.pathname === routes.enterpriseProfile
                 }
