@@ -26,6 +26,7 @@ import { useAuth } from '../../hooks/auth';
 import InputDefault from '../../components/InputDefault';
 import Avatar from '../../components/Avatar';
 import { SelectDefault } from '../SignUp/styles';
+import resize from '../../components/Resize';
 
 interface ProfileFormData {
   name: string;
@@ -146,24 +147,50 @@ const Profile: React.FC = () => {
     [addToast, history, updateUser, isPrivate, data],
   );
 
-  const handleAvatarChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        const formData = new FormData();
-        formData.append('avatar', e.target.files[0]);
+  const callback = (image: any) => {
+    // criando um formData para upload do arquivo
+    const formData = new FormData();
+    formData.append('avatar', image);
+    api.patch('/users/avatar', formData).then((response) => {
+      updateUser(response.data);
 
-        api.patch('/users/avatar', formData).then((response) => {
-          updateUser(response.data);
+      addToast({
+        type: 'success',
+        title: 'Avatar Atualizado!',
+      });
+    });
+  };
 
-          addToast({
-            type: 'success',
-            title: 'Avatar Atualizado!',
-          });
-        });
+  const handleAvatarChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const { files } = e.target;
+      if (files.length === 0) {
+        return; // se não selecionar nenhum file
       }
-    },
-    [addToast, updateUser],
-  );
+      console.log(files);
+      // funcao de resize
+      resize(files[0], callback);
+    }
+  }, []);
+
+  // const handleAvatarChange = useCallback(
+  //   (e: ChangeEvent<HTMLInputElement>) => {
+  //     if (e.target.files) {
+  //       const formData = new FormData();
+  //       formData.append('avatar', e.target.files[0]);
+
+  //       api.patch('/users/avatar', formData).then((response) => {
+  //         updateUser(response.data);
+
+  //         addToast({
+  //           type: 'success',
+  //           title: 'Avatar Atualizado!',
+  //         });
+  //       });
+  //     }
+  //   },
+  //   [addToast, updateUser],
+  // );
 
   return (
     <Container>
@@ -190,7 +217,12 @@ const Profile: React.FC = () => {
 
             <label htmlFor="avatar">
               <FiCamera />
-              <input type="file" onChange={handleAvatarChange} id="avatar" />
+              <input
+                type="file"
+                accept="image/*,"
+                onChange={handleAvatarChange}
+                id="avatar"
+              />
             </label>
           </AvatarInput>
           <h1>Meu Perfil</h1>
