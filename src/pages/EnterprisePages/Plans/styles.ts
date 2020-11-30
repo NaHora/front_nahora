@@ -98,6 +98,19 @@ export const CardSolicitation = styled.div<StatusColor>`
     }
   }
 
+  > main {
+    display: flex;
+    align-items: center;
+
+    > svg {
+      margin: 0 10px;
+    }
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+    }
+  }
+
   > div {
     display: flex;
     align-items: center;

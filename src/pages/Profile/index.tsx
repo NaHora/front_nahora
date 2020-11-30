@@ -167,7 +167,7 @@ const Profile: React.FC = () => {
       if (files.length === 0) {
         return; // se não selecionar nenhum file
       }
-      console.log(files);
+
       // funcao de resize
       resize(files[0], callback);
     }

@@ -16,6 +16,7 @@ import {
 import { Tooltip } from '@material-ui/core';
 import {
   differenceInDays,
+  format,
   formatDistance,
   getMonth,
   getYear,
@@ -25,6 +26,7 @@ import { ptBR } from 'date-fns/locale';
 import numeral from 'numeral';
 import NumberFormat from 'react-number-format';
 import { useHistory } from 'react-router-dom';
+import { MdEdit } from 'react-icons/md';
 import HeaderMenu from '../../../components/Header';
 import {
   Container,
@@ -81,7 +83,7 @@ interface Solicitation {
 interface UserPlan {
   id: string;
   user: User;
-  expiration_at: Date;
+  expiration_at: Date | string;
   plan_id: string;
 }
 
@@ -108,10 +110,12 @@ const Plans: React.FC = () => {
   );
   const toast = useToast();
   const [searchValue, setSearchValue] = useState('');
+  const [editPlan, setEditPlan] = useState<UserPlan>({} as UserPlan);
   const [selectValue, setSelectValue] = useState('0');
   const [openSolicitationSection, setOpenSolicitationSection] = useState(true);
   const [openActiveSection, setOpenActiveSection] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [openInvite, setOpenInvite] = useState(false);
   const [openRestrict, setOpenRestrict] = useState(false);
   const [openPlanSection, setOpenPlanSection] = useState(true);
@@ -491,6 +495,37 @@ const Plans: React.FC = () => {
     [toast, getSolicitations, getAllEnterpriseAcceptedInvites],
   );
 
+  const changeExpirationDate = useCallback(async () => {
+    try {
+      await api.put(`/plans/expiration`, {
+        user_plan_id: editPlan.id,
+        expiration_at: editPlan.expiration_at,
+      });
+      getAllEnterpriseAcceptedInvites();
+      setEditPlan({} as UserPlan);
+      setEditMode(false);
+      toast.addToast({
+        type: 'success',
+        title: 'Você editou o tempo de expiração do plano do usuário.',
+      });
+    } catch (err) {
+      if (err.response) {
+        toast.addToast({
+          type: 'error',
+          title:
+            err.response.data.message ||
+            'Ocorreu um erro ao editar o tempo de expiração do plano, tente novamente',
+        });
+      } else {
+        toast.addToast({
+          type: 'error',
+          title:
+            'Ocorreu um erro ao editar o tempo de expiração do plano, tente novamente',
+        });
+      }
+    }
+  }, [toast, getAllEnterpriseAcceptedInvites, editPlan]);
+
   const cancelUserPlan = useCallback(
     async (active_plan_id) => {
       try {
@@ -636,7 +671,8 @@ const Plans: React.FC = () => {
                     setInviteData({
                       ...inviteData,
                       [e.target.name]: e.target.value,
-                    })}
+                    })
+                  }
                   placeholder="Nome"
                 />
                 <NumberFormat
@@ -654,7 +690,8 @@ const Plans: React.FC = () => {
                     setInviteData({
                       ...inviteData,
                       celphone: text.value,
-                    })}
+                    })
+                  }
                 />
 
                 <InputDefault
@@ -667,7 +704,8 @@ const Plans: React.FC = () => {
                     setInviteData({
                       ...inviteData,
                       [e.target.name]: e.target.value,
-                    })}
+                    })
+                  }
                 />
                 <Button loading={loading} onClick={inviteUser}>
                   Convidar
@@ -777,7 +815,8 @@ const Plans: React.FC = () => {
                                 setSelectionSolicitation({
                                   ...selectedSolicitation,
                                   [invite.user.id]: e.target.value,
-                                })}
+                                })
+                              }
                               name="selectedSolicitation"
                               value={selectedSolicitation[invite.user.id]}
                             >
@@ -800,7 +839,8 @@ const Plans: React.FC = () => {
                                   invite.user.id,
                                   selectedSolicitation[invite.user.id],
                                   invite.currentPlan?.id,
-                                )}
+                                )
+                              }
                               color="#1ec657"
                               cursor="pointer"
                               size={25}
@@ -823,11 +863,75 @@ const Plans: React.FC = () => {
                                 new Date(invite.currentPlan?.expiration_at),
                                 new Date(),
                               ) ? (
-                                formatDistance(
-                                  new Date(invite.currentPlan?.expiration_at),
-                                  new Date(),
-                                  { addSuffix: true, locale: ptBR },
-                                )
+                                <>
+                                  {formatDistance(
+                                    new Date(invite.currentPlan?.expiration_at),
+                                    new Date(),
+                                    { addSuffix: true, locale: ptBR },
+                                  )}{' '}
+                                  - (
+                                  {format(
+                                    new Date(invite.currentPlan?.expiration_at),
+                                    'dd/MM/yyyy',
+                                  )}
+                                  ){' '}
+                                  <div
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                    }}
+                                  >
+                                    {editMode &&
+                                      editPlan.id ===
+                                        invite.currentPlan?.id && (
+                                        <InputDefault
+                                          name="date"
+                                          maxWidth="180px"
+                                          margin={false}
+                                          type="date"
+                                          value={editPlan.expiration_at}
+                                          placeholder="Data"
+                                          onChange={(e) => {
+                                            setEditPlan({
+                                              ...editPlan,
+                                              expiration_at: e.target.value,
+                                            });
+                                          }}
+                                        />
+                                      )}
+                                    {editMode &&
+                                    editPlan.id === invite.currentPlan?.id ? (
+                                      <>
+                                        <FiCheck
+                                          onClick={changeExpirationDate}
+                                          color="#1ec657"
+                                          cursor="pointer"
+                                          size={20}
+                                        />
+                                        <FiX
+                                          onClick={() => {
+                                            setEditMode(false);
+                                          }}
+                                          color="#fc384c"
+                                          cursor="pointer"
+                                          size={20}
+                                        />
+                                      </>
+                                    ) : (
+                                      <MdEdit
+                                        color="#ff9000"
+                                        size={20}
+                                        cursor="pointer"
+                                        onClick={() => {
+                                          setEditPlan(
+                                            invite.currentPlan as UserPlan,
+                                          );
+                                          setEditMode(true);
+                                        }}
+                                      />
+                                    )}
+                                  </div>
+                                </>
                               ) : (
                                 <>
                                   Expirou{' '}
@@ -836,6 +940,68 @@ const Plans: React.FC = () => {
                                     new Date(),
                                     { addSuffix: true, locale: ptBR },
                                   )}
+                                  - (
+                                  {format(
+                                    new Date(invite.currentPlan?.expiration_at),
+                                    'dd/MM/yyyy',
+                                  )}
+                                  ){' '}
+                                  <div
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                    }}
+                                  >
+                                    {editMode &&
+                                      editPlan.id ===
+                                        invite.currentPlan?.id && (
+                                        <InputDefault
+                                          name="date"
+                                          maxWidth="180px"
+                                          margin={false}
+                                          type="date"
+                                          value={editPlan.expiration_at}
+                                          placeholder="Data"
+                                          onChange={(e) => {
+                                            setEditPlan({
+                                              ...editPlan,
+                                              expiration_at: e.target.value,
+                                            });
+                                          }}
+                                        />
+                                      )}
+                                    {editMode &&
+                                    editPlan.id === invite.currentPlan?.id ? (
+                                      <>
+                                        <FiCheck
+                                          onClick={changeExpirationDate}
+                                          color="#1ec657"
+                                          cursor="pointer"
+                                          size={20}
+                                        />
+                                        <FiX
+                                          onClick={() => {
+                                            setEditMode(false);
+                                          }}
+                                          color="#fc384c"
+                                          cursor="pointer"
+                                          size={20}
+                                        />
+                                      </>
+                                    ) : (
+                                      <MdEdit
+                                        color="#ff9000"
+                                        size={20}
+                                        cursor="pointer"
+                                        onClick={() => {
+                                          setEditPlan(
+                                            invite.currentPlan as UserPlan,
+                                          );
+                                          setEditMode(true);
+                                        }}
+                                      />
+                                    )}
+                                  </div>
                                 </>
                               )
                             ) : (
@@ -851,7 +1017,8 @@ const Plans: React.FC = () => {
                                 onClick={() =>
                                   history.push(
                                     `${routes.clientDetailNoParams}/${invite.user.id}`,
-                                  )}
+                                  )
+                                }
                                 style={{
                                   color: '#ff9000',
                                   display: 'flex',
@@ -882,7 +1049,8 @@ const Plans: React.FC = () => {
           <SolicitationSection>
             <span
               onClick={() =>
-                setOpenSolicitationSection(!openSolicitationSection)}
+                setOpenSolicitationSection(!openSolicitationSection)
+              }
             >
               {!openSolicitationSection ? (
                 <FiChevronDown
@@ -1005,7 +1173,8 @@ const Plans: React.FC = () => {
                       setRestrictData({
                         ...restrictData,
                         [e.target.name]: e.target.value,
-                      })}
+                      })
+                    }
                     name="plan_id"
                   >
                     {' '}
@@ -1027,7 +1196,8 @@ const Plans: React.FC = () => {
                       setRestrictData({
                         ...restrictData,
                         [e.target.name]: e.target.value,
-                      })}
+                      })
+                    }
                     name="category_id"
                   >
                     <option value="">-</option>
@@ -1110,7 +1280,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           placeholder="Nome"
                           type="text"
                         />
@@ -1123,7 +1294,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           placeholder="Valor"
                           type="text"
                         />
@@ -1137,7 +1309,8 @@ const Plans: React.FC = () => {
                               setPlanData({
                                 ...planData,
                                 [e.target.name]: e.target.value,
-                              })}
+                              })
+                            }
                             style={{ borderRadius: '5px 0 0 5px' }}
                             name="days_to_expire"
                             placeholder="Expiração"
@@ -1149,7 +1322,8 @@ const Plans: React.FC = () => {
                               setPlanData({
                                 ...planData,
                                 [e.target.name]: e.target.value,
-                              })}
+                              })
+                            }
                             name="type_expiration"
                           >
                             <option value="day">Dia</option>
@@ -1164,7 +1338,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           name="schedule_limit"
                           placeholder="Limite"
                           type="number"
@@ -1177,7 +1352,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           name="week_limit"
                           placeholder="Limite Semanal"
                           type="number"
@@ -1190,7 +1366,8 @@ const Plans: React.FC = () => {
                             setPlanData({
                               ...planData,
                               [e.target.name]: e.target.value,
-                            })}
+                            })
+                          }
                           name="delete_limit"
                           placeholder="Limite de Cancelamento"
                           type="number"
