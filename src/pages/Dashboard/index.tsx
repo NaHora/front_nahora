@@ -240,20 +240,23 @@ const Dashboard: React.FC = () => {
     getAllEnterpriseAcceptedInvites();
   }, []);
 
-  const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
-    if ((modifiers.available && !modifiers.disabled) || owner_enterprise) {
-      setOpeModal({});
+  const handleDateChange = useCallback(
+    (day: Date, modifiers: DayModifiers) => {
+      if ((modifiers.available && !modifiers.disabled) || owner_enterprise) {
+        setOpeModal({});
 
-      setSelectedDate(day);
-      setCurrentWeekDay(getDay(day));
-    } else {
-      toast.addToast({
-        type: 'error',
-        title:
-          'Sem Horário disponível este dia, datas com horários disponíveis ficam com um contorno.',
-      });
-    }
-  }, []);
+        setSelectedDate(day);
+        setCurrentWeekDay(getDay(day));
+      } else {
+        toast.addToast({
+          type: 'error',
+          title:
+            'Sem Horário disponível este dia, datas com horários disponíveis ficam com um contorno.',
+        });
+      }
+    },
+    [toast, owner_enterprise],
+  );
 
   useEffect(() => {
     api.get(`/services/category/${thisEnterprise.id}`).then((response) => {
@@ -274,7 +277,7 @@ const Dashboard: React.FC = () => {
     } finally {
       stop();
     }
-  }, [thisEnterprise.id, selectectedCategory]);
+  }, [thisEnterprise.id, selectectedCategory, start, stop]);
 
   useEffect(() => {
     if (selectectedCategory && thisEnterprise.id) {
@@ -459,7 +462,7 @@ const Dashboard: React.FC = () => {
   );
 
   useEffect(() => {
-    if (thisEnterprise.id && currentWeekDay && selectectedCategory) {
+    if (thisEnterprise.id && selectectedCategory) {
       handleServices();
     }
   }, [thisEnterprise.id, currentWeekDay, selectectedCategory, selectedDate]);
