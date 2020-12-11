@@ -115,7 +115,7 @@ const Enterprises: React.FC = () => {
     setLoading(true);
     start();
     try {
-      const response = await api.get(`/appointments/me`);
+      const response = await api.get(`/appointments/me/${7}`);
 
       setMyAppointments(response.data);
       setOpenDelete(false);
@@ -341,7 +341,7 @@ const Enterprises: React.FC = () => {
           )}
         </div>
         <div>
-          <span>Agendamentos Passados:</span>
+          <span>Últimos 7 Passados:</span>
           {myAppointments && myAppointments.pastAppointments.length > 0 ? (
             myAppointments.pastAppointments
               .filter((appointment) => appointment.service !== null)
