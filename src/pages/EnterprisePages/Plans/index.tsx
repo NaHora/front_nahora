@@ -27,6 +27,7 @@ import numeral from 'numeral';
 import NumberFormat from 'react-number-format';
 import { useHistory } from 'react-router-dom';
 import { MdEdit } from 'react-icons/md';
+import { FaWhatsapp } from 'react-icons/fa';
 import HeaderMenu from '../../../components/Header';
 import {
   Container,
@@ -49,11 +50,13 @@ import { routes } from '../../../routes';
 import Select from '../../../components/Select';
 import Avatar from '../../../components/Avatar';
 import DialogModal from '../../../components/DialogModal';
+import { removeMask } from '../../../utils';
 
 interface User {
   id: string;
   avatar_url: string;
   name: string;
+  celphone: string;
 }
 
 interface Category {
@@ -857,156 +860,186 @@ const Plans: React.FC = () => {
                             />
                           </div>
                           <main>
-                            expiração do plano:{' '}
-                            {invite.currentPlan ? (
-                              isAfter(
-                                new Date(invite.currentPlan?.expiration_at),
-                                new Date(),
-                              ) ? (
-                                <>
-                                  {formatDistance(
-                                    new Date(invite.currentPlan?.expiration_at),
-                                    new Date(),
-                                    { addSuffix: true, locale: ptBR },
-                                  )}{' '}
-                                  - (
-                                  {format(
-                                    new Date(invite.currentPlan?.expiration_at),
-                                    'dd/MM/yyyy',
-                                  )}
-                                  ){' '}
-                                  <div
-                                    style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                    }}
-                                  >
-                                    {editMode &&
-                                      editPlan.id ===
-                                        invite.currentPlan?.id && (
-                                        <InputDefault
-                                          name="date"
-                                          maxWidth="180px"
-                                          margin={false}
-                                          type="date"
-                                          value={editPlan.expiration_at}
-                                          placeholder="Data"
-                                          onChange={(e) => {
-                                            setEditPlan({
-                                              ...editPlan,
-                                              expiration_at: e.target.value,
-                                            });
+                            <a
+                              target="_blank"
+                              style={{
+                                display: 'flex',
+                                cursor: 'pointer',
+                                textDecoration: 'none',
+                                color: 'inherit',
+                              }}
+                              href={`https://api.whatsapp.com/send?phone=55${removeMask(
+                                invite.user.celphone,
+                              )}`}
+                            >
+                              <FaWhatsapp size={20} />
+                              {invite.user.celphone}
+                            </a>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                              }}
+                            >
+                              expiração do plano:{' '}
+                              {invite.currentPlan ? (
+                                isAfter(
+                                  new Date(invite.currentPlan?.expiration_at),
+                                  new Date(),
+                                ) ? (
+                                  <>
+                                    {formatDistance(
+                                      new Date(
+                                        invite.currentPlan?.expiration_at,
+                                      ),
+                                      new Date(),
+                                      { addSuffix: true, locale: ptBR },
+                                    )}{' '}
+                                    - (
+                                    {format(
+                                      new Date(
+                                        invite.currentPlan?.expiration_at,
+                                      ),
+                                      'dd/MM/yyyy',
+                                    )}
+                                    ){' '}
+                                    <div
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                      }}
+                                    >
+                                      {editMode &&
+                                        editPlan.id ===
+                                          invite.currentPlan?.id && (
+                                          <InputDefault
+                                            name="date"
+                                            maxWidth="180px"
+                                            margin={false}
+                                            type="date"
+                                            value={editPlan.expiration_at}
+                                            placeholder="Data"
+                                            onChange={(e) => {
+                                              setEditPlan({
+                                                ...editPlan,
+                                                expiration_at: e.target.value,
+                                              });
+                                            }}
+                                          />
+                                        )}
+                                      {editMode &&
+                                      editPlan.id === invite.currentPlan?.id ? (
+                                        <>
+                                          <FiCheck
+                                            onClick={changeExpirationDate}
+                                            color="#1ec657"
+                                            cursor="pointer"
+                                            size={20}
+                                          />
+                                          <FiX
+                                            onClick={() => {
+                                              setEditMode(false);
+                                            }}
+                                            color="#fc384c"
+                                            cursor="pointer"
+                                            size={20}
+                                          />
+                                        </>
+                                      ) : (
+                                        <MdEdit
+                                          color="#ff9000"
+                                          size={20}
+                                          cursor="pointer"
+                                          onClick={() => {
+                                            setEditPlan(
+                                              invite.currentPlan as UserPlan,
+                                            );
+                                            setEditMode(true);
                                           }}
                                         />
                                       )}
-                                    {editMode &&
-                                    editPlan.id === invite.currentPlan?.id ? (
-                                      <>
-                                        <FiCheck
-                                          onClick={changeExpirationDate}
-                                          color="#1ec657"
-                                          cursor="pointer"
-                                          size={20}
-                                        />
-                                        <FiX
-                                          onClick={() => {
-                                            setEditMode(false);
-                                          }}
-                                          color="#fc384c"
-                                          cursor="pointer"
-                                          size={20}
-                                        />
-                                      </>
-                                    ) : (
-                                      <MdEdit
-                                        color="#ff9000"
-                                        size={20}
-                                        cursor="pointer"
-                                        onClick={() => {
-                                          setEditPlan(
-                                            invite.currentPlan as UserPlan,
-                                          );
-                                          setEditMode(true);
-                                        }}
-                                      />
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    Expirou{' '}
+                                    {formatDistance(
+                                      new Date(
+                                        invite.currentPlan?.expiration_at,
+                                      ),
+                                      new Date(),
+                                      { addSuffix: true, locale: ptBR },
                                     )}
-                                  </div>
-                                </>
+                                    - (
+                                    {format(
+                                      new Date(
+                                        invite.currentPlan?.expiration_at,
+                                      ),
+                                      'dd/MM/yyyy',
+                                    )}
+                                    ){' '}
+                                    <div
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                      }}
+                                    >
+                                      {editMode &&
+                                        editPlan.id ===
+                                          invite.currentPlan?.id && (
+                                          <InputDefault
+                                            name="date"
+                                            maxWidth="180px"
+                                            margin={false}
+                                            type="date"
+                                            value={editPlan.expiration_at}
+                                            placeholder="Data"
+                                            onChange={(e) => {
+                                              setEditPlan({
+                                                ...editPlan,
+                                                expiration_at: e.target.value,
+                                              });
+                                            }}
+                                          />
+                                        )}
+                                      {editMode &&
+                                      editPlan.id === invite.currentPlan?.id ? (
+                                        <>
+                                          <FiCheck
+                                            onClick={changeExpirationDate}
+                                            color="#1ec657"
+                                            cursor="pointer"
+                                            size={20}
+                                          />
+                                          <FiX
+                                            onClick={() => {
+                                              setEditMode(false);
+                                            }}
+                                            color="#fc384c"
+                                            cursor="pointer"
+                                            size={20}
+                                          />
+                                        </>
+                                      ) : (
+                                        <MdEdit
+                                          color="#ff9000"
+                                          size={20}
+                                          cursor="pointer"
+                                          onClick={() => {
+                                            setEditPlan(
+                                              invite.currentPlan as UserPlan,
+                                            );
+                                            setEditMode(true);
+                                          }}
+                                        />
+                                      )}
+                                    </div>
+                                  </>
+                                )
                               ) : (
-                                <>
-                                  Expirou{' '}
-                                  {formatDistance(
-                                    new Date(invite.currentPlan?.expiration_at),
-                                    new Date(),
-                                    { addSuffix: true, locale: ptBR },
-                                  )}
-                                  - (
-                                  {format(
-                                    new Date(invite.currentPlan?.expiration_at),
-                                    'dd/MM/yyyy',
-                                  )}
-                                  ){' '}
-                                  <div
-                                    style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                    }}
-                                  >
-                                    {editMode &&
-                                      editPlan.id ===
-                                        invite.currentPlan?.id && (
-                                        <InputDefault
-                                          name="date"
-                                          maxWidth="180px"
-                                          margin={false}
-                                          type="date"
-                                          value={editPlan.expiration_at}
-                                          placeholder="Data"
-                                          onChange={(e) => {
-                                            setEditPlan({
-                                              ...editPlan,
-                                              expiration_at: e.target.value,
-                                            });
-                                          }}
-                                        />
-                                      )}
-                                    {editMode &&
-                                    editPlan.id === invite.currentPlan?.id ? (
-                                      <>
-                                        <FiCheck
-                                          onClick={changeExpirationDate}
-                                          color="#1ec657"
-                                          cursor="pointer"
-                                          size={20}
-                                        />
-                                        <FiX
-                                          onClick={() => {
-                                            setEditMode(false);
-                                          }}
-                                          color="#fc384c"
-                                          cursor="pointer"
-                                          size={20}
-                                        />
-                                      </>
-                                    ) : (
-                                      <MdEdit
-                                        color="#ff9000"
-                                        size={20}
-                                        cursor="pointer"
-                                        onClick={() => {
-                                          setEditPlan(
-                                            invite.currentPlan as UserPlan,
-                                          );
-                                          setEditMode(true);
-                                        }}
-                                      />
-                                    )}
-                                  </div>
-                                </>
-                              )
-                            ) : (
-                              'usuário sem plano'
-                            )}
+                                'usuário sem plano'
+                              )}
+                            </div>
                           </main>
                           {invite.currentPlan &&
                             isAfter(

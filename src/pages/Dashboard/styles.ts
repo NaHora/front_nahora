@@ -364,6 +364,13 @@ export const ModalUsers = styled.div<PageColor>`
     margin-right: 8px;
   } */
 
+  > main {
+    @media (max-width: 600px) {
+      width: 100%;
+      padding: 0;
+    }
+  }
+
   > div {
     overflow-y: scroll;
     width: 100%;
@@ -371,6 +378,10 @@ export const ModalUsers = styled.div<PageColor>`
     flex-direction: column;
     align-items: center;
     margin: 10px;
+
+    @media (max-width: 600px) {
+      align-items: flex-start;
+    }
 
     ::-webkit-scrollbar-track {
       background-color: ${(props) => lighten(0.1, props.secondaryColor)};

@@ -100,7 +100,22 @@ export const CardSolicitation = styled.div<StatusColor>`
 
   > main {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    flex-direction: column;
+
+    > a {
+      > svg {
+        margin-right: 8px;
+      }
+    }
+
+    > div {
+      margin: 4px 0;
+
+      > div {
+        margin-left: 8px;
+      }
+    }
 
     > svg {
       margin: 0 10px;
