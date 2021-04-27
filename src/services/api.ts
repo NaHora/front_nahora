@@ -7,17 +7,12 @@ const api = axios.create({
 });
 
 export async function getNewRefreshToken() {
-  const userToken = localStorage.getItem('@NaHora:token') as any;
-
-  const tokenExpiration = jwt.decode(userToken) as { exp: any };
-
-  if (isAfter(new Date(), new Date(tokenExpiration?.exp * 1000))) {
-    try {
-      localStorage.removeItem('@NaHora:token');
-      localStorage.removeItem('@NaHora:user');
-      localStorage.removeItem('@NaHora:myEnterprise');
-    } catch (err) {}
-  }
+  try {
+    localStorage.removeItem('@NaHora:token');
+    localStorage.removeItem('@NaHora:user');
+    localStorage.removeItem('@NaHora:myEnterprise');
+    return window.location.reload(true);
+  } catch (err) {}
 }
 
 function observeToken(instance: any) {
