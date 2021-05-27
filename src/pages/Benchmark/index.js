@@ -20,6 +20,7 @@ import { routes } from '../../routes';
 import api from '../../services/api';
 import Button from '../../components/Button';
 import NumberFormat from 'react-number-format';
+import { Switch } from '@material-ui/core';
 
 const Benchmark = () => {
   const toast = useToast();
@@ -45,6 +46,7 @@ const Benchmark = () => {
 
   const [secondaryColor, setSecondaryColor] = useState('#ff9000');
   const [values, setValues] = useState({});
+  const [libras, setLibras] = useState(false);
 
   const getBenchmark = useCallback(async () => {
     try {
@@ -98,6 +100,10 @@ const Benchmark = () => {
     }
   }, [thisEnterprise, values]);
 
+  // useEffect(()=>{
+
+  // },[libras])
+
   return (
     <Container
       primaryColor={primaryColor || '#28262e'}
@@ -112,6 +118,13 @@ const Benchmark = () => {
       />
       <div>
         <h2>Adicione seu pr:</h2>
+        {/* <Switch
+          onChange={(e) => setLibras(e.target.checked)}
+          name="libras"
+          inputProps={{ 'aria-label': 'secondary checkbox' }}
+          checked={!!libras}
+        />
+        <h3>Libras</h3> */}
         <main>
           <label htmlFor="">
             Back Squat

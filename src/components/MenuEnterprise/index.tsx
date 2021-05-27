@@ -94,6 +94,14 @@ const MenuEnterprise: React.FC<MenuEnterpriseProps> = ({
             >
               Recordes Pessoais
             </Span>
+            <Span
+              primaryColor={primaryColor || '#28262e'}
+              secondaryColor={secondaryColor || '#ff9000'}
+              currentPage={history.location.pathname === routes.sorteador}
+              onClick={() => history.push(routes.sorteador)}
+            >
+              Sorteador
+            </Span>
             <hr />
 
             <Span

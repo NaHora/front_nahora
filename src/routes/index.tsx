@@ -23,6 +23,7 @@ import Alert from '../pages/EnterprisePages/Alert';
 import Training from '../pages/Training';
 import Ranking from '../pages/Ranking';
 import Benchmark from '../pages/Benchmark';
+import Sorteador from '../pages/Sorteador';
 
 export const routes = {
   dashboard: '/dashboard',
@@ -46,6 +47,7 @@ export const routes = {
   financial: '/gestão-financeira',
   plan: '/gestão-de-planos',
   success: '/success',
+  sorteador: '/sorteador',
   signin: '/',
 };
 
@@ -57,6 +59,7 @@ const Routes: React.FC = () => {
       <Route path={routes.alert} component={Alert} isPrivate />
       <Route path={routes.clientDetail} component={ClientDetail} isPrivate />
       <Route path={routes.schedule} component={Schedule} isPrivate />
+      <Route path={routes.sorteador} component={Sorteador} isPrivate />
       <Route path={routes.training} component={Training} isPrivate />
       <Route path={routes.pr} component={Benchmark} isPrivate />
       <Route path={routes.ranking} component={Ranking} isPrivate />
