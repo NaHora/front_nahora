@@ -10,6 +10,7 @@ import HeaderMenu from '../../../components/Header';
 import Button from '../../../components/Button';
 import InputDefault from '../../../components/InputDefault';
 import EnterpriseImg from '../../../assets/empresa.png';
+import resize from '../../../components/Resize';
 
 interface Enterprise {
   id?: string;
@@ -77,24 +78,31 @@ const EnterpriseProfile: React.FC = () => {
     getMyEnterprises();
   }, []);
 
-  const handleAvatarChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        const data = new FormData();
-        data.append('logo', e.target.files[0]);
+  const callback = (image: any) => {
+    const data = new FormData();
+    data.append('logo', image);
 
-        api.patch('/enterprises/logo', data).then((response) => {
-          setEnterpriseData(response.data);
+    api.patch('/enterprises/logo', data).then((response) => {
+      setEnterpriseData(response.data);
 
-          addToast({
-            type: 'success',
-            title: 'Logo Atualizada!',
-          });
-        });
+      addToast({
+        type: 'success',
+        title: 'Logo Atualizada!',
+      });
+    });
+  };
+
+  const handleAvatarChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const { files } = e.target;
+      if (files.length === 0) {
+        return; // se não selecionar nenhum file
       }
-    },
-    [addToast, setEnterpriseData],
-  );
+
+      // funcao de resize
+      resize(files[0], callback);
+    }
+  }, []);
   return (
     <Container>
       <HeaderMenu />

@@ -392,17 +392,17 @@ const EnterpriseSchedule: React.FC = () => {
           </label>
 
           <label htmlFor="">
-            <Tooltip title="Até quantas horas antes do horário de agendamento o usuário conseguirá se cadastrar. exemplo: 'Para um serviço que será as 08:00h, com 1 hora de antecedência, o usuário só poderá se agendar se ainda não for 07:00h.'">
+            <Tooltip title="Até quantos minutos antes do horário de agendamento o usuário conseguirá se cadastrar. exemplo: 'Para um serviço que será as 08:00h, com 30 minutos de antecedência, o usuário só poderá se agendar se ainda não for 07:30h.'">
               <span>
                 <MdInfoOutline />
-                Horas de antecedência *
+                Minutos de antecedência *
               </span>
             </Tooltip>
             <InputDefault
               type="text"
               name="hour_to_schedule"
               maxWidth="200px"
-              placeholder="Horas de antecedência"
+              placeholder="Minutos de antecedência"
               value={formService.hour_to_schedule}
               onChange={(e) =>
                 setFormService({

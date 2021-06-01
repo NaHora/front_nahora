@@ -1,5 +1,5 @@
-var MAX_WIDTH = 400;
-var MAX_HEIGHT = 400;
+var MAX_WIDTH = 150;
+var MAX_HEIGHT = 150;
 
 export default function resize(image, callback) {
   //criamos img que será a nossa imagem nova
@@ -35,8 +35,6 @@ export default function resize(image, callback) {
       //fazemos calculos para saber  qual lado é maior e reduzir na propoção certa
       let width = img.width;
       let height = img.height;
-
-      console.log(width, height);
 
       if (width > height) {
         if (width > MAX_WIDTH) {
