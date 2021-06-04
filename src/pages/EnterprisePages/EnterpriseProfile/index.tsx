@@ -3,6 +3,7 @@ import React, { ChangeEvent, useCallback, useState, useEffect } from 'react';
 import { FiCamera, FiArrowLeft } from 'react-icons/fi';
 import { Switch, Tooltip } from '@material-ui/core';
 import { MdInfoOutline } from 'react-icons/md';
+import Loader from 'react-loader-spinner';
 import { Container, AvatarInput, Cel, Header, Body, Form } from './styles';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
@@ -11,6 +12,7 @@ import Button from '../../../components/Button';
 import InputDefault from '../../../components/InputDefault';
 import EnterpriseImg from '../../../assets/empresa.png';
 import resize from '../../../components/Resize';
+import Load from '../../../components/Load';
 
 interface Enterprise {
   id?: string;
@@ -27,6 +29,7 @@ interface Enterprise {
 
 const EnterpriseProfile: React.FC = () => {
   const [enterpriseData, setEnterpriseData] = useState<Enterprise | any>({});
+  const [loading, setLoading] = useState(false);
 
   const { addToast } = useToast();
 
@@ -79,17 +82,29 @@ const EnterpriseProfile: React.FC = () => {
   }, []);
 
   const callback = (image: any) => {
+    setLoading(true);
     const data = new FormData();
     data.append('logo', image);
 
-    api.patch('/enterprises/logo', data).then((response) => {
-      setEnterpriseData(response.data);
+    api
+      .patch('/enterprises/logo', data)
+      .then((response) => {
+        setEnterpriseData(response.data);
 
-      addToast({
-        type: 'success',
-        title: 'Logo Atualizada!',
+        addToast({
+          type: 'success',
+          title: 'Logo Atualizada!',
+        });
+      })
+      .catch((err) => {
+        addToast({
+          type: 'error',
+          title: 'Algo de errado ocorreu ao trocar a imagem, tente novamente.',
+        });
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    });
   };
 
   const handleAvatarChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +128,7 @@ const EnterpriseProfile: React.FC = () => {
             alt={myEnterprise.name}
           />
           <label htmlFor="avatar">
-            <FiCamera />
+            {loading ? <Loader /> : <FiCamera />}
             <input type="file" onChange={handleAvatarChange} id="avatar" />
           </label>
         </AvatarInput>

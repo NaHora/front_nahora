@@ -15,6 +15,7 @@ import { FormHandles } from '@unform/core';
 import { useHistory, Link } from 'react-router-dom';
 import { Switch } from '@material-ui/core';
 import NumberFormat from 'react-number-format';
+import Loader from 'react-loader-spinner';
 import { Container, Content, AvatarInput } from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -44,6 +45,7 @@ const Profile: React.FC = () => {
   const { addToast } = useToast();
   const { user, updateUser, signOut } = useAuth();
 
+  const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [isPrivate, setIsPrivate] = useState(user.isPrivate);
   const [data, setData] = useState<ProfileFormData>({
@@ -148,17 +150,27 @@ const Profile: React.FC = () => {
   );
 
   const callback = (image: any) => {
+    setLoading(true);
     // criando um formData para upload do arquivo
     const formData = new FormData();
     formData.append('avatar', image);
-    api.patch('/users/avatar', formData).then((response) => {
-      updateUser(response.data);
+    api
+      .patch('/users/avatar', formData)
+      .then((response) => {
+        updateUser(response.data);
 
-      addToast({
-        type: 'success',
-        title: 'Avatar Atualizado!',
-      });
-    });
+        addToast({
+          type: 'success',
+          title: 'Avatar Atualizado!',
+        });
+      })
+      .catch((err) =>
+        addToast({
+          type: 'error',
+          title: 'Foto não atualizada, tente novamente.',
+        }),
+      )
+      .finally(() => setLoading(false));
   };
 
   const handleAvatarChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -216,7 +228,7 @@ const Profile: React.FC = () => {
             />
 
             <label htmlFor="avatar">
-              <FiCamera />
+              {loading ? <Loader /> : <FiCamera />}
               <input
                 type="file"
                 accept="image/*,"
