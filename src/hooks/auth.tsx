@@ -15,6 +15,7 @@ interface User {
 
 interface AuthState {
   token: string;
+  refresh_token: string;
   user: User;
 }
 
@@ -45,13 +46,14 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider: React.FC = ({ children }) => {
   const history = useHistory();
   const [data, setData] = useState<AuthState>(() => {
+    const refresh_token = localStorage.getItem('@NaHora:refresh_token');
     const token = localStorage.getItem('@NaHora:token');
     const user = localStorage.getItem('@NaHora:user');
 
-    if (token && user) {
+    if (token && user && refresh_token) {
       api.defaults.headers.authorization = `Bearer ${token}`;
 
-      return { token, user: JSON.parse(user) };
+      return { token, user: JSON.parse(user), refresh_token };
     }
 
     return {} as AuthState;
@@ -63,14 +65,15 @@ export const AuthProvider: React.FC = ({ children }) => {
       password,
     });
 
-    const { token, user } = response.data;
+    const { token, user, refresh_token } = response.data;
 
+    localStorage.setItem('@NaHora:refresh_token', refresh_token);
     localStorage.setItem('@NaHora:token', token);
     localStorage.setItem('@NaHora:user', JSON.stringify(user));
 
     api.defaults.headers.authorization = `Bearer ${token}`;
 
-    setData({ token, user });
+    setData({ token, user, refresh_token });
   }, []);
 
   const signInSocial = useCallback(
@@ -84,14 +87,15 @@ export const AuthProvider: React.FC = ({ children }) => {
         gender,
       });
 
-      const { token, user } = response.data;
+      const { token, user, refresh_token } = response.data;
 
+      localStorage.setItem('@NaHora:refresh_token', refresh_token);
       localStorage.setItem('@NaHora:token', token);
       localStorage.setItem('@NaHora:user', JSON.stringify(user));
 
       api.defaults.headers.authorization = `Bearer ${token}`;
 
-      setData({ token, user });
+      setData({ token, user, refresh_token });
 
       if (!user.celphone) {
         return history.push(routes.profile);
@@ -102,6 +106,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   );
 
   const signOut = useCallback(() => {
+    localStorage.removeItem('@NaHora:refresh_token');
     localStorage.removeItem('@NaHora:token');
     localStorage.removeItem('@NaHora:user');
     localStorage.removeItem('@NaHora:myEnterprise');
@@ -114,11 +119,11 @@ export const AuthProvider: React.FC = ({ children }) => {
       localStorage.setItem('@NaHora:user', JSON.stringify(user));
 
       setData({
-        token: data.token,
+        ...data,
         user,
       });
     },
-    [setData, data.token],
+    [setData, data],
   );
 
   return (
