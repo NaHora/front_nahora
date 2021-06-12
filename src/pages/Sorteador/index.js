@@ -84,9 +84,9 @@ const Sorteador = () => {
       });
     }
     const newTreinos = [...treinos];
-    const embaralhado = embaralhar(newTreinos);
+    // const embaralhado = embaralhar(newTreinos);
 
-    const card = comprar(embaralhado, 1);
+    const card = comprar(newTreinos, 1);
 
     setBaralho(card[0]);
     const newConcluidos = [...concluidos];
