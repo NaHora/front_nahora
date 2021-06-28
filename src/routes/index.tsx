@@ -39,6 +39,7 @@ export const routes = {
   clientDetailNoParams: '/detalhes-do-usuario',
   clientDetail: '/detalhes-do-usuario/:client_id',
   schedule: '/schedule',
+  enterpriseUserSchedule: '/empresa/agendamentos',
   private: '/politica-de-privacidade',
   terms: '/termos-de-uso',
   signupEnterprise: '/signupEnterprise',
@@ -59,6 +60,11 @@ const Routes: React.FC = () => {
       <Route path={routes.alert} component={Alert} isPrivate />
       <Route path={routes.clientDetail} component={ClientDetail} isPrivate />
       <Route path={routes.schedule} component={Schedule} isPrivate />
+      <Route
+        path={routes.enterpriseUserSchedule}
+        component={Schedule}
+        isPrivate
+      />
       <Route path={routes.sorteador} component={Sorteador} isPrivate />
       <Route path={routes.training} component={Training} isPrivate />
       <Route path={routes.pr} component={Benchmark} isPrivate />

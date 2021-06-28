@@ -73,6 +73,16 @@ const MenuEnterprise: React.FC<MenuEnterpriseProps> = ({
             <Span
               primaryColor={primaryColor || '#28262e'}
               secondaryColor={secondaryColor || '#ff9000'}
+              currentPage={
+                history.location.pathname === routes.enterpriseUserSchedule
+              }
+              onClick={() => history.push(routes.enterpriseUserSchedule)}
+            >
+              Agendamentos
+            </Span>
+            <Span
+              primaryColor={primaryColor || '#28262e'}
+              secondaryColor={secondaryColor || '#ff9000'}
               currentPage={history.location.pathname === routes.training}
               onClick={() => history.push(routes.training)}
             >

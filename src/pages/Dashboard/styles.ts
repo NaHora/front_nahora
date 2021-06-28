@@ -93,6 +93,7 @@ export const DivCategory = styled.div<PageColor>`
 export const ButtonContainer = styled.main`
   width: 300px;
   margin: 0 auto;
+  margin-top: auto;
   padding-bottom: 10px;
 
   @media (max-width: 600px) {
@@ -344,8 +345,13 @@ export const Calendar = styled.aside<PageColor>`
 `;
 
 export const ModalUsers = styled.div<PageColor>`
-  box-shadow: #000000 2px 2px 6px;
+  position: fixed;
+  top: 60px;
+  bottom: 60px;
+  right: 15px;
+  left: 15px;
 
+  box-shadow: #000000 2px 2px 6px;
   border-radius: 5px;
   margin-top: 15px;
   display: flex;

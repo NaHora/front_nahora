@@ -22,6 +22,9 @@ import Button from '../../components/Button';
 import { useToast } from '../../hooks/toast';
 import { useLoad } from '../../hooks/load';
 import Avatar from '../../components/Avatar';
+import { useHistory } from 'react-router-dom';
+import { routes } from '../../routes';
+import EnterpriseHeader from '../../components/EnterpriseHeader';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -91,7 +94,10 @@ interface ListAppointment {
 }
 
 const Enterprises: React.FC = () => {
+  const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
+
   const toast = useToast();
+  const history = useHistory();
   const { start, stop } = useLoad();
 
   const [openShedule, setOpenShedule] = useState<OpenModal>({});
@@ -111,11 +117,25 @@ const Enterprises: React.FC = () => {
   const handleClose = () => {
     setOpen(false);
   };
+
+  useEffect(() => {
+    if (
+      !thisEnterprise.id &&
+      window.location.pathname === routes.enterpriseUserSchedule
+    ) {
+      history.push('/schedule');
+    }
+  }, []);
+
   const getMyAppointments = useCallback(async () => {
     setLoading(true);
     start();
     try {
-      const response = await api.get(`/appointments/me/${7}`);
+      const response = await api.get(
+        window.location.pathname === routes.schedule
+          ? `/appointments/me/${7}`
+          : `/appointments/me/${7}/${thisEnterprise.id}`,
+      );
 
       setMyAppointments(response.data);
       setOpenDelete(false);
@@ -219,7 +239,17 @@ const Enterprises: React.FC = () => {
           </div>
         </OpenDelete>
       )}
-      <HeaderMenu />
+      {window.location.pathname === routes.enterpriseUserSchedule ? (
+        <EnterpriseHeader
+          service
+          primaryColor="#28262e"
+          secondaryColor="#ff9000"
+          name={thisEnterprise.name}
+          logo_url={thisEnterprise.logo_url}
+        />
+      ) : (
+        <HeaderMenu />
+      )}
       <Content>
         <div>
           <span>Próximos Agendamentos:</span>

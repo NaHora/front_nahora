@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import {
   FiClock,
-  FiArrowLeft,
   FiUsers,
   FiHome,
   FiX,
@@ -20,12 +19,11 @@ import { GoLocation } from 'react-icons/go';
 import DayPicker, { DayModifiers } from 'react-day-picker';
 import { isToday, format, getDay, getYear, getMonth, getDate } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
-import EnterpriseImg from '../../assets/empresa.png';
 import {
   Container,
   Content,
@@ -45,7 +43,6 @@ import { useToast } from '../../hooks/toast';
 import Button from '../../components/Button';
 import { useAuth } from '../../hooks/auth';
 import { removeMask } from '../../utils';
-import { useSocket } from '../../hooks/socket';
 import { useLoad } from '../../hooks/load';
 import Avatar from '../../components/Avatar';
 import EnterpriseHeader from '../../components/EnterpriseHeader';
@@ -364,7 +361,7 @@ const Dashboard: React.FC = () => {
         await api.post(`/appointments`, body);
 
         if (!currentCustomer && !owner_enterprise) {
-          history.push(routes.schedule);
+          history.push(routes.enterpriseUserSchedule);
         }
         handleServices();
 
@@ -390,7 +387,14 @@ const Dashboard: React.FC = () => {
         setLoading(false);
       }
     },
-    [thisEnterprise.id, toast, selectedDate, history, currentCustomer],
+    [
+      thisEnterprise.id,
+      toast,
+      selectedDate,
+      history,
+      currentCustomer,
+      owner_enterprise,
+    ],
   );
 
   const deleteSchedule = useCallback(
