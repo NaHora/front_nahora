@@ -345,11 +345,14 @@ export const Calendar = styled.aside<PageColor>`
 `;
 
 export const ModalUsers = styled.div<PageColor>`
-  position: fixed;
-  top: 60px;
-  bottom: 60px;
-  right: 15px;
-  left: 15px;
+  @media (max-width: 600px) {
+    position: fixed;
+    top: 30px;
+    bottom: 30px;
+    right: 15px;
+    left: 15px;
+    z-index: 1;
+  }
 
   box-shadow: #000000 2px 2px 6px;
   border-radius: 5px;
