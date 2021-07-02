@@ -368,6 +368,8 @@ export const ModalUsers = styled.div<PageColor>`
 
   .selectInput {
     position: relative;
+    width: 100%;
+    max-width: 300px;
     > input {
       width:100%;
       background:${(props) => props.primaryColor};
@@ -377,8 +379,16 @@ export const ModalUsers = styled.div<PageColor>`
       border: 1px solid  ${(props) => lighten(0.3, props.secondaryColor)};
 
     }
+
+    >h5{
+      background:${(props) => props.primaryColor};
+      color:${(props) => props.secondaryColor};
+      padding: 8px;
+      border-radius: 0 0 10px 10px ;
+    }
     > .selectOptions {
       position: absolute;
+      top: 37px;
       margin: 0;
       padding: 8px;
 
