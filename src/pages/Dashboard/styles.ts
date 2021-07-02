@@ -483,5 +483,6 @@ export const ModalUsers = styled.div<PageColor>`
     margin-bottom: 8px;
     display: flex;
     align-items: center;
+
   }
 `;

@@ -771,7 +771,13 @@ const Dashboard: React.FC = () => {
           </span>
           <div>
             {appointments.map((appointment, index) => (
-              <span key={appointment.id}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  margin: '4px 0',
+                }}
+              >
                 <Avatar
                   width={30}
                   height={30}
@@ -779,11 +785,13 @@ const Dashboard: React.FC = () => {
                   avatarUrl={appointment.user.avatar_url}
                   isPrivate={appointment.user.isPrivate}
                 />
-                {appointment.user.isPrivate && !owner_enterprise ? (
-                  <>Anônimo</>
-                ) : (
-                  appointment.user.name
-                )}
+                <span key={appointment.id}>
+                  {appointment.user.isPrivate && !owner_enterprise ? (
+                    <>Anônimo</>
+                  ) : (
+                    appointment.user.name
+                  )}
+                </span>
                 {user.id === thisEnterprise.owner_id && (
                   <>
                     <a
@@ -792,6 +800,9 @@ const Dashboard: React.FC = () => {
                         cursor: 'pointer',
                         textDecoration: 'none',
                         color: 'inherit',
+                        margin: '0 8px',
+                        display: 'flex',
+                        alignItems: 'center',
                       }}
                       href={`https://api.whatsapp.com/send?phone=55${removeMask(
                         appointment.user.celphone,
@@ -802,8 +813,8 @@ const Dashboard: React.FC = () => {
                       }%2C%20posso%20confirmar%20seu%20agendamento%20%3F`}
                     >
                       <FaWhatsapp size={20} />
+                      {appointment.user.celphone}
                     </a>
-                    {appointment.user.celphone}
 
                     <FiX
                       cursor="pointer"
@@ -811,7 +822,7 @@ const Dashboard: React.FC = () => {
                     />
                   </>
                 )}
-              </span>
+              </div>
             ))}
           </div>
           <ButtonContainer>
