@@ -136,7 +136,7 @@ const Benchmark = () => {
               name="backsquat"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Back Squat"
               thousandSeparator="."
               type="text"
@@ -159,7 +159,7 @@ const Benchmark = () => {
               name="benchpress"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Bench Press"
               thousandSeparator="."
               type="text"
@@ -182,7 +182,7 @@ const Benchmark = () => {
               name="deadlift"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Deadlift"
               thousandSeparator="."
               type="text"
@@ -205,7 +205,7 @@ const Benchmark = () => {
               name="frontsquat"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Front Squat"
               thousandSeparator="."
               type="text"
@@ -228,7 +228,7 @@ const Benchmark = () => {
               name="overheadsquat"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Overhead Squat"
               thousandSeparator="."
               type="text"
@@ -251,7 +251,7 @@ const Benchmark = () => {
               name="pushpress"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Push Press"
               thousandSeparator="."
               type="text"
@@ -274,7 +274,7 @@ const Benchmark = () => {
               name="shoulderpress"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Shouder Press"
               thousandSeparator="."
               type="text"
@@ -297,7 +297,7 @@ const Benchmark = () => {
               name="thruster"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Thruster"
               thousandSeparator="."
               type="text"
@@ -320,7 +320,7 @@ const Benchmark = () => {
               name="clean"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Clean"
               thousandSeparator="."
               type="text"
@@ -343,7 +343,7 @@ const Benchmark = () => {
               name="cleanjerk"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Clean & Jerk"
               thousandSeparator="."
               type="text"
@@ -366,7 +366,7 @@ const Benchmark = () => {
               name="cluster"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Cluster"
               thousandSeparator="."
               type="text"
@@ -389,7 +389,7 @@ const Benchmark = () => {
               name="hangpowerclean"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Hang Power Clean"
               thousandSeparator="."
               type="text"
@@ -412,7 +412,7 @@ const Benchmark = () => {
               name="hangpowersnatch"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Hang Power Snatch"
               thousandSeparator="."
               type="text"
@@ -435,7 +435,7 @@ const Benchmark = () => {
               name="handsquatsnatch"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Hang Squat Snatch"
               thousandSeparator="."
               type="text"
@@ -458,7 +458,7 @@ const Benchmark = () => {
               name="hangsquatclean"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Hang Squat Clean"
               thousandSeparator="."
               type="text"
@@ -481,7 +481,7 @@ const Benchmark = () => {
               name="powerclean"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Power Clean"
               thousandSeparator="."
               type="text"
@@ -504,7 +504,7 @@ const Benchmark = () => {
               name="powersnatch"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Power Snatch"
               thousandSeparator="."
               type="text"
@@ -527,7 +527,7 @@ const Benchmark = () => {
               name="pushjerk"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Push Jerk"
               thousandSeparator="."
               type="text"
@@ -550,7 +550,7 @@ const Benchmark = () => {
               name="snatch"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Snatch"
               thousandSeparator="."
               type="text"
@@ -573,7 +573,7 @@ const Benchmark = () => {
               name="snatchbalance"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Snatch Balance"
               thousandSeparator="."
               type="text"
@@ -596,7 +596,7 @@ const Benchmark = () => {
               name="splitjerk"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Split Jerk"
               thousandSeparator="."
               type="text"
@@ -619,7 +619,7 @@ const Benchmark = () => {
               name="squatclean"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Squat Clean"
               thousandSeparator="."
               type="text"
@@ -642,7 +642,7 @@ const Benchmark = () => {
               name="squatsnatch"
               margin={false}
               maxWidth="180px"
-              suffix=" Kg"
+              suffix=" Lbs"
               placeholder="Squat Snatch"
               thousandSeparator="."
               type="text"

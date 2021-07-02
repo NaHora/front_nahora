@@ -358,7 +358,7 @@ export const ModalUsers = styled.div<PageColor>`
   border-radius: 5px;
   margin-top: 15px;
   display: flex;
-  overflow: hidden;
+  /* overflow: hidden; */
   align-items: center;
   flex-direction: column;
   background: ${(props) => lighten(0.03, props.secondaryColor)};
@@ -366,12 +366,62 @@ export const ModalUsers = styled.div<PageColor>`
     TinyColor(props.secondaryColor).isLight() ? '#000' : '#f4ede8'};
   padding: 20px;
 
-  /* img {
-    border-radius: 50%;
-    height: 30px;
-    width: 30px;
-    margin-right: 8px;
-  } */
+  .selectInput {
+    position: relative;
+    > input {
+      width:100%;
+      background:${(props) => props.primaryColor};
+      color:${(props) => props.secondaryColor};
+      padding: 8px;
+      border-radius:10px 10px 0 0;
+      border: 1px solid  ${(props) => lighten(0.3, props.secondaryColor)};
+
+    }
+    > .selectOptions {
+      position: absolute;
+      margin: 0;
+      padding: 8px;
+
+      background:${(props) => props.primaryColor};
+          color:${(props) => props.secondaryColor};
+      max-height: 150px;
+      overflow-y: scroll;
+      box-shadow: 2px 0 0 rgb(0,0,0,0.3);
+      border-radius: 0 0 10px 10px;
+
+      >p{
+        cursor: pointer;
+        width:100%;
+
+        :hover{
+          background: ${(props) => lighten(0.03, props.secondaryColor)};
+          color: ${(props) => lighten(0.03, props.primaryColor)};
+        }
+      }
+
+      ::-webkit-scrollbar-track {
+      background-color: transparent;
+      border-radius: 20px;
+      width: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 2px;
+      border-radius: 20px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: ${(props) => props.secondaryColor};
+      border-radius: 20px;
+      width: 1px;
+    }
+
+    @media (max-width: 600px) {
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
 
   > main {
     @media (max-width: 600px) {

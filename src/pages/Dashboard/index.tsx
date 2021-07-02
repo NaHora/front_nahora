@@ -22,6 +22,7 @@ import { isToday, format, getDay, getYear, getMonth, getDate } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
@@ -48,6 +49,7 @@ import { useLoad } from '../../hooks/load';
 import Avatar from '../../components/Avatar';
 import EnterpriseHeader from '../../components/EnterpriseHeader';
 import AlertToast from '../../components/AlertToast';
+import InputDefault from '../../components/InputDefault';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -181,6 +183,8 @@ const Dashboard: React.FC = () => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [openUser, setOpenUser] = useState(false);
+  const [searchInputValue, setSearchInputValue] = useState('');
+  const [openSelectInput, setOpenSelectInput] = useState(false);
   const [limits, setLimits] = useState({
     leftmorning: true,
     leftafternoom: true,
@@ -690,18 +694,75 @@ const Dashboard: React.FC = () => {
           </span>
           <br />
           {owner_enterprise && (
-            <select
-              value={currentCustomer}
-              name="customer"
-              onChange={(e) => setCurrentCustomer(e.target.value)}
-            >
-              <option value="full-schedule-service">Ocupar todo horário</option>
-              <option value="">Agendar em seu nome</option>
-              {allUsersEnterpriseAccepted &&
-                allUsersEnterpriseAccepted.map((customer) => (
-                  <option value={customer.user.id}>{customer.user.name}</option>
-                ))}
-            </select>
+            <>
+              <div className="selectInput">
+                <input
+                  onClick={() => setOpenSelectInput(true)}
+                  value={searchInputValue}
+                  name="customer"
+                  onChange={(e) => setSearchInputValue(e.target.value)}
+                />
+                {openSelectInput && (
+                  <ClickAwayListener
+                    onClickAway={() => setOpenSelectInput(false)}
+                  >
+                    <div className="selectOptions">
+                      <p
+                        onClick={() => {
+                          setCurrentCustomer('full-schedule-service');
+                          setOpenSelectInput(false);
+                        }}
+                      >
+                        Ocupar todo horário
+                      </p>
+                      <p
+                        onClick={() => {
+                          setCurrentCustomer('');
+                          setOpenSelectInput(false);
+                        }}
+                      >
+                        Agendar em seu nome
+                      </p>
+                      {allUsersEnterpriseAccepted &&
+                        allUsersEnterpriseAccepted
+                          .filter(
+                            (item) =>
+                              item.user.name
+                                .toLocaleLowerCase()
+                                .indexOf(searchInputValue.toLocaleLowerCase()) >
+                              -1,
+                          )
+                          .map((customer) => (
+                            <p
+                              onClick={() => {
+                                setCurrentCustomer(customer.user.id);
+                                setOpenSelectInput(false);
+                              }}
+                            >
+                              {customer.user.name}
+                            </p>
+                          ))}
+                    </div>
+                  </ClickAwayListener>
+                )}
+              </div>
+              <select
+                value={currentCustomer}
+                name="customer"
+                onChange={(e) => setCurrentCustomer(e.target.value)}
+              >
+                <option value="full-schedule-service">
+                  Ocupar todo horário
+                </option>
+                <option value="">Agendar em seu nome</option>
+                {allUsersEnterpriseAccepted &&
+                  allUsersEnterpriseAccepted.map((customer) => (
+                    <option value={customer.user.id}>
+                      {customer.user.name}
+                    </option>
+                  ))}
+              </select>
+            </>
           )}
           <span>
             {appointments.length > 0 ? (
