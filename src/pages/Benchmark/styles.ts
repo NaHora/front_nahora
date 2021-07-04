@@ -32,7 +32,8 @@ export const Container = styled.div<PageColor>`
   min-height: 100vh;
   width: 100%;
   display: flex;
-
+  color: ${(props) =>
+    TinyColor(props.primaryColor).isLight() ? '#000' : '#f4ede8'};
   flex-direction: column;
 
   > div {

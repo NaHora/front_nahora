@@ -46,13 +46,39 @@ const Benchmark = () => {
 
   const [secondaryColor, setSecondaryColor] = useState('#ff9000');
   const [values, setValues] = useState({});
-  const [libras, setLibras] = useState(false);
+  const [libras, setLibras] = useState(true);
 
   const getBenchmark = useCallback(async () => {
     try {
       const response = await api.get(
         `/training/benchmark/enterprise/${thisEnterprise.id}`,
       );
+
+      // kgValues['backsquat'] = response.data['backsquat'] * 0.453592;
+      // kgValues['benchpress'] = response.data['benchpress'] * 0.453592;
+      // kgValues['deadlift'] = response.data['deadlift'] * 0.453592;
+      // kgValues['frontsquat'] = response.data['frontsquat'] * 0.453592;
+      // kgValues['overheadsquat'] = response.data['overheadsquat'] * 0.453592;
+      // kgValues['maxwallball'] = response.data['maxwallball'] * 0.453592;
+      // kgValues['pushpress'] = response.data['pushpress'] * 0.453592;
+      // kgValues['shoulderpress'] = response.data['shoulderpress'] * 0.453592;
+      // kgValues['thruster'] = response.data['thruster'] * 0.453592;
+      // kgValues['clean'] = response.data['clean'] * 0.453592;
+      // kgValues['cleanjerk'] = response.data['cleanjerk'] * 0.453592;
+      // kgValues['cluster'] = response.data['cluster'] * 0.453592;
+      // kgValues['hangpowerclean'] = response.data['hangpowerclean'] * 0.453592;
+      // kgValues['hangpowersnatch'] = response.data['hangpowersnatch'] * 0.453592;
+      // kgValues['handsquatsnatch'] = response.data['handsquatsnatch'] * 0.453592;
+      // kgValues['hangsquatclean'] = response.data['hangsquatclean'] * 0.453592;
+      // kgValues['powerclean'] = response.data['powerclean'] * 0.453592;
+      // kgValues['powersnatch'] = response.data['powersnatch'] * 0.453592;
+      // kgValues['pushjerk'] = response.data['pushjerk'] * 0.453592;
+      // kgValues['snatch'] = response.data['snatch'] * 0.453592;
+      // kgValues['snatchbalance'] = response.data['snatchbalance'] * 0.453592;
+      // kgValues['splitjerk'] = response.data['splitjerk'] * 0.453592;
+      // kgValues['squatclean'] = response.data['squatclean'] * 0.453592;
+      // kgValues['squatsnatch'] = response.data['squatsnatch'] * 0.453592;
+
       setValues(response.data);
     } catch {}
   }, [thisEnterprise]);
@@ -118,13 +144,16 @@ const Benchmark = () => {
       />
       <div>
         <h2>Adicione seu pr:</h2>
-        {/* <Switch
-          onChange={(e) => setLibras(e.target.checked)}
-          name="libras"
-          inputProps={{ 'aria-label': 'secondary checkbox' }}
-          checked={!!libras}
-        />
-        <h3>Libras</h3> */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <h3>Kg</h3>
+          <Switch
+            onChange={(e) => setLibras(e.target.checked)}
+            name="libras"
+            inputProps={{ 'aria-label': 'secondary checkbox' }}
+            checked={!!libras}
+          />
+          <h3>Libras</h3>
+        </div>
         <main>
           <label htmlFor="">
             Back Squat
