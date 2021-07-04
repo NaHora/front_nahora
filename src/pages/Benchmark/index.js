@@ -690,7 +690,7 @@ const Benchmark = () => {
           secondaryColor={secondaryColor || '#ff9000'}
           onClick={handleBenchmark}
         >
-          adicionar
+          alterar
         </Button>
       </div>
     </Container>
