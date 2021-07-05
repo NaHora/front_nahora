@@ -144,7 +144,7 @@ const Benchmark = () => {
       />
       <div>
         <h2>Adicione seu pr:</h2>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        {/* <div style={{ display: 'flex', alignItems: 'center' }}>
           <h3>Kg</h3>
           <Switch
             onChange={(e) => setLibras(e.target.checked)}
@@ -153,7 +153,7 @@ const Benchmark = () => {
             checked={!!libras}
           />
           <h3>Libras</h3>
-        </div>
+        </div> */}
         <main>
           <label htmlFor="">
             Back Squat

@@ -59,7 +59,7 @@ export const Container = styled.div<PageColor>`
       margin-top: 32px;
       width: 100%;
       border-spacing: 0;
-
+      color: white;
       thead {
         border-bottom: 1px solid #ff9000;
 
