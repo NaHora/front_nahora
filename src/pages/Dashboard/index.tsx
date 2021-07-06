@@ -328,8 +328,8 @@ const Dashboard: React.FC = () => {
 
   const handleAppointment = useCallback(
     async (service_id) => {
-      setLoading(true);
       setOpeModal({});
+      start();
       try {
         if (currentCustomer === 'full-schedule-service') {
           const body = {
@@ -377,7 +377,7 @@ const Dashboard: React.FC = () => {
           });
         }
       } finally {
-        setLoading(false);
+        stop();
       }
     },
     [
