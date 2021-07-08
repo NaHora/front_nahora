@@ -1,38 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
-
-import { format, getDate, getDay, getMonth, getYear } from 'date-fns';
-import { useHistory } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useState, useEffect } from 'react';
 
 import { Container, Content } from './styles';
-import 'react-day-picker/lib/style.css';
 
 import { useToast } from '../../hooks/toast';
-
-import { useAuth } from '../../hooks/auth';
-
-import { useLoad } from '../../hooks/load';
 
 import EnterpriseHeader from '../../components/EnterpriseHeader';
 
 import InputDefault from '../../components/InputDefault';
-import { routes } from '../../routes';
-import api from '../../services/api';
 import Button from '../../components/Button';
-import NumberFormat from 'react-number-format';
-import Avatar from '../../components/Avatar';
-import useStayAwake from 'use-stay-awake';
-
+import NoSleep from 'nosleep.js';
+const noSleep = new NoSleep();
 const Sorteador = () => {
   const toast = useToast();
-  const { user } = useAuth();
-  const history = useHistory();
-  const device = useStayAwake();
-  // const { socket } = useSocket();
-  const { start, stop } = useLoad();
-
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
-  const owner_enterprise = thisEnterprise.owner_id === user.id;
 
   const [primaryColor, setPrimaryColor] = useState('#28262e');
 
@@ -42,10 +22,14 @@ const Sorteador = () => {
   const [concluidos, setConcluidos] = useState([]);
   const [baralho, setBaralho] = useState('');
 
+  async function enableNoSleep() {
+    await noSleep.enable();
+  }
+
   useEffect(() => {
     setPrimaryColor(thisEnterprise.primary_color);
     setSecondaryColor(thisEnterprise.secondary_color);
-    device.preventSleeping();
+    enableNoSleep();
   }, []);
 
   const adicionarTreino = () => {
