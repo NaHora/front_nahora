@@ -21,15 +21,16 @@ const Sorteador = () => {
   const [treinos, setTreinos] = useState([]);
   const [concluidos, setConcluidos] = useState([]);
   const [baralho, setBaralho] = useState('');
+  const [wakeLockEnabled, setwakeLockEnabled] = useState(false);
 
-  async function enableNoSleep() {
-    await noSleep.enable();
-  }
+  // async function enableNoSleep() {
+  //   await noSleep.enable();
+  // }
 
   useEffect(() => {
     setPrimaryColor(thisEnterprise.primary_color);
     setSecondaryColor(thisEnterprise.secondary_color);
-    enableNoSleep();
+    // enableNoSleep();
   }, []);
 
   const adicionarTreino = () => {
@@ -38,6 +39,9 @@ const Sorteador = () => {
         title: 'Escreva um treino para adicionar como opção',
       });
     }
+
+    noSleep.enable(); // keep the screen on!
+
     const newTreinos = [...treinos];
     newTreinos.push(values);
     setTreinos(newTreinos);
