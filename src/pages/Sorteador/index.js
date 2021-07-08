@@ -40,7 +40,9 @@ const Sorteador = () => {
       });
     }
 
-    noSleep.enable(); // keep the screen on!
+    if (noSleep.isEnabled === false) {
+      noSleep.enable(); // keep the screen on!
+    }
 
     const newTreinos = [...treinos];
     newTreinos.push(values);
