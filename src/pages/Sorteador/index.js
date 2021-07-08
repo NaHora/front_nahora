@@ -21,11 +21,13 @@ import api from '../../services/api';
 import Button from '../../components/Button';
 import NumberFormat from 'react-number-format';
 import Avatar from '../../components/Avatar';
+import useStayAwake from 'use-stay-awake';
 
 const Sorteador = () => {
   const toast = useToast();
   const { user } = useAuth();
   const history = useHistory();
+  const device = useStayAwake();
   // const { socket } = useSocket();
   const { start, stop } = useLoad();
 
@@ -43,6 +45,7 @@ const Sorteador = () => {
   useEffect(() => {
     setPrimaryColor(thisEnterprise.primary_color);
     setSecondaryColor(thisEnterprise.secondary_color);
+    device.preventSleeping();
   }, []);
 
   const adicionarTreino = () => {
@@ -143,11 +146,11 @@ const Sorteador = () => {
         <Button onClick={sortear}>Sortear</Button>
         <div className="daVez">{baralho}</div>
         <div className="sorteados">
+          <h4>total de rounds : {concluidos.length}</h4>
           <h2>Treinos Concluídos:</h2>
           {concluidos.map((treino, index) => {
             return <h3>{treino}</h3>;
           })}
-          <h4>total de rounds : {concluidos.length}</h4>
         </div>
       </Content>
     </Container>
