@@ -252,7 +252,6 @@ function RichTextEditor({
   }, [readOnly]);
 
   const saveText = useCallback(async () => {
-    console.log(date);
     try {
       const [newyear, newmonth, newdate] = date.split('-');
       const body = {
