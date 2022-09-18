@@ -23,7 +23,14 @@ import './styles.js';
 import { EditorState } from 'draft-js';
 import { convertToHTML } from 'draft-convert';
 import { convertFromRaw } from 'draft-js';
-import { addHours, format, getDate, getMonth, getYear } from 'date-fns';
+import {
+  addHours,
+  format,
+  getDate,
+  getMonth,
+  getYear,
+  setHours,
+} from 'date-fns';
 import InputDefault from '../InputDefault';
 import { useToast } from '../../hooks/toast';
 import api from '../../services/api';
@@ -245,10 +252,12 @@ function RichTextEditor({
   }, [readOnly]);
 
   const saveText = useCallback(async () => {
+    console.log(date);
     try {
+      const [newyear, newmonth, newdate] = date.split('-');
       const body = {
         title: '',
-        date: addHours(new Date(date), 8),
+        date: new Date(newyear, newmonth - 1, newdate, 3),
         description: values,
         type: type,
       };
