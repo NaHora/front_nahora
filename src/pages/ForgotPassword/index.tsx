@@ -84,6 +84,7 @@ const ForgotPassword: React.FC = () => {
             />
             <div
               style={{
+                alignItems: 'center',
                 marginTop: 8,
                 display: 'flex',
                 justifyContent: 'center',
