@@ -15,6 +15,7 @@ export const Container = styled.button<PageColor>`
       : props.secondaryColor
       ? props.secondaryColor
       : '#ff9000'};
+
   height: 56px;
   border-radius: 10px;
   border: ${(props) =>
@@ -33,12 +34,15 @@ export const Container = styled.button<PageColor>`
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+
   svg {
     margin-right: 8px;
   }
 
   &:hover {
     background: ${(props) =>
+      !props.disabled &&
       shade(0.2, props.secondaryColor ? props.secondaryColor : '#ff9000')};
     color: ${(props) =>
       props.transparent

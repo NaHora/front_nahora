@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import { Link } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
 import logoImg from '../../assets/nahora.png';
 import { Container, Content, Background, AnimationContainer } from './styles';
 import Input from '../../components/Input';
@@ -21,6 +22,7 @@ interface ForgotPasswordForm {
 const ForgotPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const formRef = useRef<FormHandles>(null);
+  const [verified, setVerified] = useState(false);
 
   const toast = useToast();
 
@@ -80,8 +82,19 @@ const ForgotPassword: React.FC = () => {
               type="email"
               placeholder="E-mail"
             />
-
-            <Button loading={loading} type="submit">
+            <div
+              style={{
+                marginTop: 8,
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              <ReCAPTCHA
+                sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
+                onChange={() => setVerified(true)}
+              />
+            </div>
+            <Button loading={loading} disabled={!verified} type="submit">
               Recuperar
             </Button>
           </Form>
