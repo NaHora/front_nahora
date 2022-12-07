@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 import { format } from 'date-fns';
 
-import { makeStyles } from '@material-ui/core/styles';
-
 import { Container, SelectDefault } from './styles';
 import 'react-day-picker/lib/style.css';
 
