@@ -21,23 +21,15 @@ import 'draft-js/dist/Draft.css';
 import 'draftail/dist/draftail.css';
 import './styles.js';
 import { EditorState } from 'draft-js';
-import { convertToHTML } from 'draft-convert';
-import { convertFromRaw } from 'draft-js';
-import {
-  addHours,
-  format,
-  getDate,
-  getMonth,
-  getYear,
-  setHours,
-} from 'date-fns';
-import InputDefault from '../InputDefault';
+import { getDate, getMonth, getYear } from 'date-fns';
 import { useToast } from '../../hooks/toast';
 import api from '../../services/api';
 import { createEditorStateFromRaw, serialiseEditorStateToRaw } from 'draftail';
+import { convertToRaw, convertFromRaw } from 'draft-js';
+import { convertFromHTML, convertToHTML } from 'draft-convert';
 import { Container } from './styles';
-import { Avatar } from '@material-ui/core';
 import EnterpriseImg from '../../assets/nahora192.png';
+
 const exporterConfig = {
   blockToHTML: (block) => {
     if (block.type === BLOCK_TYPE.BLOCKQUOTE) {
@@ -61,7 +53,7 @@ const exporterConfig = {
     }
 
     if (entity.type === ENTITY_TYPE.IMAGE) {
-      return <img alt={entity.data.alt} src={entity.data.src} />;
+      return <img src={entity.data.src} alt={entity.data.alt} />;
     }
 
     if (entity.type === ENTITY_TYPE.HORIZONTAL_RULE) {
@@ -71,6 +63,40 @@ const exporterConfig = {
     return originalText;
   },
 };
+
+const toHTML = (raw) =>
+  raw ? convertToHTML(exporterConfig)(convertFromRaw(raw)) : '';
+
+const importerConfig = {
+  htmlToEntity: (nodeName, node, createEntity) => {
+    // a tags will become LINK entities, marked as mutable, with only the URL as data.
+    if (nodeName === 'a') {
+      return createEntity(ENTITY_TYPE.LINK, 'MUTABLE', { url: node.href });
+    }
+
+    if (nodeName === 'img') {
+      return createEntity(ENTITY_TYPE.IMAGE, 'IMMUTABLE', {
+        src: node.src,
+      });
+    }
+
+    if (nodeName === 'hr') {
+      return createEntity(ENTITY_TYPE.HORIZONTAL_RULE, 'IMMUTABLE', {});
+    }
+
+    return null;
+  },
+  htmlToBlock: (nodeName) => {
+    if (nodeName === 'hr' || nodeName === 'img') {
+      // "atomic" blocks is how Draft.js structures block-level entities.
+      return 'atomic';
+    }
+
+    return null;
+  },
+};
+
+const fromHTML = (html) => convertToRaw(convertFromHTML(importerConfig)(html));
 
 function RichTextEditor({
   onChange,
@@ -95,13 +121,16 @@ function RichTextEditor({
       );
 
       setEditorState(
-        createEditorStateFromRaw(JSON.parse(response.data.description)),
+        createEditorStateFromRaw(
+          fromHTML(JSON.parse(response?.data?.description)),
+        ),
       );
     } catch {}
   }, [date, thisEnterprise]);
 
-  function test(e) {
-    setValues(JSON.stringify(serialiseEditorStateToRaw(editorState)));
+  function onChange(e) {
+    // console.log(toHTML(e));
+    setValues(serialiseEditorStateToRaw(editorState));
     setEditorState(e);
   }
 
@@ -254,10 +283,11 @@ function RichTextEditor({
   const saveText = useCallback(async () => {
     try {
       const [newyear, newmonth, newdate] = date.split('-');
+
       const body = {
         title: '',
         date: new Date(newyear, newmonth - 1, newdate, 3),
-        description: values,
+        description: JSON.stringify(toHTML(values)),
         type: type,
       };
 
@@ -301,7 +331,7 @@ function RichTextEditor({
       )}
       <DraftailEditor
         editorState={editorState}
-        onChange={test}
+        onChange={onChange}
         blockTypes={[
           { type: BLOCK_TYPE.HEADER_THREE, icon: <MdTitle /> },
           {
