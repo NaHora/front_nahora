@@ -5,7 +5,7 @@ const signOut = () => {
   localStorage.removeItem('@NaHora:token');
   localStorage.removeItem('@NaHora:user');
   localStorage.removeItem('@NaHora:myEnterprise');
-  return window.location.reload(true);
+  return window.location.reload();
 };
 
 let isRefreshing = false;
@@ -27,8 +27,12 @@ function setupAPIClient(): AxiosInstance {
       return response;
     },
     (error: AxiosError) => {
+      const responseData = error.response?.data as
+        | { message?: string }
+        | undefined;
+
       if (error.response?.status === 401) {
-        if (error.response.data.message === 'Token expirou, refaça o login.') {
+        if (responseData?.message === 'Token expirou, refaça o login.') {
           const refreshToken = localStorage.getItem('@NaHora:refresh_token');
 
           const originalConfig = error.config;
@@ -69,9 +73,11 @@ function setupAPIClient(): AxiosInstance {
           return new Promise((resolve, reject) => {
             failedRequestQueue.push({
               onSuccess: (token: string) => {
-                originalConfig.headers.authorization = `Bearer ${token}`;
+                if (originalConfig?.headers) {
+                  originalConfig.headers.authorization = `Bearer ${token}`;
+                }
 
-                resolve(api(originalConfig));
+                resolve(api(originalConfig || {}));
               },
               onFailure: (err: AxiosError) => {
                 reject(err);

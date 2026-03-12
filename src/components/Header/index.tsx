@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Header, HeaderContent, Profile } from './styles';
+import { FiCompass } from 'react-icons/fi';
+import { Header, HeaderContent, Brand, Profile, ProfileText } from './styles';
 import logoImg from '../../assets/nahora.png';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
@@ -14,31 +15,37 @@ function HeaderMenu() {
   return (
     <Header>
       <HeaderContent>
-        <img
-          onClick={() => history.push(routes.enterprise)}
-          src={logoImg}
-          alt="NaHora"
-        />
+        <Brand onClick={() => history.push(routes.enterprise)}>
+          <img src={logoImg} alt="NaHora" />
+          <div>
+            <span>NaHora Admin</span>
+            <strong>Operacao, agenda e crescimento</strong>
+          </div>
+        </Brand>
+
+        <Profile>
+          <FiCompass />
+          <ProfileText>
+            <span>Area ativa</span>
+            <Link to={routes.enterprise}>Empresas</Link>
+          </ProfileText>
+        </Profile>
 
         <Profile>
           <Avatar
-            width={56}
-            height={56}
+            width={54}
+            height={54}
             name={user.name}
             isPrivate={false}
             avatarUrl={user.avatar_url}
           />
-
-          <div>
-            <span>Bem-vindo,</span>
-            <Link to={routes.profile}>
-              <strong>{user.name}</strong>
-            </Link>
-          </div>
+          <ProfileText>
+            <span>Bem-vindo</span>
+            <Link to={routes.profile}>{user.name}</Link>
+          </ProfileText>
         </Profile>
-        <button>
-          <Menu />
-        </button>
+
+        <Menu />
       </HeaderContent>
     </Header>
   );

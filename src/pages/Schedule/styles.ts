@@ -1,196 +1,144 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-interface CardAction {
-  past?: boolean | undefined;
-}
+export const SummaryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
 
-export const Container = styled.div``;
-
-export const OpenDelete = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 50%;
-  background: #28262e;
-  padding: 50px;
-  position: absolute;
-  left: 25%;
-  top: 50%;
-  border-radius: 5px;
-  border: 2px solid #ff9000;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-
-  > div {
-    width: 100%;
-    margin-top: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    > button {
-      width: 200px;
-      height: 50px;
-    }
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
   }
 `;
 
-export const Content = styled.main`
-  max-width: 1120px;
-  margin: 34px auto;
+export const SummaryCard = styled.div`
+  padding: 22px 24px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fbff;
+
+  strong {
+    display: block;
+    font-size: 2.2rem;
+    letter-spacing: -0.05em;
+  }
+
+  span {
+    display: block;
+    margin-top: 8px;
+    color: #b8c7db;
+  }
+`;
+
+export const ScheduleGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+
+  @media (max-width: 980px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ScheduleSection = styled.section`
+  padding: 28px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(12, 23, 41, 0.08);
+  box-shadow: 0 20px 60px rgba(7, 17, 31, 0.12);
+`;
+
+export const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
-
-  > div {
-    width: 100%;
-    padding: 30px;
-
-    @media (max-width: 600px) {
-      padding: 15px;
-    }
-
-    > span {
-      font-size: 22px;
-    }
-  }
-
-  @media (max-width: 600px) {
-    flex-direction: column;
-
-    margin-top: 20px;
-  }
+  gap: 16px;
 `;
 
-export const Card = styled.div<CardAction>`
-  cursor: pointer;
-  width: 100%;
-  border-radius: 5px;
-  box-shadow: #000 0px 4px 6px;
-  background: #3e3b47;
-  opacity: ${(props) => props.past && 0.5};
-  padding: 17px 22px 15px 15px;
-  display: flex;
-  flex-direction: column;
-  margin: 25px 0;
-  position: relative;
-
-  > main {
-    hr {
-      margin-bottom: 12px;
-      margin-top: 8px;
-    }
-
-    padding: 5px 10px;
-    display: flex;
-    flex-direction: column;
-    > div {
-      display: flex;
-      align-items: center;
-      margin: 12px 0;
-      /* img {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        margin-right: 8px;
-      } */
-    }
-
-    > span {
-      margin: 8px 0;
-      svg {
-        margin-right: 8px;
-      }
-    }
-  }
-
-  > div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    div {
-      display: flex;
-      align-items: center;
-
-      span {
-        font-size: 18px;
-        margin-right: 8px;
-      }
-      > img {
-        border-radius: 5px;
-        height: 30px;
-        width: 30px;
-        margin-right: 8px;
-      }
-    }
-  }
+export const SectionTitle = styled.h2`
+  color: #0c1729;
+  font-size: 1.6rem;
+  letter-spacing: -0.04em;
 `;
 
-export const Title = styled.div`
-  font-size: 22px;
-  color: #ffffff;
-  margin-bottom: 5px;
-  font-weight: bold;
+export const SectionText = styled.p`
+  margin-top: 8px;
+  color: #62748d;
+  line-height: 1.7;
 `;
 
-export const SubTitle = styled.div`
-  font-size: 16px;
-  margin-bottom: 5px;
-  color: #ffffff;
-`;
+export const ScheduleCard = styled.article<{ past?: boolean }>`
+  margin-top: 18px;
+  padding: 22px;
+  border-radius: 26px;
+  background: #f4f7fb;
+  border: 1px solid rgba(12, 23, 41, 0.08);
 
-export const Text = styled.div`
-  font-size: 14px;
-  color: #ffffff;
-  margin-bottom: 5px;
-`;
+  ${(props) =>
+    props.past &&
+    css`
+      opacity: 0.8;
+    `}
 
-export const CadastraButton = styled.button`
-  font-size: 16px;
-  color: ${(props) => (!props.disabled ? '#3e3b47' : '#ff9d3b')};
-  background: ${(props) => (props.disabled ? '#3e3b47' : '#ff9d3b')};
-  padding: 5px 22px;
-  font-weight: bold;
-  border-radius: 5px;
-  border: none;
-  align-self: flex-end;
-  cursor: ${(props) => (props.disabled ? 'default' : 'pointer')};
-`;
+  > div:first-child {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 18px;
 
-export const SearchContent = styled.div`
-  width: 40%;
-  @media (max-width: 600px) {
-    margin: 25px 0;
-    width: 100%;
-  }
-`;
-
-export const MyEnterprises = styled.div`
-  span {
-    font-size: 34px;
-    font-weight: bold;
-  }
-  width: 40%;
-  @media (max-width: 600px) {
-    width: 100%;
-  }
-`;
-
-export const CardMine = styled.div`
-  border-radius: 5px;
-  box-shadow: #000 0px 4px 6px;
-  background: #3e3b47;
-  cursor: pointer;
-
-  padding: 17px 22px 15px 15px;
-  display: flex;
-  flex-direction: column;
-  margin: 25px 0;
-
-  > div {
-    display: flex;
     > img {
-      border-radius: 5px;
-      height: 100px;
-      width: 100px;
-      margin-right: 18px;
+      width: 88px;
+      height: 88px;
+      border-radius: 20px;
+      object-fit: cover;
+      background: #e9eef6;
     }
   }
+
+  h3 {
+    color: #0c1729;
+    font-size: 1.14rem;
+    letter-spacing: -0.03em;
+  }
+`;
+
+export const ScheduleMeta = styled.div`
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  color: #62748d;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+`;
+
+export const ParticipantList = styled.ul`
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(12, 23, 41, 0.08);
+
+  li {
+    display: flex;
+    align-items: center;
+    color: #0c1729;
+  }
+`;
+
+export const EmptyState = styled.div`
+  margin-top: 18px;
+  padding: 28px 22px;
+  border-radius: 24px;
+  background: #f4f7fb;
+  color: #62748d;
+  text-align: center;
+`;
+
+export const InlineAction = styled.div`
+  max-width: 180px;
+  margin-top: 6px;
 `;

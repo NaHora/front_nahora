@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from 'react';
 
-import { IconBaseProps } from 'react-icons/lib/cjs';
+import { IconBaseProps } from 'react-icons';
 import { FiAlertCircle } from 'react-icons/fi';
 import { useField } from '@unform/core';
 import { Container, Error } from './styles';

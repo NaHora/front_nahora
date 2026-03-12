@@ -1,80 +1,93 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  MutableRefObject,
-} from 'react';
-import {
-  FiClock,
-  FiUsers,
-  FiHome,
-  FiX,
-  FiCheckCircle,
-  FiChevronRight,
-  FiChevronLeft,
-} from 'react-icons/fi';
-import { FaWhatsapp } from 'react-icons/fa';
-import { GoLocation } from 'react-icons/go';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DayPicker, { DayModifiers } from 'react-day-picker';
-import { isToday, format, getDay, getYear, getMonth, getDate } from 'date-fns';
+import {
+  FiActivity,
+  FiAlertCircle,
+  FiArrowRight,
+  FiBriefcase,
+  FiCalendar,
+  FiCheck,
+  FiClock,
+  FiDollarSign,
+  FiLayers,
+  FiMail,
+  FiShield,
+  FiTrash2,
+  FiTrendingUp,
+  FiUsers,
+  FiX,
+} from 'react-icons/fi';
+import {
+  endOfMonth,
+  format,
+  getDate,
+  getDay,
+  getMonth,
+  getYear,
+  startOfMonth,
+  differenceInDays,
+  isAfter,
+} from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { useHistory } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import Modal from '@material-ui/core/Modal';
-import Backdrop from '@material-ui/core/Backdrop';
-import Fade from '@material-ui/core/Fade';
-import {
-  Container,
-  Content,
-  Schedule,
-  Section,
-  Appointment,
-  Calendar,
-  Category,
-  ButtonContainer,
-  DivCategory,
-  ModalUsers,
-} from './styles';
-import 'react-day-picker/lib/style.css';
+import numeral from 'numeral';
+import AdminShell from '../../components/AdminShell';
+import Button from '../../components/Button';
+import Avatar from '../../components/Avatar';
 import api from '../../services/api';
 import { routes } from '../../routes';
 import { useToast } from '../../hooks/toast';
-import Button from '../../components/Button';
 import { useAuth } from '../../hooks/auth';
-import { removeMask } from '../../utils';
 import { useLoad } from '../../hooks/load';
-import Avatar from '../../components/Avatar';
-import EnterpriseHeader from '../../components/EnterpriseHeader';
-import AlertToast from '../../components/AlertToast';
-import InputDefault from '../../components/InputDefault';
+import {
+  DashboardGrid,
+  MainColumn,
+  SideColumn,
+  Panel,
+  PanelTitle,
+  PanelText,
+  MetricsGrid,
+  MetricCard,
+  MetricEyebrow,
+  FiltersRow,
+  FilterChip,
+  BookingToolbar,
+  SelectField,
+  ServiceSection,
+  ServiceList,
+  ServiceCard,
+  ServiceMeta,
+  ServiceActions,
+  ParticipantList,
+  CalendarPanel,
+  HighlightCard,
+  AlertCard,
+  EmptyState,
+  InsightGrid,
+  InsightCard,
+  InsightList,
+  InsightListItem,
+  QuickActions,
+  QuickActionCard,
+  StatusPill,
+  InlineValue,
+  ExecutiveGrid,
+  ExecutiveCard,
+  DataHighlights,
+  DataHighlight,
+  FinanceStrip,
+  FinancePill,
+  PriorityList,
+  PriorityCard,
+  ToneBadge,
+} from './styles';
+import 'react-day-picker/lib/style.css';
 
-const useStyles = makeStyles((theme) => ({
-  modal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  paper: {
-    backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-    color: 'black',
-  },
-  divButton: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-}));
 interface User {
   id: string;
   avatar_url: string;
   name: string;
   celphone: string;
-  gender?: string;
   isPrivate: boolean;
 }
 
@@ -91,12 +104,6 @@ interface Appointment {
   date: Date;
 }
 
-interface ModalData {
-  morning: boolean;
-  afternoom: boolean;
-  night: boolean;
-}
-
 interface Service {
   id: string;
   disabled: boolean;
@@ -104,10 +111,10 @@ interface Service {
   capacity: number;
   category_id: string;
   appointments: Appointment[];
-  description: {
+  description?: {
     title: string;
     description: string;
-  };
+  } | null;
 }
 
 interface UserPlan {
@@ -120,19 +127,13 @@ interface UserPlan {
 interface Invite {
   id: string;
   user: User;
-
   accepted: number;
   currentPlan?: UserPlan;
 }
 
 interface AboutDays {
   availableDays: number[];
-
   disabledDays: number[];
-}
-
-interface LimitOptions {
-  [key: string]: boolean;
 }
 
 interface Alert {
@@ -142,1002 +143,1041 @@ interface Alert {
   enterprise_id: string;
 }
 
+interface Solicitation {
+  id: string;
+  user: User;
+}
+
+interface Plan {
+  id: string;
+  name: string;
+  price: number;
+  schedule_limit: number;
+  week_limit: number;
+  delete_limit: number;
+  days_to_expire: number;
+  type_expiration: string;
+}
+
+interface Restrict {
+  id: string;
+  plan: Plan;
+  category: Category;
+}
+
+interface Balance {
+  income: number;
+  outcome: number;
+  total: number;
+}
+
 const Dashboard: React.FC = () => {
+  numeral.locale('pt-br');
   const toast = useToast();
   const { user } = useAuth();
   const history = useHistory();
-  // const { socket } = useSocket();
   const { start, stop } = useLoad();
 
-  const morningRef = useRef<any>(null);
-  const afternoomRef = useRef<any>(null);
-  const nightRef = useRef<any>(null);
-
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
-  const owner_enterprise = thisEnterprise.owner_id === user.id;
+  const ownerEnterprise = thisEnterprise.owner_id === user.id;
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekDay, setCurrentWeekDay] = useState(getDay(new Date()));
-  const [currentCustomer, setCurrentCustomer] = useState<any>('');
-  const [openModal, setOpeModal] = useState<ModalData | any>({});
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  const [selectectedService, setSelectectedService] = useState<Service | null>(
-    null,
-  );
-  const [
-    selectectedCategory,
-    setSelectectedCategory,
-  ] = useState<Category | null>(null);
-  const [primaryColor, setPrimaryColor] = useState<string | null>('#28262e');
-  const [loading, setLoading] = useState(false);
-  const [currentService, setCurrentService] = useState('');
-  const [currentAppointment, setCurrentAppointment] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [aboutDays, setAboutDays] = useState<AboutDays>({
     availableDays: [],
     disabledDays: [],
   });
   const [categories, setCategories] = useState<Category[]>([]);
-  const [secondaryColor, setSecondaryColor] = useState<string | null>(
-    '#ff9000',
-  );
-  const classes = useStyles();
-  const [open, setOpen] = useState(false);
-  const [openUser, setOpenUser] = useState(false);
-  const [searchInputValue, setSearchInputValue] = useState('');
-  const [openSelectInput, setOpenSelectInput] = useState(false);
-  const [limits, setLimits] = useState({
-    leftmorning: true,
-    leftafternoom: true,
-    leftnight: true,
-  } as LimitOptions);
   const [allUsersEnterpriseAccepted, setAllUsersEnterpriseAccepted] = useState<
     Invite[]
   >([]);
-  const [currentAlert, setCurrentAlert] = useState<Alert | any>({});
+  const [currentAlert, setCurrentAlert] = useState<Alert | null>(null);
+  const [currentCustomer, setCurrentCustomer] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
+  const [enterprisePlans, setEnterprisePlans] = useState<Plan[]>([]);
+  const [restricts, setRestricts] = useState<Restrict[]>([]);
+  const [balance, setBalance] = useState<Balance>({
+    income: 0,
+    outcome: 0,
+    total: 0,
+  });
 
-  const handleOpen = (service_id: string) => {
-    setCurrentService(service_id);
-    setOpen(true);
-  };
+  useEffect(() => {
+    if (!thisEnterprise.id) {
+      history.push(routes.enterprise);
+    }
+  }, [history, thisEnterprise.id]);
 
   const getMyAlerts = useCallback(async () => {
     try {
       const response = await api.get(`/alert/${thisEnterprise.id}`);
-
       setCurrentAlert(response.data);
-    } catch (err) {}
-  }, [thisEnterprise]);
-
-  const handleOpenUser = (appointment_id: string) => {
-    setCurrentAppointment(appointment_id);
-    setOpenUser(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleCloseUser = () => {
-    setOpenUser(false);
-  };
-
-  useEffect(() => {
-    setPrimaryColor(thisEnterprise.primary_color);
-    setSecondaryColor(thisEnterprise.secondary_color);
-  }, []);
-
-  useEffect(() => {
-    getMyAlerts();
-  }, []);
+    } catch {}
+  }, [thisEnterprise.id]);
 
   const getAllEnterpriseAcceptedInvites = useCallback(async () => {
     try {
       const response = await api.get('/invites/enterprise/accepted');
-
       setAllUsersEnterpriseAccepted(response.data);
     } catch {}
   }, []);
 
-  useEffect(() => {
-    getAllEnterpriseAcceptedInvites();
+  const getSolicitations = useCallback(async () => {
+    try {
+      const response = await api.get('/invites/enterprise-invites');
+      setSolicitations(response.data);
+    } catch {}
   }, []);
 
-  const handleDateChange = useCallback(
-    (day: Date, modifiers: DayModifiers) => {
-      if ((modifiers.available && !modifiers.disabled) || owner_enterprise) {
-        setOpeModal({});
+  const getEnterprisePlans = useCallback(async () => {
+    try {
+      const response = await api.get('/plans');
+      setEnterprisePlans(response.data);
+    } catch {}
+  }, []);
 
-        setSelectedDate(day);
-        setCurrentWeekDay(getDay(day));
-      } else {
-        toast.addToast({
-          type: 'error',
-          title:
-            'Sem Horário disponível este dia, datas com horários disponíveis ficam com um contorno.',
-        });
-      }
-    },
-    [toast, owner_enterprise],
-  );
+  const getRestricts = useCallback(async () => {
+    try {
+      const response = await api.get('/plans/restrict');
+      setRestricts(response.data);
+    } catch {}
+  }, []);
+
+  const getFinancialBalance = useCallback(async () => {
+    try {
+      const response = await api.post('/financial/byDate', {
+        start_date: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
+        finish_date: format(endOfMonth(new Date()), 'yyyy-MM-dd'),
+      });
+      setBalance(response.data.balance);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    getMyAlerts();
+    getAllEnterpriseAcceptedInvites();
+    getSolicitations();
+    getEnterprisePlans();
+    getRestricts();
+    getFinancialBalance();
+  }, [
+    getAllEnterpriseAcceptedInvites,
+    getEnterprisePlans,
+    getFinancialBalance,
+    getMyAlerts,
+    getRestricts,
+    getSolicitations,
+  ]);
 
   useEffect(() => {
     api.get(`/services/category/${thisEnterprise.id}`).then((response) => {
-      setSelectectedCategory(response.data[0]);
+      setSelectedCategory(response.data[0]);
       setCategories(response.data);
     });
   }, [thisEnterprise.id]);
 
-  const getAvaiableDays = useCallback(async () => {
+  const getAvailableDays = useCallback(async () => {
     start();
-
     try {
       const response = await api.get(
-        `/services/enterprise/${thisEnterprise.id}/category/${selectectedCategory?.id}`,
+        `/services/enterprise/${thisEnterprise.id}/category/${selectedCategory?.id}`,
       );
       setAboutDays(response.data);
-    } catch (err) {
     } finally {
       stop();
     }
-  }, [thisEnterprise.id, selectectedCategory, start, stop]);
+  }, [selectedCategory, start, stop, thisEnterprise.id]);
 
   useEffect(() => {
-    if (selectectedCategory && thisEnterprise.id) {
-      getAvaiableDays();
+    if (selectedCategory && thisEnterprise.id) {
+      getAvailableDays();
     }
-  }, [selectectedCategory, thisEnterprise.id]);
+  }, [getAvailableDays, selectedCategory, thisEnterprise.id]);
 
   const handleServices = useCallback(async () => {
     start();
-
     try {
       const response = await api.get(
         `/services/enterprise/${
           thisEnterprise.id
-        }/day/${currentWeekDay}/category/${selectectedCategory?.id}/${getYear(
+        }/day/${currentWeekDay}/category/${selectedCategory?.id}/${getYear(
           selectedDate,
         )}/${getMonth(selectedDate)}/${getDate(selectedDate)}`,
       );
       setServices(response.data);
     } catch (err) {
-      if (err.response) {
-        toast.addToast({
-          type: 'error',
-          title:
-            err.response.data.message ||
-            'Ocorreu um erro ao procurar serviços, tente novamente',
-        });
-      } else {
-        toast.addToast({
-          type: 'error',
-          title: 'Ocorreu um erro ao procurar os serviços, tente novamente',
-        });
-      }
+      toast.addToast({
+        type: 'error',
+        title:
+          err.response?.data.message ||
+          'Ocorreu um erro ao procurar os servicos',
+      });
     } finally {
       stop();
     }
   }, [
-    thisEnterprise.id,
     currentWeekDay,
-    toast,
-    selectectedCategory,
+    selectedCategory,
     selectedDate,
     start,
     stop,
+    thisEnterprise.id,
+    toast,
   ]);
 
+  useEffect(() => {
+    if (thisEnterprise.id && selectedCategory) {
+      handleServices();
+    }
+  }, [
+    currentWeekDay,
+    handleServices,
+    selectedCategory,
+    selectedDate,
+    thisEnterprise.id,
+  ]);
+
+  const handleDateChange = useCallback(
+    (day: Date, modifiers: DayModifiers) => {
+      if ((modifiers.available && !modifiers.disabled) || ownerEnterprise) {
+        setSelectedDate(day);
+        setCurrentWeekDay(getDay(day));
+        return;
+      }
+
+      toast.addToast({
+        type: 'error',
+        title: 'Sem horario disponivel neste dia',
+      });
+    },
+    [ownerEnterprise, toast],
+  );
+
   const handleAppointment = useCallback(
-    async (service_id) => {
-      setOpeModal({});
+    async (service_id: string) => {
+      if (ownerEnterprise && !currentCustomer) {
+        toast.addToast({
+          type: 'error',
+          title: 'Selecione um cliente ou encerre a vaga',
+        });
+        return;
+      }
+
+      setLoading(true);
       start();
       try {
         if (currentCustomer === 'full-schedule-service') {
-          const body = {
+          await api.post('/appointments/full-time', {
             service_id,
-
             service_date: selectedDate,
-          };
-          await api.post(`/appointments/full-time`, body);
-
-          handleServices();
-          return toast.addToast({
-            type: 'success',
-            title: 'Vagas encerradas com sucesso.',
+          });
+        } else {
+          await api.post('/appointments', {
+            service_id,
+            enterprise_id: thisEnterprise.id,
+            service_date: selectedDate,
+            customer_id: currentCustomer,
           });
         }
-        const body = {
-          service_id,
-          enterprise_id: thisEnterprise.id,
-          service_date: selectedDate,
-          customer_id: currentCustomer,
-        };
-        await api.post(`/appointments`, body);
 
-        if (!currentCustomer && !owner_enterprise) {
+        if (!currentCustomer && !ownerEnterprise) {
           history.push(routes.enterpriseUserSchedule);
         }
-        handleServices();
+
+        setCurrentCustomer('');
+        await handleServices();
+        getFinancialBalance();
 
         toast.addToast({
           type: 'success',
-          title: 'Agendamento realizado com sucesso.',
+          title: 'Agendamento realizado com sucesso',
         });
       } catch (err) {
-        if (err.response) {
-          toast.addToast({
-            type: 'error',
-            title:
-              err.response.data.message ||
-              'Ocorreu um erro ao agendar este horário, tente novamente',
-          });
-        } else {
-          toast.addToast({
-            type: 'error',
-            title: 'Ocorreu um erro ao agendar este horário, tente novamente',
-          });
-        }
+        toast.addToast({
+          type: 'error',
+          title:
+            err.response?.data.message ||
+            'Ocorreu um erro ao agendar este horario',
+        });
       } finally {
         stop();
+        setLoading(false);
       }
     },
     [
+      currentCustomer,
+      getFinancialBalance,
+      handleServices,
+      history,
+      ownerEnterprise,
+      selectedDate,
+      start,
+      stop,
       thisEnterprise.id,
       toast,
-      selectedDate,
-      history,
-      currentCustomer,
-      owner_enterprise,
     ],
   );
 
   const deleteSchedule = useCallback(
-    async (appointment_id: string | undefined) => {
+    async (appointment_id: string) => {
       setLoading(true);
-
       try {
         await api.delete(`/appointments/${appointment_id}`);
-        handleServices();
-        setOpeModal({});
-        handleCloseUser();
-
+        await handleServices();
         toast.addToast({
-          title: 'Agendamento Deletado',
+          title: 'Agendamento removido',
           type: 'success',
         });
       } catch (err) {
-        if (err.response) {
-          toast.addToast({
-            type: 'error',
-            title:
-              err.response.data.message ||
-              'Ocorreu um erro ao deletar o agendamento, tente novamente',
-          });
-        } else {
-          toast.addToast({
-            type: 'error',
-            title: 'Ocorreu um erro ao deletar o agendamento, tente novamente',
-          });
-        }
+        toast.addToast({
+          type: 'error',
+          title:
+            err.response?.data.message ||
+            'Ocorreu um erro ao remover o agendamento',
+        });
       } finally {
         setLoading(false);
       }
     },
-    [toast, handleServices],
+    [handleServices, toast],
   );
 
-  const deleteAppointment = useCallback(
-    async (service_id) => {
+  const deleteService = useCallback(
+    async (service_id: string) => {
+      setLoading(true);
       try {
         await api.delete(`/services/${service_id}`);
-
-        handleClose();
-        handleServices();
-
+        await handleServices();
         toast.addToast({
           type: 'success',
-          title: 'Horário excluído !',
+          title: 'Horario excluido',
         });
       } catch (err) {
-        if (err.response) {
-          toast.addToast({
-            type: 'error',
-            title:
-              err.response.data.message ||
-              'Ocorreu um erro ao excluir este horário, tente novamente',
-          });
-        } else {
-          toast.addToast({
-            type: 'error',
-            title: 'Ocorreu um erro ao excluir este horário, tente novamente',
-          });
-        }
+        toast.addToast({
+          type: 'error',
+          title:
+            err.response?.data.message ||
+            'Ocorreu um erro ao excluir este horario',
+        });
       } finally {
         setLoading(false);
       }
     },
-    [toast, handleServices],
+    [handleServices, toast],
   );
-
-  useEffect(() => {
-    if (thisEnterprise.id && selectectedCategory) {
-      handleServices();
-    }
-  }, [thisEnterprise.id, currentWeekDay, selectectedCategory, selectedDate]);
 
   const selectedDateAsText = useMemo(() => {
-    return format(selectedDate, "'Dia' dd 'de' MMMM", {
+    return format(selectedDate, "dd 'de' MMMM", {
       locale: ptBr,
     });
   }, [selectedDate]);
 
-  const selectedWeekDay = useMemo(() => {
-    return format(selectedDate, 'cccc', {
-      locale: ptBr,
-    });
-  }, [selectedDate]);
-
-  const morningServices = useMemo(() => {
-    return services
-      .filter((service) => {
-        return Number(service.start_hour.replace(':', '')) < 1200;
-      })
-      .sort(function (a, b) {
-        if (a.start_hour > b.start_hour) {
-          return 1;
-        }
-        if (a.start_hour < b.start_hour) {
-          return -1;
-        }
-        // a must be equal to b
-        return 0;
-      });
+  const groupedServices = useMemo(() => {
+    return {
+      morning: services.filter(
+        (service) => Number(service.start_hour.replace(':', '')) < 1200,
+      ),
+      afternoon: services.filter((service) => {
+        const hour = Number(service.start_hour.replace(':', ''));
+        return hour >= 1200 && hour < 1800;
+      }),
+      night: services.filter(
+        (service) => Number(service.start_hour.replace(':', '')) >= 1800,
+      ),
+    };
   }, [services]);
 
-  const afternoonServices = useMemo(() => {
-    return services
-      .filter((service) => {
-        return (
-          Number(service.start_hour.replace(':', '')) >= 1200 &&
-          Number(service.start_hour.replace(':', '')) < 1800
+  const totalReserved = useMemo(
+    () => services.reduce((total, service) => total + service.appointments.length, 0),
+    [services],
+  );
+
+  const totalCapacity = useMemo(
+    () => services.reduce((total, service) => total + service.capacity, 0),
+    [services],
+  );
+
+  const occupancyRate = useMemo(() => {
+    if (!totalCapacity) return 0;
+    return Math.round((totalReserved / totalCapacity) * 100);
+  }, [totalCapacity, totalReserved]);
+
+  const monthlyResultTone = balance.total >= 0 ? 'positive' : 'negative';
+
+  const activePlansCount = useMemo(() => {
+    return allUsersEnterpriseAccepted.filter((invite) => invite.currentPlan).length;
+  }, [allUsersEnterpriseAccepted]);
+
+  const expiredPlansCount = useMemo(() => {
+    return allUsersEnterpriseAccepted.filter((invite) => {
+      if (!invite.currentPlan) return false;
+      return !isAfter(new Date(invite.currentPlan.expiration_at), new Date());
+    }).length;
+  }, [allUsersEnterpriseAccepted]);
+
+  const expiringPlans = useMemo(() => {
+    return allUsersEnterpriseAccepted
+      .filter((invite) => invite.currentPlan)
+      .filter((invite) => {
+        const days = differenceInDays(
+          new Date(invite.currentPlan!.expiration_at),
+          new Date(),
         );
+        return days <= 7;
       })
-      .sort(function (a, b) {
-        if (a.start_hour > b.start_hour) {
-          return 1;
-        }
-        if (a.start_hour < b.start_hour) {
-          return -1;
-        }
-        // a must be equal to b
-        return 0;
-      });
-  }, [services]);
+      .sort((a, b) => {
+        const aDays = differenceInDays(
+          new Date(a.currentPlan!.expiration_at),
+          new Date(),
+        );
+        const bDays = differenceInDays(
+          new Date(b.currentPlan!.expiration_at),
+          new Date(),
+        );
+        return aDays - bDays;
+      })
+      .slice(0, 5);
+  }, [allUsersEnterpriseAccepted]);
 
-  const nightServices = useMemo(() => {
+  const categoryUtilization = useMemo(() => {
+    return categories.map((category) => {
+      const categoryServices = services.filter(
+        (service) => service.category_id === category.id,
+      );
+      const reserved = categoryServices.reduce(
+        (total, service) => total + service.appointments.length,
+        0,
+      );
+      const capacity = categoryServices.reduce(
+        (total, service) => total + service.capacity,
+        0,
+      );
+
+      return {
+        id: category.id,
+        name: category.name,
+        reserved,
+        capacity,
+      };
+    });
+  }, [categories, services]);
+
+  const nextService = useMemo(() => {
     return services
-      .filter((service) => {
-        return Number(service.start_hour.replace(':', '')) >= 1800;
-      })
-      .sort(function (a, b) {
-        if (a.start_hour > b.start_hour) {
-          return 1;
-        }
-        if (a.start_hour < b.start_hour) {
-          return -1;
-        }
-        // a must be equal to b
-        return 0;
-      });
+      .filter((service) => !service.disabled)
+      .sort((a, b) => a.start_hour.localeCompare(b.start_hour))[0];
   }, [services]);
 
-  const scrollWhell = useCallback(
-    (e, ref, period) => {
-      const { scrollLeft } = ref.current;
-      const totalScrollRight =
-        ref.current.scrollWidth - ref.current.offsetWidth;
-      const scrollRight = totalScrollRight - ref.current.scrollLeft;
-      const nameLeft = `left${period}`;
-      const nameRight = `right${period}`;
+  const servicesByPeriod = useMemo(() => {
+    return [
+      {
+        label: 'Manhã',
+        total: groupedServices.morning.length,
+        reserved: groupedServices.morning.reduce(
+          (total, service) => total + service.appointments.length,
+          0,
+        ),
+      },
+      {
+        label: 'Tarde',
+        total: groupedServices.afternoon.length,
+        reserved: groupedServices.afternoon.reduce(
+          (total, service) => total + service.appointments.length,
+          0,
+        ),
+      },
+      {
+        label: 'Noite',
+        total: groupedServices.night.length,
+        reserved: groupedServices.night.reduce(
+          (total, service) => total + service.appointments.length,
+          0,
+        ),
+      },
+    ];
+  }, [groupedServices]);
 
-      if (scrollLeft === 0 && scrollRight === 0) {
-        setLimits({ ...limits, [nameLeft]: true, [nameRight]: true });
-      }
-      if (scrollLeft === 0 && scrollRight !== 0) {
-        setLimits({ ...limits, [nameLeft]: true, [nameRight]: false });
-      }
-      if (scrollLeft !== 0 && scrollRight === 0) {
-        setLimits({ ...limits, [nameLeft]: false, [nameRight]: true });
-      }
-      if (scrollLeft !== 0 && scrollRight !== 0) {
-        setLimits({ ...limits, [nameLeft]: false, [nameRight]: false });
-      }
+  const averageRevenuePerCustomer = useMemo(() => {
+    if (!allUsersEnterpriseAccepted.length) return 0;
+    return balance.income / allUsersEnterpriseAccepted.length;
+  }, [allUsersEnterpriseAccepted.length, balance.income]);
 
-      if (e.deltaY > 0) {
-        ref?.current?.scrollBy(200, 0);
-      } else {
-        ref?.current?.scrollBy(-200, 0);
-      }
-    },
-    [limits],
+  const pendingCoverageRate = useMemo(() => {
+    if (!allUsersEnterpriseAccepted.length) return 0;
+    return Math.round((activePlansCount / allUsersEnterpriseAccepted.length) * 100);
+  }, [activePlansCount, allUsersEnterpriseAccepted.length]);
+
+  const operationalPriorities = useMemo(() => {
+    const priorities = [];
+
+    if (solicitations.length > 0) {
+      priorities.push({
+        title: 'Solicitações aguardando resposta',
+        description: `${solicitations.length} cliente(s) aguardando aprovação para entrar na base da empresa.`,
+        badge: `${solicitations.length} pendente(s)`,
+        tone: 'warning' as const,
+      });
+    }
+
+    if (expiringPlans.length > 0) {
+      priorities.push({
+        title: 'Clientes em risco de cancelamento',
+        description: `${expiringPlans.length} plano(s) vencem em até 7 dias ou já estão expirados.`,
+        badge: 'renovar',
+        tone: 'danger' as const,
+      });
+    }
+
+    if (occupancyRate < 40) {
+      priorities.push({
+        title: 'Agenda com baixa ocupação',
+        description: `A ocupação do dia está em ${occupancyRate}%. Vale impulsionar horários livres e reativar clientes.`,
+        badge: 'atenção',
+        tone: 'info' as const,
+      });
+    }
+
+    if (currentAlert) {
+      priorities.push({
+        title: 'Comunicado público ativo',
+        description: 'Existe um alerta em exibição no app. Revise se a mensagem ainda faz sentido para hoje.',
+        badge: 'ao vivo',
+        tone: 'success' as const,
+      });
+    }
+
+    if (!priorities.length) {
+      priorities.push({
+        title: 'Operação estável',
+        description: 'Sem gargalos imediatos identificados. O foco pode ficar em eficiência e crescimento.',
+        badge: 'estável',
+        tone: 'success' as const,
+      });
+    }
+
+    return priorities.slice(0, 4);
+  }, [currentAlert, expiringPlans.length, occupancyRate, solicitations.length]);
+
+  const formatMoney = useCallback(
+    (value: number) => `R$ ${numeral(value).format('0,0.00')}`,
+    [],
   );
 
-  const scrollClick = useCallback(
-    (ref, value, period) => {
-      const { scrollLeft } = ref.current;
-      const totalScrollRight =
-        ref.current.scrollWidth - ref.current.offsetWidth;
-      const scrollRight = totalScrollRight - ref.current.scrollLeft;
-      const nameLeft = `left${period}`;
-      const nameRight = `right${period}`;
+  const renderServiceSection = (title: string, list: Service[]) => (
+    <ServiceSection>
+      <div>
+        <PanelTitle>{title}</PanelTitle>
+        <PanelText>
+          {list.length} horarios ativos para {selectedDateAsText}.
+        </PanelText>
+      </div>
 
-      if (scrollLeft === 0 && scrollRight === 0) {
-        setLimits({ ...limits, [nameLeft]: true, [nameRight]: true });
-      }
-      if (scrollLeft === 0 && scrollRight !== 0) {
-        setLimits({ ...limits, [nameLeft]: true, [nameRight]: false });
-      }
-      if (scrollLeft !== 0 && scrollRight === 0) {
-        setLimits({ ...limits, [nameLeft]: false, [nameRight]: true });
-      }
-      if (scrollLeft !== 0 && scrollRight !== 0) {
-        setLimits({ ...limits, [nameLeft]: false, [nameRight]: false });
-      }
+      <ServiceList>
+        {list.map((service) => {
+          const userAppointment = service.appointments.find(
+            (appointment) => appointment.user.id === user.id,
+          );
+          const serviceTitle =
+            service.description?.title || 'Horário sem título definido';
+          const serviceDescription =
+            service.description?.description ||
+            'Este horário não possui uma descrição cadastrada.';
 
-      if (value < 0 && scrollLeft !== 0) {
-        ref?.current?.scrollBy(value, 0);
-      } else if (value > 0 && scrollRight !== 0) {
-        ref?.current?.scrollBy(value, 0);
-      }
-    },
-    [limits],
-  );
-
-  const showServices = (
-    ref: MutableRefObject<HTMLDivElement>,
-    array: any[],
-    period: string,
-  ) => {
-    return array.length > 0 ? (
-      <main>
-        <FiChevronLeft
-          size={30}
-          style={limits[`left${period}`] ? { opacity: 0.3 } : { opacity: 1 }}
-          cursor="pointer"
-          onClick={() => scrollClick(ref, -100, period)}
-        />
-
-        <div ref={ref}>
-          {array.map((service: Service) => (
-            <Appointment
-              onWheel={(e) => scrollWhell(e, ref, period)}
-              primaryColor={primaryColor || '#28262e'}
-              disabled={service.disabled}
-              secondaryColor={secondaryColor || '#ff9000'}
-              key={service.id}
-              currentSelected={selectectedService?.id === service.id}
-            >
-              <div
-                onClick={() => {
-                  if (!service.disabled || owner_enterprise) {
-                    setOpeModal({ [period]: true });
-                    setAppointments(service.appointments);
-                    setSelectectedService(service);
-                  } else {
-                    toast.addToast({
-                      type: 'error',
-                      title: 'Horário indisponível',
-                    });
-                  }
-                }}
-              >
-                <span style={{ marginRight: '16px' }}>
-                  <FiClock /> {service.start_hour}
-                </span>
-                <span>
-                  <FiUsers /> {service.appointments.length}/{service.capacity}
-                </span>
-              </div>
-              {user.id === thisEnterprise.owner_id && (
-                <span style={{ marginLeft: '8px' }}>
-                  <FiX
-                    cursor="pointer"
-                    onClick={() => handleOpen(service.id)}
-                  />
-                </span>
-              )}
-            </Appointment>
-          ))}
-        </div>
-        <FiChevronRight
-          cursor="pointer"
-          size={30}
-          style={limits[`right${period}`] ? { opacity: 0.3 } : { opacity: 1 }}
-          onClick={() => scrollClick(ref, 100, period)}
-        />
-      </main>
-    ) : owner_enterprise ? (
-      <span>
-        Cadastre seus horários para este período,{' '}
-        <strong onClick={() => history.push(routes.enterpriseSchedule)}>
-          clique aqui
-        </strong>
-      </span>
-    ) : (
-      <p>Nenhum serviço neste período</p>
-    );
-  };
-
-  const showServiceModal = (period: string) => {
-    return (
-      openModal[period] && (
-        <ModalUsers
-          primaryColor={primaryColor || '#28262e'}
-          secondaryColor={secondaryColor || '#ff9000'}
-        >
-          <FiX
-            onClick={() => setOpeModal({ [period]: false })}
-            cursor="pointer"
-            color={primaryColor || '#28262e'}
-            style={{ alignSelf: 'flex-end' }}
-          />
-          <span>
-            <FiHome />
-            {thisEnterprise.name}
-          </span>
-          <span>
-            <GoLocation />
-            {selectectedCategory?.name}
-          </span>
-          <span>
-            <FiClock />
-            {selectedDateAsText} {selectectedService?.start_hour}h
-          </span>
-          <br />
-          {owner_enterprise && (
-            <div className="selectInput">
-              <input
-                onClick={() => setOpenSelectInput(true)}
-                value={searchInputValue}
-                name="customer"
-                autoComplete="off"
-                onChange={(e) => setSearchInputValue(e.target.value)}
-              />
-              <h5>
-                Agendar:{' '}
-                {currentCustomer === ''
-                  ? 'Agendar em seu nome'
-                  : currentCustomer === 'full-schedule-service'
-                  ? 'Ocupar todo horário'
-                  : allUsersEnterpriseAccepted &&
-                    allUsersEnterpriseAccepted.find(
-                      (item) => item.user.id === currentCustomer,
-                    )?.user.name}
-              </h5>
-              {openSelectInput && (
-                <ClickAwayListener
-                  onClickAway={() => setOpenSelectInput(false)}
-                >
-                  <div className="selectOptions">
-                    <p
-                      onClick={() => {
-                        setCurrentCustomer('full-schedule-service');
-                        setOpenSelectInput(false);
-                      }}
-                    >
-                      Ocupar todo horário
-                    </p>
-                    <p
-                      onClick={() => {
-                        setCurrentCustomer('');
-                        setOpenSelectInput(false);
-                      }}
-                    >
-                      Agendar em seu nome
-                    </p>
-                    {allUsersEnterpriseAccepted &&
-                      allUsersEnterpriseAccepted
-                        .filter(
-                          (item) =>
-                            item.user.name
-                              .toLocaleLowerCase()
-                              .indexOf(searchInputValue.toLocaleLowerCase()) >
-                            -1,
-                        )
-                        .map((customer) => (
-                          <p
-                            onClick={() => {
-                              setCurrentCustomer(customer.user.id);
-                              setOpenSelectInput(false);
-                            }}
-                          >
-                            {customer.user.name}
-                          </p>
-                        ))}
-                  </div>
-                </ClickAwayListener>
-              )}
-            </div>
-          )}
-          <br />
-          <span>
-            {appointments.length > 0 ? (
-              <>
-                <FiUsers />
-                Usuários que marcaram horário:
-              </>
-            ) : (
-              <>Ninguém se agendou até o momento.</>
-            )}
-          </span>
-          <div>
-            {appointments.map((appointment, index) => (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  margin: '4px 0',
-                }}
-              >
-                <Avatar
-                  width={30}
-                  height={30}
-                  name={appointment.user.name}
-                  avatarUrl={appointment.user.avatar_url}
-                  isPrivate={appointment.user.isPrivate}
-                />
-                <span key={appointment.id}>
-                  {appointment.user.isPrivate && !owner_enterprise ? (
-                    <>Anônimo</>
-                  ) : (
-                    appointment.user.name
-                  )}
-                </span>
-                {user.id === thisEnterprise.owner_id && (
-                  <>
-                    <a
-                      target="_blank"
-                      style={{
-                        cursor: 'pointer',
-                        textDecoration: 'none',
-                        color: 'inherit',
-                        margin: '0 8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                      href={`https://api.whatsapp.com/send?phone=55${removeMask(
-                        appointment.user.celphone,
-                      )}&text=Ol%C3%A1!%20Voc%C3%AA%20marcou%20hor%C3%A1rio%20%C3%A0s%20${
-                        selectectedService?.start_hour
-                      }h%20${selectedDateAsText}%20na%20empresa%20${
-                        thisEnterprise.name
-                      }%2C%20posso%20confirmar%20seu%20agendamento%20%3F`}
-                    >
-                      <FaWhatsapp size={20} />
-                      {appointment.user.celphone}
-                    </a>
-
-                    <FiX
-                      cursor="pointer"
-                      onClick={() => handleOpenUser(appointment.id)}
-                    />
-                  </>
+          return (
+            <ServiceCard key={service.id}>
+              <div>
+                <div>
+                  <h3>{serviceTitle}</h3>
+                  <p>{serviceDescription}</p>
+                </div>
+                {ownerEnterprise && (
+                  <button type="button" onClick={() => deleteService(service.id)}>
+                    <FiTrash2 />
+                  </button>
                 )}
               </div>
-            ))}
-          </div>
-          <ButtonContainer>
-            <Button
-              primaryColor={secondaryColor || '#ff9000'}
-              secondaryColor={primaryColor || '#28262e'}
-              onClick={() => handleAppointment(selectectedService?.id)}
-              loading={loading}
-            >
-              <FiCheckCircle />
-              Agendar
-            </Button>
-          </ButtonContainer>
-        </ModalUsers>
-      )
-    );
-  };
 
-  const findCategory = useCallback(() => {
-    const categoryexist = categories.find((category) => {
-      return category.name.toLocaleLowerCase() === 'crossfit';
-    });
-    if (categoryexist) {
-      return true;
-    }
-    return false;
-  }, [categories]);
+              <ServiceMeta>
+                <span>
+                  <FiClock />
+                  {service.start_hour}
+                </span>
+                <span>
+                  <FiUsers />
+                  {service.appointments.length}/{service.capacity} vagas ocupadas
+                </span>
+              </ServiceMeta>
 
-  // useEffect(() => {
-  //   if (thisEnterprise.id && selectectedCategory?.id && selectedDate) {
-  //     socket.on(
-  //       `new${thisEnterprise.id}${format(
-  //         new Date(selectedDate),
-  //         'dd/MM/yyyy',
-  //       )}${selectectedCategory?.id}`,
-  //       (appointment: { appointment: Appointment; service: Service }) => {
-  //         if (
-  //           appointment.appointment.enterprise_id === thisEnterprise.id &&
-  //           selectectedCategory?.id === appointment.service.category_id &&
-  //           isEqual(
-  //             new Date(
-  //               getYear(new Date(appointment.appointment.date)),
-  //               getMonth(new Date(appointment.appointment.date)),
-  //               getDate(new Date(appointment.appointment.date)),
-  //             ),
-  //             new Date(
-  //               getYear(selectedDate),
-  //               getMonth(selectedDate),
-  //               getDate(selectedDate),
-  //             ),
-  //           )
-  //         ) {
-  //           return handleServices();
-  //         }
-  //       },
-  //     );
+              <ParticipantList>
+                {service.appointments.map((appointment) => (
+                  <li key={appointment.id}>
+                    <div>
+                      <Avatar
+                        width={38}
+                        height={38}
+                        name={appointment.user.name}
+                        isPrivate={appointment.user.isPrivate}
+                        avatarUrl={appointment.user.avatar_url}
+                      />
+                      <span>
+                        {appointment.user.isPrivate
+                          ? 'Anonimo'
+                          : appointment.user.name}
+                      </span>
+                    </div>
 
-  //     socket.on(
-  //       `delete${thisEnterprise.id}${format(
-  //         new Date(selectedDate),
-  //         'dd/MM/yyyy',
-  //       )}${selectectedCategory?.id}`,
-  //       (appointment: { appointment: Appointment; service: Service }) => {
-  //         if (
-  //           appointment.appointment.enterprise_id === thisEnterprise.id &&
-  //           selectectedCategory?.id === appointment.service.category_id &&
-  //           isEqual(
-  //             new Date(
-  //               getYear(new Date(appointment.appointment.date)),
-  //               getMonth(new Date(appointment.appointment.date)),
-  //               getDate(new Date(appointment.appointment.date)),
-  //             ),
-  //             new Date(
-  //               getYear(selectedDate),
-  //               getMonth(selectedDate),
-  //               getDate(selectedDate),
-  //             ),
-  //           )
-  //         ) {
-  //           return handleServices();
-  //         }
-  //       },
-  //     );
-  //   }
-  // }, [
-  //   socket,
-  //   thisEnterprise.id,
-  //   selectedDate,
-  //   selectectedCategory,
-  //   handleServices,
-  // ]);
+                    {ownerEnterprise && (
+                      <button
+                        type="button"
+                        onClick={() => deleteSchedule(appointment.id)}
+                      >
+                        <FiX />
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ParticipantList>
+
+              <ServiceActions>
+                {!ownerEnterprise && !userAppointment && (
+                  <Button
+                    onClick={() => handleAppointment(service.id)}
+                    disabled={service.disabled}
+                    loading={loading}
+                  >
+                    Reservar vaga
+                    <FiArrowRight />
+                  </Button>
+                )}
+
+                {!ownerEnterprise && !!userAppointment && (
+                  <Button
+                    transparent
+                    secondaryColor="#d34f4f"
+                    primaryColor="#ffffff"
+                    onClick={() => deleteSchedule(userAppointment.id)}
+                    loading={loading}
+                  >
+                    Cancelar reserva
+                  </Button>
+                )}
+
+                {ownerEnterprise && (
+                  <Button
+                    onClick={() => handleAppointment(service.id)}
+                    disabled={service.disabled || !currentCustomer}
+                    loading={loading}
+                  >
+                    Aplicar acao
+                    <FiCheck />
+                  </Button>
+                )}
+              </ServiceActions>
+            </ServiceCard>
+          );
+        })}
+
+        {list.length === 0 && (
+          <EmptyState>Nenhum horario cadastrado neste periodo.</EmptyState>
+        )}
+      </ServiceList>
+    </ServiceSection>
+  );
 
   return (
-    <Container
-      primaryColor={primaryColor || '#28262e'}
-      secondaryColor={secondaryColor || '#ff9000'}
+    <AdminShell
+      eyebrow={ownerEnterprise ? 'Painel da empresa' : 'Agenda da empresa'}
+      title={thisEnterprise.name || 'Dashboard da operacao'}
+      description={`Acompanhe ocupacao, clientes ativos, caixa do mes e saude operacional de ${selectedDateAsText}.`}
+      actions={
+        ownerEnterprise ? (
+          <BookingToolbar>
+            <SelectField
+              value={currentCustomer}
+              onChange={(e) => setCurrentCustomer(e.target.value)}
+            >
+              <option value="">Selecione um cliente</option>
+              <option value="full-schedule-service">Encerrar vaga manualmente</option>
+              {allUsersEnterpriseAccepted.map((invite) => (
+                <option key={invite.id} value={invite.user.id}>
+                  {invite.user.name}
+                </option>
+              ))}
+            </SelectField>
+          </BookingToolbar>
+        ) : undefined
+      }
     >
-      {currentAlert.id && (
-        <AlertToast
-          title={currentAlert.title}
-          description={currentAlert.description}
-        />
-      )}
-      <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
-        className={classes.modal}
-        open={open}
-        onClose={handleClose}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
-      >
-        <Fade in={open}>
-          <div className={classes.paper}>
-            <h2 id="transition-modal-title">Deseja excluir o horário?</h2>
-            <p id="transition-modal-description">
-              se você confirmar terá que criar novamente o horário
-            </p>
-            <div className={classes.divButton}>
-              <Button
-                primaryColor={secondaryColor || '#ff9000'}
-                secondaryColor={primaryColor || '#28262e'}
-                onClick={handleClose}
-                loading={loading}
-                transparent
-              >
-                <FiCheckCircle />
-                Cancelar
-              </Button>
-              <Button
-                primaryColor={secondaryColor || '#ff9000'}
-                secondaryColor={primaryColor || '#28262e'}
-                onClick={() => deleteAppointment(currentService)}
-                loading={loading}
-              >
-                <FiCheckCircle />
-                Excluir
-              </Button>
-            </div>
-          </div>
-        </Fade>
-      </Modal>
-      <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
-        className={classes.modal}
-        open={openUser}
-        onClose={handleCloseUser}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
-      >
-        <Fade in={openUser}>
-          <div className={classes.paper}>
-            <h2 id="transition-modal-title">Deseja excluir o agendamento?</h2>
-            <p id="transition-modal-description">
-              se você confirmar o agendamento será excluído.
-            </p>
-            <div className={classes.divButton}>
-              <Button
-                primaryColor={secondaryColor || '#ff9000'}
-                secondaryColor={primaryColor || '#28262e'}
-                onClick={handleCloseUser}
-                loading={loading}
-                transparent
-              >
-                <FiCheckCircle />
-                Cancelar
-              </Button>
-              <Button
-                primaryColor={secondaryColor || '#ff9000'}
-                secondaryColor={primaryColor || '#28262e'}
-                onClick={() => deleteSchedule(currentAppointment)}
-                loading={loading}
-              >
-                <FiCheckCircle />
-                Excluir
-              </Button>
-            </div>
-          </div>
-        </Fade>
-      </Modal>
-      <EnterpriseHeader
-        service={findCategory()}
-        primaryColor={primaryColor || '#28262e'}
-        secondaryColor={secondaryColor || '#ff9000'}
-        name={thisEnterprise.name}
-        logo_url={thisEnterprise.logo_url}
-      />
+      <MetricsGrid>
+        <MetricCard>
+          <MetricEyebrow>Agenda do dia</MetricEyebrow>
+          <strong>{services.length}</strong>
+          <span>Horários publicados para a data selecionada</span>
+        </MetricCard>
+        <MetricCard>
+          <MetricEyebrow>Ocupação</MetricEyebrow>
+          <strong>{occupancyRate}%</strong>
+          <span>{totalReserved} reservas sobre {totalCapacity || 0} vagas</span>
+        </MetricCard>
+        <MetricCard>
+          <MetricEyebrow>Clientes vinculados</MetricEyebrow>
+          <strong>{allUsersEnterpriseAccepted.length}</strong>
+          <span>Base total aprovada na empresa</span>
+        </MetricCard>
+        <MetricCard>
+          <MetricEyebrow>Resultado mensal</MetricEyebrow>
+          <strong>{formatMoney(balance.total)}</strong>
+          <span>Saldo acumulado do mês corrente</span>
+        </MetricCard>
+        <MetricCard>
+          <MetricEyebrow>Receita</MetricEyebrow>
+          <strong>{formatMoney(balance.income)}</strong>
+          <span>Entradas lançadas neste mês</span>
+        </MetricCard>
+        <MetricCard>
+          <MetricEyebrow>Planos ativos</MetricEyebrow>
+          <strong>{activePlansCount}</strong>
+          <span>{pendingCoverageRate}% da base com cobertura atual</span>
+        </MetricCard>
+        <MetricCard>
+          <MetricEyebrow>Solicitações</MetricEyebrow>
+          <strong>{solicitations.length}</strong>
+          <span>Clientes aguardando decisão</span>
+        </MetricCard>
+        <MetricCard>
+          <MetricEyebrow>Risco imediato</MetricEyebrow>
+          <strong>{expiredPlansCount + expiringPlans.length}</strong>
+          <span>Planos vencidos ou perto do vencimento</span>
+        </MetricCard>
+      </MetricsGrid>
 
-      <Category
-        primaryColor={primaryColor || '#28262e'}
-        secondaryColor={secondaryColor || '#ff9000'}
-      >
-        <span>Serviço: </span>
-        <div>
-          {categories && categories.length > 0 ? (
-            categories.map((category) => (
-              <DivCategory
-                primaryColor={primaryColor || '#28262e'}
-                secondaryColor={secondaryColor || '#ff9000'}
-                currentSelected={selectectedCategory?.id === category.id}
-                key={category.id}
-                onClick={() => {
-                  setOpeModal({});
+      <DashboardGrid>
+        <MainColumn>
+          <Panel>
+            <PanelTitle>Comando da operação</PanelTitle>
+            <PanelText>
+              A leitura principal do dia combina agenda, carteira, caixa e pressão comercial para facilitar decisões rápidas.
+            </PanelText>
 
-                  setSelectectedCategory(category);
-                }}
-              >
-                <span>{category.name}</span>
-              </DivCategory>
-            ))
-          ) : owner_enterprise ? (
-            <span>
-              Cadastre seus serviços,{' '}
-              <strong onClick={() => history.push(routes.enterpriseSchedule)}>
-                clique aqui
-              </strong>
-            </span>
-          ) : (
-            <span>Empresa sem serviços</span>
+            <ExecutiveGrid>
+              <ExecutiveCard>
+                <div>
+                  <FiCalendar />
+                  <span>Próximo horário</span>
+                </div>
+                <strong>{nextService ? nextService.start_hour : 'Sem agenda'}</strong>
+                <p>
+                  {nextService
+                    ? nextService.description?.title || 'Horário sem título definido'
+                    : 'Nenhum serviço disponível para esta data.'}
+                </p>
+              </ExecutiveCard>
+
+              <ExecutiveCard>
+                <div>
+                  <FiActivity />
+                  <span>Capacidade livre</span>
+                </div>
+                <strong>{Math.max(totalCapacity - totalReserved, 0)}</strong>
+                <p>Vagas ainda disponíveis na agenda selecionada.</p>
+              </ExecutiveCard>
+
+              <ExecutiveCard>
+                <div>
+                  <FiShield />
+                  <span>Planos em risco</span>
+                </div>
+                <strong>{expiringPlans.length}</strong>
+                <p>Clientes com plano expirado ou prestes a expirar.</p>
+              </ExecutiveCard>
+
+              <ExecutiveCard>
+                <div>
+                  <FiTrendingUp />
+                  <span>Receita por cliente</span>
+                </div>
+                <strong>{formatMoney(averageRevenuePerCustomer)}</strong>
+                <p>Média simples de entrada mensal por cliente vinculado.</p>
+              </ExecutiveCard>
+            </ExecutiveGrid>
+
+            <DataHighlights>
+              <DataHighlight>
+                <span>Portfólio</span>
+                <strong>{enterprisePlans.length} plano(s)</strong>
+              </DataHighlight>
+              <DataHighlight>
+                <span>Restrições</span>
+                <strong>{restricts.length} regra(s)</strong>
+              </DataHighlight>
+              <DataHighlight>
+                <span>Saúde da base</span>
+                <strong>{pendingCoverageRate}% coberta</strong>
+              </DataHighlight>
+            </DataHighlights>
+          </Panel>
+
+          <Panel>
+            <PanelTitle>Demanda por categoria</PanelTitle>
+            <PanelText>
+              Selecione uma categoria para reorganizar a agenda e entender onde a demanda está concentrada.
+            </PanelText>
+
+            <FiltersRow>
+              {categories.map((category) => (
+                <FilterChip
+                  key={category.id}
+                  selected={selectedCategory?.id === category.id}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category.name}
+                </FilterChip>
+              ))}
+            </FiltersRow>
+
+            <InsightList>
+              {categoryUtilization.map((category) => (
+                <InsightListItem key={category.id}>
+                  <div>
+                    <strong>{category.name}</strong>
+                    <span>
+                      {category.reserved}/{category.capacity || 0} reservas
+                    </span>
+                  </div>
+                  <InlineValue>
+                    {category.capacity
+                      ? `${Math.round((category.reserved / category.capacity) * 100)}%`
+                      : '0%'}
+                  </InlineValue>
+                </InsightListItem>
+              ))}
+            </InsightList>
+          </Panel>
+
+          <Panel>
+            <PanelTitle>Financeiro do mês</PanelTitle>
+            <PanelText>
+              Resultado acumulado entre {format(startOfMonth(new Date()), 'dd/MM')} e{' '}
+              {format(endOfMonth(new Date()), 'dd/MM')}, com foco em caixa e margem operacional.
+            </PanelText>
+
+            <FinanceStrip>
+              <FinancePill tone="positive">
+                <span>Entradas</span>
+                <strong>{formatMoney(balance.income)}</strong>
+              </FinancePill>
+              <FinancePill tone="negative">
+                <span>Saídas</span>
+                <strong>{formatMoney(balance.outcome)}</strong>
+              </FinancePill>
+              <FinancePill tone={monthlyResultTone}>
+                <span>Resultado</span>
+                <strong>{formatMoney(balance.total)}</strong>
+              </FinancePill>
+            </FinanceStrip>
+          </Panel>
+
+          <Panel>
+            <PanelTitle>Ritmo da agenda</PanelTitle>
+            <PanelText>
+              Distribuição da operação por período para enxergar o peso de manhã, tarde e noite.
+            </PanelText>
+
+            <InsightGrid>
+              {servicesByPeriod.map((period) => (
+                <InsightCard key={period.label}>
+                  <div>
+                    <FiClock />
+                    <span>{period.label}</span>
+                  </div>
+                  <strong>{period.total}</strong>
+                  <p>{period.reserved} reservas registradas neste período.</p>
+                </InsightCard>
+              ))}
+            </InsightGrid>
+          </Panel>
+
+          {renderServiceSection('Manhã', groupedServices.morning)}
+          {renderServiceSection('Tarde', groupedServices.afternoon)}
+          {renderServiceSection('Noite', groupedServices.night)}
+        </MainColumn>
+
+        <SideColumn>
+          <CalendarPanel>
+            <PanelTitle>Calendário operacional</PanelTitle>
+            <PanelText>
+              Dias destacados indicam disponibilidade para a categoria atual.
+            </PanelText>
+
+            <DayPicker
+              weekdaysShort={['D', 'S', 'T', 'Q', 'Q', 'S', 'S']}
+              months={[
+                'Janeiro',
+                'Fevereiro',
+                'Marco',
+                'Abril',
+                'Maio',
+                'Junho',
+                'Julho',
+                'Agosto',
+                'Setembro',
+                'Outubro',
+                'Novembro',
+                'Dezembro',
+              ]}
+              selectedDays={selectedDate}
+              disabledDays={[
+                {
+                  daysOfWeek: aboutDays.disabledDays,
+                },
+              ]}
+              modifiers={{
+                available: {
+                  daysOfWeek: aboutDays.availableDays,
+                },
+              }}
+              onDayClick={handleDateChange}
+            />
+
+            <HighlightCard>
+              <div>
+                <span>Dia selecionado</span>
+                <strong>{selectedDateAsText}</strong>
+              </div>
+              <span>
+                <FiCalendar />
+                {format(selectedDate, 'cccc', {
+                  locale: ptBr,
+                })}
+              </span>
+            </HighlightCard>
+          </CalendarPanel>
+
+          {currentAlert && (
+            <AlertCard>
+              <div>
+                <FiAlertCircle />
+                <span>Comunicado ativo</span>
+              </div>
+              <strong>{currentAlert.title || 'Aviso da operação'}</strong>
+              <p>{currentAlert.description || 'Sem detalhes adicionais.'}</p>
+            </AlertCard>
           )}
-        </div>
-      </Category>
-      <Content>
-        <Calendar
-          primaryColor={primaryColor || '#28262e'}
-          secondaryColor={secondaryColor || '#ff9000'}
-        >
-          <DayPicker
-            weekdaysShort={
-              window.screen.width > 600
-                ? ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']
-                : ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
-            }
-            fromMonth={new Date()}
-            disabledDays={[
-              { before: new Date() },
-              { daysOfWeek: aboutDays.disabledDays },
-            ]}
-            modifiers={{
-              available: { daysOfWeek: aboutDays.availableDays },
-            }}
-            selectedDays={selectedDate}
-            onDayClick={handleDateChange}
-            months={[
-              'Janeiro',
-              'Fevereiro',
-              'Março',
-              'Abril',
-              'Maio',
-              'Junho',
-              'Julho',
-              'Agosto',
-              'Setembro',
-              'Outubro',
-              'Novembro',
-              'Dezembro',
-            ]}
-          />
-        </Calendar>
-        <Schedule
-          primaryColor={primaryColor || '#28262e'}
-          secondaryColor={secondaryColor || '#ff9000'}
-        >
-          <h1>Horários</h1>
-          <p>
-            {isToday(selectedDate) && <span> Hoje</span>}
-            <span>{selectedDateAsText}</span>
-            <span>{selectedWeekDay}</span>
-          </p>
-          <Section
-            primaryColor={primaryColor || '#28262e'}
-            secondaryColor={secondaryColor || '#ff9000'}
-          >
-            <strong>Manhã</strong>
-            {showServices(morningRef, morningServices, 'morning')}
-            {showServiceModal('morning')}
-          </Section>
-          <Section
-            primaryColor={primaryColor || '#28262e'}
-            secondaryColor={secondaryColor || '#ff9000'}
-          >
-            <strong>Tarde</strong>
-            {showServices(afternoomRef, afternoonServices, 'afternoom')}
-            {showServiceModal('afternoom')}
-          </Section>
 
-          <Section
-            primaryColor={primaryColor || '#28262e'}
-            secondaryColor={secondaryColor || '#ff9000'}
-          >
-            <strong>Noite</strong>
-            {showServices(nightRef, nightServices, 'night')}
-            {showServiceModal('night')}
-          </Section>
-        </Schedule>
-      </Content>
-      {/* <ButtonContainer>
-        <Button
-          primaryColor={primaryColor || '#28262e'}
-          secondaryColor={secondaryColor || '#ff9000'}
-          onClick={() => handleAppointment(selectectedService?.id)}
-          loading={loading}
-        >
-          <FiCheckCircle />
-          Confirmar
-        </Button>
-      </ButtonContainer> */}
-    </Container>
+          <Panel>
+            <PanelTitle>Prioridades do dia</PanelTitle>
+            <PanelText>
+              O que merece resposta imediata para proteger receita, agenda e relacionamento.
+            </PanelText>
+
+            <PriorityList>
+              {operationalPriorities.map((priority) => (
+                <PriorityCard key={priority.title}>
+                  <div>
+                    <strong>{priority.title}</strong>
+                    <ToneBadge tone={priority.tone}>{priority.badge}</ToneBadge>
+                  </div>
+                  <p>{priority.description}</p>
+                </PriorityCard>
+              ))}
+            </PriorityList>
+          </Panel>
+
+          <Panel>
+            <PanelTitle>Clientes em atenção</PanelTitle>
+            <PanelText>
+              Priorize contato com quem está perto do vencimento ou já perdeu cobertura.
+            </PanelText>
+
+            {expiringPlans.length > 0 ? (
+              <InsightList>
+                {expiringPlans.map((invite) => {
+                  const expiration = new Date(invite.currentPlan!.expiration_at);
+                  const isExpired = !isAfter(expiration, new Date());
+
+                  return (
+                    <InsightListItem key={invite.id}>
+                      <div>
+                        <strong>{invite.user.name}</strong>
+                        <span>{format(expiration, 'dd/MM/yyyy')}</span>
+                      </div>
+                      <StatusPill expired={isExpired}>
+                        {isExpired
+                          ? 'Expirado'
+                          : `${differenceInDays(expiration, new Date())} dias`}
+                      </StatusPill>
+                    </InsightListItem>
+                  );
+                })}
+              </InsightList>
+            ) : (
+              <EmptyState>Nenhum cliente em risco imediato.</EmptyState>
+            )}
+          </Panel>
+
+          <Panel>
+            <PanelTitle>Atalhos de gestão</PanelTitle>
+            <PanelText>
+              Acesse rapidamente as áreas mais importantes da operação.
+            </PanelText>
+
+            <QuickActions>
+              <QuickActionCard onClick={() => history.push(routes.customers)}>
+                <FiUsers />
+                <div>
+                  <strong>Clientes</strong>
+                  <span>Planos, convites e base ativa</span>
+                </div>
+              </QuickActionCard>
+
+              <QuickActionCard onClick={() => history.push(routes.plan)}>
+                <FiLayers />
+                <div>
+                  <strong>Planos</strong>
+                  <span>Catálogo, restrições e cobertura</span>
+                </div>
+              </QuickActionCard>
+
+              <QuickActionCard onClick={() => history.push(routes.financial)}>
+                <FiDollarSign />
+                <div>
+                  <strong>Financeiro</strong>
+                  <span>Transações, caixa e balanço</span>
+                </div>
+              </QuickActionCard>
+
+              <QuickActionCard onClick={() => history.push(routes.enterprise)}>
+                <FiBriefcase />
+                <div>
+                  <strong>Empresa</strong>
+                  <span>Dados cadastrais e configurações gerais</span>
+                </div>
+              </QuickActionCard>
+
+              <QuickActionCard
+                onClick={() => history.push(routes.enterpriseSchedule)}
+              >
+                <FiLayers />
+                <div>
+                  <strong>Horários</strong>
+                  <span>Cadastro e gestão da agenda</span>
+                </div>
+              </QuickActionCard>
+
+              <QuickActionCard onClick={() => history.push(routes.alert)}>
+                <FiMail />
+                <div>
+                  <strong>Alertas</strong>
+                  <span>Comunicados exibidos no app</span>
+                </div>
+              </QuickActionCard>
+            </QuickActions>
+          </Panel>
+        </SideColumn>
+      </DashboardGrid>
+    </AdminShell>
   );
 };
 

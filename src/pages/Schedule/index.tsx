@@ -1,63 +1,36 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { FiChevronDown, FiChevronUp, FiUsers } from 'react-icons/fi';
-import { MdDeleteForever } from 'react-icons/md';
-
-import { format } from 'date-fns';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { FiCalendar, FiClock, FiMapPin, FiTrash2, FiUsers } from 'react-icons/fi';
+import { format, isFuture } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
-import { GoLocation } from 'react-icons/go';
-import { makeStyles } from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';
-import Backdrop from '@material-ui/core/Backdrop';
-import Fade from '@material-ui/core/Fade';
+import { useHistory } from 'react-router-dom';
 import EnterpriseImg from '../../assets/empresa.png';
-import { Container, Content, Card, OpenDelete } from './styles';
-
-import 'react-day-picker/lib/style.css';
-
-import HeaderMenu from '../../components/Header';
-
-import api from '../../services/api';
-
+import AdminShell from '../../components/AdminShell';
+import Avatar from '../../components/Avatar';
 import Button from '../../components/Button';
+import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
 import { useLoad } from '../../hooks/load';
-import Avatar from '../../components/Avatar';
-import { useHistory } from 'react-router-dom';
 import { routes } from '../../routes';
-import EnterpriseHeader from '../../components/EnterpriseHeader';
-
-const useStyles = makeStyles((theme) => ({
-  modal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  paper: {
-    backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-    color: 'black',
-  },
-  divButton: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-}));
-interface OpenModal {
-  [key: string]: boolean;
-}
+import {
+  EmptyState,
+  ScheduleGrid,
+  ScheduleSection,
+  SectionHeader,
+  SectionTitle,
+  SectionText,
+  ScheduleCard,
+  ScheduleMeta,
+  ParticipantList,
+  SummaryGrid,
+  SummaryCard,
+  InlineAction,
+} from './styles';
 
 interface Enterprise {
   id: string;
   name: string;
   address: string;
-  area: string;
-  open_hour: string;
-  close_hour: string;
   logo_url: string;
-  primary_color: string;
-  secondary_color: string;
   friends: boolean;
 }
 
@@ -70,14 +43,8 @@ interface User {
 
 interface Service {
   id: string;
-  disabled: boolean;
-  start_hour: string;
   capacity: number;
   appointments: Appointment[];
-  description: {
-    title: string;
-    description: string;
-  };
 }
 
 interface Appointment {
@@ -93,39 +60,23 @@ interface ListAppointment {
   pastAppointments: Appointment[];
 }
 
-const Enterprises: React.FC = () => {
+const Schedule: React.FC = () => {
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
-
   const toast = useToast();
   const history = useHistory();
   const { start, stop } = useLoad();
 
-  const [openShedule, setOpenShedule] = useState<OpenModal>({});
-
   const [loading, setLoading] = useState(false);
-  const [currentAppointment, setCurrentAppointment] = useState<Appointment>();
-  const [openDelete, setOpenDelete] = useState(false);
-
   const [myAppointments, setMyAppointments] = useState<ListAppointment>();
-  const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   useEffect(() => {
     if (
       !thisEnterprise.id &&
       window.location.pathname === routes.enterpriseUserSchedule
     ) {
-      history.push('/schedule');
+      history.push(routes.schedule);
     }
-  }, []);
+  }, [history, thisEnterprise.id]);
 
   const getMyAppointments = useCallback(async () => {
     setLoading(true);
@@ -133,356 +84,236 @@ const Enterprises: React.FC = () => {
     try {
       const response = await api.get(
         window.location.pathname === routes.schedule
-          ? `/appointments/me/${7}`
-          : `/appointments/me/${7}/${thisEnterprise.id}`,
+          ? '/appointments/me/7'
+          : `/appointments/me/7/${thisEnterprise.id}`,
       );
 
       setMyAppointments(response.data);
-      setOpenDelete(false);
-    } catch (err) {
     } finally {
       stop();
       setLoading(false);
     }
-  }, []);
+  }, [start, stop, thisEnterprise.id]);
 
   const deleteAppointments = useCallback(
     async (appointment_id: string | undefined) => {
+      if (!appointment_id) {
+        return;
+      }
+
       setLoading(true);
 
       try {
         await api.delete(`/appointments/${appointment_id}`);
-        getMyAppointments();
-        handleClose();
+        await getMyAppointments();
 
         toast.addToast({
-          title: 'Agendamento Deletado',
+          title: 'Agendamento cancelado',
           type: 'success',
         });
       } catch (err) {
-        if (err.response) {
-          toast.addToast({
-            type: 'error',
-            title:
-              err.response.data.message ||
-              'Ocorreu um erro ao deletar o agendamento, tente novamente',
-          });
-        } else {
-          toast.addToast({
-            type: 'error',
-            title: 'Ocorreu um erro ao deletar o agendamento, tente novamente',
-          });
-        }
+        toast.addToast({
+          type: 'error',
+          title:
+            err.response?.data.message ||
+            'Ocorreu um erro ao cancelar o agendamento',
+        });
       } finally {
         setLoading(false);
       }
     },
-    [toast, getMyAppointments],
+    [getMyAppointments, toast],
   );
 
   useEffect(() => {
     getMyAppointments();
-  }, []);
+  }, [getMyAppointments]);
+
+  const allAppointments = useMemo(() => {
+    return [
+      ...(myAppointments?.futureAppointments || []),
+      ...(myAppointments?.pastAppointments || []),
+    ];
+  }, [myAppointments]);
 
   return (
-    <Container>
-      <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
-        className={classes.modal}
-        open={open}
-        onClose={handleClose}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
-      >
-        <Fade in={open}>
-          <div className={classes.paper}>
-            <h2 id="transition-modal-title">Deseja cancelar o agendamento?</h2>
-            <p id="transition-modal-description">
-              Ao cancelar, você perderá a vaga.
-            </p>
-            <div className={classes.divButton}>
-              <Button
-                primaryColor="#ff9000"
-                secondaryColor="#28262e"
-                onClick={handleClose}
-                loading={loading}
-                transparent
-              >
-                Cancelar
-              </Button>
-              <Button
-                primaryColor="#ff9000"
-                secondaryColor="#28262e"
-                onClick={() => deleteAppointments(currentAppointment?.id)}
-                loading={loading}
-              >
-                Excluir
-              </Button>
-            </div>
-          </div>
-        </Fade>
-      </Modal>
-      {openDelete && (
-        <OpenDelete>
-          <span>Tem certeza que deseja excluir o agendamento ?</span>
-          <div>
-            <Button transparent onClick={() => setOpenDelete(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={() => deleteAppointments(currentAppointment?.id)}>
-              Excluir
-            </Button>
-          </div>
-        </OpenDelete>
-      )}
-      {window.location.pathname === routes.enterpriseUserSchedule ? (
-        <EnterpriseHeader
-          service
-          primaryColor="#28262e"
-          secondaryColor="#ff9000"
-          name={thisEnterprise.name}
-          logo_url={thisEnterprise.logo_url}
-        />
-      ) : (
-        <HeaderMenu />
-      )}
-      <Content>
-        <div>
-          <span>Próximos Agendamentos:</span>
-          {myAppointments && myAppointments.futureAppointments.length > 0 ? (
-            myAppointments.futureAppointments
-              .filter((appointment) => appointment.service !== null)
-              .map((appointment) => {
-                return (
-                  <Card>
-                    <div>
-                      <div
-                        onClick={() =>
-                          setOpenShedule({
-                            ...openShedule,
-                            [appointment.id]: !openShedule[appointment.id],
-                          })
-                        }
-                      >
-                        {!openShedule[appointment.id] ? (
-                          <FiChevronDown
-                            style={{ marginRight: '8px' }}
-                            onClick={() =>
-                              setOpenShedule({
-                                ...openShedule,
-                                [appointment.id]: true,
-                              })
-                            }
-                            cursor="pointer"
-                            size={20}
-                            color="#ff9000"
-                          />
-                        ) : (
-                          <FiChevronUp
-                            style={{ marginRight: '8px' }}
-                            onClick={() =>
-                              setOpenShedule({
-                                ...openShedule,
-                                [appointment.id]: false,
-                              })
-                            }
-                            cursor="pointer"
-                            size={20}
-                            color="#ff9000"
-                          />
-                        )}
-                        <img
-                          src={appointment.enterprise.logo_url || EnterpriseImg}
-                          alt="logo empresa"
-                        />
-                        <span>{appointment.enterprise.name}</span>
-                        <span style={{ fontSize: '14px' }}>
-                          {format(
-                            new Date(appointment.date),
-                            "HH:mm'h' dd/MM/yyyy",
-                            {
-                              locale: ptBr,
-                            },
-                          )}
-                        </span>
-                      </div>
-                      <MdDeleteForever
-                        onClick={() => {
-                          setCurrentAppointment(appointment);
-                          handleOpen();
-                        }}
-                        color="#c53030"
-                      />
-                    </div>
-                    {openShedule[appointment.id] && (
-                      <main>
-                        <hr />
-                        <span>
-                          <GoLocation size={20} color="#ff9000" />
-                          {appointment.enterprise.address}
-                        </span>
-                        <span>
-                          <FiUsers size={20} color="#ff9000" />
-                          Usuários agendados:
-                          {appointment.service.appointments.length}/
-                          {appointment.service.capacity}
-                        </span>
-                        {appointment.service.appointments &&
-                          appointment.service.appointments.map(
-                            (currentAppointment) => {
-                              return (
-                                <div>
-                                  <Avatar
-                                    width={35}
-                                    height={35}
-                                    name={currentAppointment.user.name}
-                                    isPrivate={
-                                      currentAppointment.user.isPrivate
-                                    }
-                                    avatarUrl={
-                                      currentAppointment.user.avatar_url
-                                    }
-                                  />
+    <AdminShell
+      eyebrow="Minha agenda"
+      title="Agendamentos organizados por contexto"
+      description="Veja os proximos compromissos, revise o historico recente e cancele com clareza quando precisar."
+    >
+      <SummaryGrid>
+        <SummaryCard>
+          <strong>{myAppointments?.futureAppointments.length || 0}</strong>
+          <span>Proximos agendamentos</span>
+        </SummaryCard>
+        <SummaryCard>
+          <strong>{myAppointments?.pastAppointments.length || 0}</strong>
+          <span>Ultimos atendimentos</span>
+        </SummaryCard>
+        <SummaryCard>
+          <strong>{allAppointments.filter((item) => isFuture(new Date(item.date))).length}</strong>
+          <span>Compromissos ainda ativos</span>
+        </SummaryCard>
+      </SummaryGrid>
 
-                                  <span>
-                                    {currentAppointment.user.isPrivate
-                                      ? 'Anônimo'
-                                      : currentAppointment.user.name}
-                                  </span>
-                                </div>
-                              );
-                            },
-                          )}
-                      </main>
-                    )}
-                  </Card>
-                );
-              })
-          ) : (
-            <>
-              <br />
-              <br />
-              Nenhum agendamento futuro.
-            </>
-          )}
-        </div>
-        <div>
-          <span>Últimos 7 Passados:</span>
-          {myAppointments && myAppointments.pastAppointments.length > 0 ? (
-            myAppointments.pastAppointments
-              .filter((appointment) => appointment.service !== null)
-              .map((appointment) => {
-                return (
-                  <Card
-                    past
-                    onClick={() =>
-                      setOpenShedule({
-                        ...openShedule,
-                        [appointment.id]: !openShedule[appointment.id],
-                      })
-                    }
+      <ScheduleGrid>
+        <ScheduleSection>
+          <SectionHeader>
+            <div>
+              <SectionTitle>Proximos agendamentos</SectionTitle>
+              <SectionText>
+                Tudo o que ainda vai acontecer nos proximos dias.
+              </SectionText>
+            </div>
+          </SectionHeader>
+
+          {(myAppointments?.futureAppointments || [])
+            .filter((appointment) => appointment.service !== null)
+            .map((appointment) => (
+              <ScheduleCard key={appointment.id}>
+                <div>
+                  <img
+                    src={appointment.enterprise.logo_url || EnterpriseImg}
+                    alt={appointment.enterprise.name}
+                  />
+                  <div>
+                    <h3>{appointment.enterprise.name}</h3>
+                    <ScheduleMeta>
+                      <span>
+                        <FiCalendar />
+                        {format(new Date(appointment.date), "dd 'de' MMMM", {
+                          locale: ptBr,
+                        })}
+                      </span>
+                      <span>
+                        <FiClock />
+                        {format(new Date(appointment.date), "HH:mm'h'", {
+                          locale: ptBr,
+                        })}
+                      </span>
+                      <span>
+                        <FiMapPin />
+                        {appointment.enterprise.address}
+                      </span>
+                      <span>
+                        <FiUsers />
+                        {appointment.service.appointments.length}/
+                        {appointment.service.capacity} participantes
+                      </span>
+                    </ScheduleMeta>
+                  </div>
+                </div>
+
+                <InlineAction>
+                  <Button
+                    transparent
+                    secondaryColor="#d34f4f"
+                    primaryColor="#ffffff"
+                    onClick={() => deleteAppointments(appointment.id)}
+                    loading={loading}
                   >
-                    <div>
-                      <div>
-                        <img
-                          src={appointment.enterprise.logo_url || EnterpriseImg}
-                          alt="logo empresa"
-                        />
-                        <span>{appointment.enterprise.name}</span>
-                        <span style={{ fontSize: '14px' }}>
-                          {format(
-                            new Date(appointment.date),
-                            "HH:mm'h' dd/MM/yyyy",
-                            {
-                              locale: ptBr,
-                            },
-                          )}
-                        </span>
-                      </div>
-                      {!openShedule[appointment.id] ? (
-                        <FiChevronDown
-                          onClick={() =>
-                            setOpenShedule({
-                              ...openShedule,
-                              [appointment.id]: !openShedule[appointment.id],
-                            })
-                          }
-                          cursor="pointer"
-                          size={20}
-                          color="#ff9000"
-                        />
-                      ) : (
-                        <FiChevronUp
-                          onClick={() =>
-                            setOpenShedule({
-                              ...openShedule,
-                              [appointment.id]: false,
-                            })
-                          }
-                          cursor="pointer"
-                          size={20}
-                          color="#ff9000"
-                        />
-                      )}
-                    </div>
-                    {openShedule[appointment.id] && (
-                      <main>
-                        <hr />
-                        <span>
-                          <GoLocation size={20} color="#ff9000" />
-                          {appointment.enterprise.address}
-                        </span>
-                        <span>
-                          <FiUsers size={20} color="#ff9000" />
-                          Usuários agendados:{' '}
-                          {appointment.service.appointments.length}/
-                          {appointment.service.capacity}
-                        </span>
-                        {appointment.service.appointments &&
-                          appointment.service.appointments.map(
-                            (currentAppointment) => {
-                              return (
-                                <div>
-                                  <Avatar
-                                    width={35}
-                                    height={35}
-                                    name={currentAppointment.user.name}
-                                    isPrivate={
-                                      currentAppointment.user.isPrivate
-                                    }
-                                    avatarUrl={
-                                      currentAppointment.user.avatar_url
-                                    }
-                                  />
-                                  <span>
-                                    {currentAppointment.user.isPrivate
-                                      ? 'Anônimo'
-                                      : currentAppointment.user.name}
-                                  </span>
-                                </div>
-                              );
-                            },
-                          )}
-                      </main>
-                    )}
-                  </Card>
-                );
-              })
-          ) : (
-            <>
-              <br />
-              <br />
-              Nenhum agendamento passado.
-            </>
+                    <FiTrash2 />
+                    Cancelar
+                  </Button>
+                </InlineAction>
+
+                <ParticipantList>
+                  {appointment.service.appointments.map((currentAppointment) => (
+                    <li key={currentAppointment.id}>
+                      <Avatar
+                        width={38}
+                        height={38}
+                        name={currentAppointment.user.name}
+                        isPrivate={currentAppointment.user.isPrivate}
+                        avatarUrl={currentAppointment.user.avatar_url}
+                      />
+                      <span>
+                        {currentAppointment.user.isPrivate
+                          ? 'Anonimo'
+                          : currentAppointment.user.name}
+                      </span>
+                    </li>
+                  ))}
+                </ParticipantList>
+              </ScheduleCard>
+            ))}
+
+          {(myAppointments?.futureAppointments || []).length === 0 && (
+            <EmptyState>Nenhum agendamento futuro.</EmptyState>
           )}
-        </div>
-      </Content>
-    </Container>
+        </ScheduleSection>
+
+        <ScheduleSection>
+          <SectionHeader>
+            <div>
+              <SectionTitle>Historico recente</SectionTitle>
+              <SectionText>
+                Ultimos atendimentos para revisar volume e recorrencia.
+              </SectionText>
+            </div>
+          </SectionHeader>
+
+          {(myAppointments?.pastAppointments || [])
+            .filter((appointment) => appointment.service !== null)
+            .map((appointment) => (
+              <ScheduleCard key={appointment.id} past>
+                <div>
+                  <img
+                    src={appointment.enterprise.logo_url || EnterpriseImg}
+                    alt={appointment.enterprise.name}
+                  />
+                  <div>
+                    <h3>{appointment.enterprise.name}</h3>
+                    <ScheduleMeta>
+                      <span>
+                        <FiCalendar />
+                        {format(new Date(appointment.date), "dd 'de' MMMM", {
+                          locale: ptBr,
+                        })}
+                      </span>
+                      <span>
+                        <FiClock />
+                        {format(new Date(appointment.date), "HH:mm'h'", {
+                          locale: ptBr,
+                        })}
+                      </span>
+                      <span>
+                        <FiMapPin />
+                        {appointment.enterprise.address}
+                      </span>
+                    </ScheduleMeta>
+                  </div>
+                </div>
+
+                <ParticipantList>
+                  {appointment.service.appointments.map((currentAppointment) => (
+                    <li key={currentAppointment.id}>
+                      <Avatar
+                        width={34}
+                        height={34}
+                        name={currentAppointment.user.name}
+                        isPrivate={currentAppointment.user.isPrivate}
+                        avatarUrl={currentAppointment.user.avatar_url}
+                      />
+                      <span>
+                        {currentAppointment.user.isPrivate
+                          ? 'Anonimo'
+                          : currentAppointment.user.name}
+                      </span>
+                    </li>
+                  ))}
+                </ParticipantList>
+              </ScheduleCard>
+            ))}
+
+          {(myAppointments?.pastAppointments || []).length === 0 && (
+            <EmptyState>Nenhum agendamento passado.</EmptyState>
+          )}
+        </ScheduleSection>
+      </ScheduleGrid>
+    </AdminShell>
   );
 };
 
-export default Enterprises;
+export default Schedule;

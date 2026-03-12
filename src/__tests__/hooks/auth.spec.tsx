@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 import { useAuth, AuthProvider } from '../../hooks/auth';
 import api from '../../services/api';
@@ -19,7 +19,7 @@ describe('Auth hook', () => {
 
     const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
 
-    const { result, waitForNextUpdate } = renderHook(() => useAuth(), {
+    const { result } = renderHook(() => useAuth(), {
       wrapper: AuthProvider,
     });
 
@@ -28,7 +28,9 @@ describe('Auth hook', () => {
       password: '123456',
     });
 
-    await waitForNextUpdate();
+    await waitFor(() =>
+      expect(result.current.user.email).toEqual('augusto@teste.com'),
+    );
     expect(setItemSpy).toHaveBeenCalledWith(
       '@GoBarber:token',
       apiResponse.token,

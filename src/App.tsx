@@ -27,7 +27,7 @@ const App: React.FC = () => {
   const reloadPage = () => {
     waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
     setShowReload(false);
-    window.location.reload(true);
+    window.location.reload();
   };
 
   return (

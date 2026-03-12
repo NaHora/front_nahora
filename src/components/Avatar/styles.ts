@@ -13,11 +13,14 @@ export const Container = styled.main<AvatarProps>`
   height: ${(props) => props.height}px;
   width: ${(props) => props.width}px;
   margin-right: ${(props) => (props.noMargin ? '0' : '8px')};
-  border: 1px solid ${(props) => props.secondaryColor};
-  background: ${(props) => props.primaryColor};
+  border: 2px solid rgba(255, 255, 255, 0.24);
+  background:
+    linear-gradient(135deg, rgba(255, 159, 67, 0.2), rgba(48, 86, 211, 0.18)),
+    ${(props) => props.primaryColor};
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 
   > img {
     max-height: ${(props) => props.height}px;
@@ -40,5 +43,6 @@ export const Container = styled.main<AvatarProps>`
     font-size: ${(props) => Number(props.height) / 2}px;
     padding: 20px;
     color: ${(props) => props.secondaryColor};
+    font-weight: 700;
   }
 `;

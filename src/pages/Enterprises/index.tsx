@@ -1,30 +1,38 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { FiSearch, FiLock, FiUnlock } from 'react-icons/fi';
-
-import { useHistory } from 'react-router-dom';
-import Loader from 'react-loader-spinner';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
-  Container,
-  Content,
-  Card,
-  Title,
-  SubTitle,
-  Text,
-  CadastraButton,
-  SearchContent,
-  MyEnterprises,
-  CardMine,
+  FiArrowRight,
+  FiCheckCircle,
+  FiClock,
+  FiLock,
+  FiSearch,
+  FiUnlock,
+} from 'react-icons/fi';
+import AdminShell from '../../components/AdminShell';
+import {
+  Grid,
+  Column,
+  Surface,
+  SurfaceHeader,
+  SectionTitle,
+  SectionText,
+  SummaryGrid,
+  SummaryCard,
+  SearchRow,
+  EnterpriseList,
+  EnterpriseCard,
+  EnterpriseCardBody,
+  EnterpriseMeta,
+  EmptyState,
+  StatusPill,
+  ActionButton,
 } from './styles';
 import EnterpriseImg from '../../assets/empresa.png';
-
-import 'react-day-picker/lib/style.css';
-
-import HeaderMenu from '../../components/Header';
 import InputDefault from '../../components/InputDefault';
 import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
+import { useHistory } from 'react-router-dom';
 import { useSocket } from '../../hooks/socket';
 import { useLoad } from '../../hooks/load';
 
@@ -44,11 +52,6 @@ interface SearchEnterprise {
 
 interface MyEnterprise {
   id: string;
-  name: string;
-  address: string;
-  area: string;
-  open_hour: string;
-  close_hour: string;
   enterprise: SearchEnterprise;
 }
 
@@ -59,75 +62,45 @@ const Enterprises: React.FC = () => {
   const { socket } = useSocket();
   const { start, stop } = useLoad();
 
-  const [searchEnterprises, setSearchEnterprises] = useState<
-    SearchEnterprise[]
-  >([]);
-
+  const [searchEnterprises, setSearchEnterprises] = useState<SearchEnterprise[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [enterprises, setEnterprises] = useState<MyEnterprise[]>([]);
   const [allEnterprises, setAllEnterprises] = useState<SearchEnterprise[]>([]);
-  const [myEnterprise, setMyEnterprises] = useState<SearchEnterprise | null>(
-    null,
-  );
+  const [myEnterprise, setMyEnterprises] = useState<SearchEnterprise | null>(null);
 
   const getAllEnterprises = useCallback(async () => {
     try {
-      const response = await api.get(`/enterprises/all-unregistered`);
-
+      const response = await api.get('/enterprises/all-unregistered');
       setAllEnterprises(response.data);
     } catch (err) {
-      if (err.response) {
-        toast.addToast({
-          type: 'error',
-          title: 'Algo deu errado,',
-          description:
-            err.response.data.message ||
-            'Não foi possível carregar suas empresas',
-        });
-      } else {
-        toast.addToast({
-          type: 'error',
-          title: 'Ocorreu um erro ao procurar empresas, tente novamente',
-        });
-      }
+      toast.addToast({
+        type: 'error',
+        title: err.response?.data.message || 'Nao foi possivel carregar empresas',
+      });
     }
   }, [toast]);
 
   const getInviteEnterprise = useCallback(async () => {
     try {
-      const response = await api.get(`/invites/accepted`);
-
+      const response = await api.get('/invites/accepted');
       setEnterprises(response.data);
     } catch (err) {
-      if (err.response) {
-        toast.addToast({
-          type: 'error',
-          title: 'Algo deu errado,',
-          description:
-            err.response.data.message ||
-            'Não foi possível carregar suas empresas',
-        });
-      } else {
-        toast.addToast({
-          type: 'error',
-          title: 'Ocorreu um erro ao procurar empresas, tente novamente',
-        });
-      }
+      toast.addToast({
+        type: 'error',
+        title:
+          err.response?.data.message ||
+          'Nao foi possivel carregar as empresas seguidas',
+      });
     }
   }, [toast]);
 
   const getMyEnterprises = useCallback(async () => {
     try {
-      const response = await api.get(`/enterprises/mine`);
-
-      localStorage.setItem(
-        '@NaHora:myEnterprise',
-        JSON.stringify(response.data),
-      );
-
+      const response = await api.get('/enterprises/mine');
+      localStorage.setItem('@NaHora:myEnterprise', JSON.stringify(response.data));
       setMyEnterprises(response.data);
-    } catch (err) {}
+    } catch {}
   }, []);
 
   const checkPermission = useCallback(
@@ -137,66 +110,48 @@ const Enterprises: React.FC = () => {
 
         if (response.data) {
           localStorage.setItem('enterprise', JSON.stringify(enterprise));
-
-          return history.push(routes.dashboard);
+          history.push(routes.dashboard);
         }
       } catch (err) {
-        if (err.response) {
-          toast.addToast({
-            type: 'error',
-            title: 'Algo deu errado,',
-            description:
-              err.response.data.message ||
-              'Não foi possível carregar suas empresas',
-          });
-        } else {
-          toast.addToast({
-            type: 'error',
-            title: 'Ocorreu um erro ao procurar empresas, tente novamente',
-          });
-        }
+        toast.addToast({
+          type: 'error',
+          title:
+            err.response?.data.message ||
+            'Nao foi possivel acessar esta empresa agora',
+        });
       }
     },
-    [toast, history],
+    [history, toast],
   );
 
   const checkEnterprisePayment = useCallback(
     async (enterprise: SearchEnterprise) => {
       try {
-        const response = await api.get(`/enterprises/checkPayment`);
+        const response = await api.get('/enterprises/checkPayment');
 
         if (response.data) {
           localStorage.setItem('enterprise', JSON.stringify(enterprise));
-
-          return history.push(routes.dashboard);
+          history.push(routes.dashboard);
         }
       } catch (err) {
-        if (err.response) {
-          toast.addToast({
-            type: 'error',
-            title: 'Algo deu errado,',
-            description:
-              err.response.data.message ||
-              'Não foi possível conferir sua assinatura.',
-          });
-        } else {
-          toast.addToast({
-            type: 'error',
-            title: 'Não foi possível conferir sua assinatura.',
-          });
-        }
+        toast.addToast({
+          type: 'error',
+          title:
+            err.response?.data.message ||
+            'Nao foi possivel conferir a assinatura da empresa',
+        });
       }
     },
-    [toast, history],
+    [history, toast],
   );
 
   const searchAllEnterprisesByName = useCallback(async (search: string) => {
     setLoading(true);
     try {
       const response = await api.get(`/enterprises/${search}/search`);
-
       setSearchEnterprises(response.data);
-    } catch (err) {
+    } catch {
+      setSearchEnterprises([]);
     } finally {
       setLoading(false);
     }
@@ -205,41 +160,29 @@ const Enterprises: React.FC = () => {
   const inviteEnterprise = useCallback(
     async (enterprise_id: string) => {
       try {
-        const body = {
+        await api.post('/invites', {
           user_id: user.id,
           enterprise_id,
-        };
-
-        await api.post(`/invites`, body);
+        });
 
         setSearchValue('');
-
         getInviteEnterprise();
         getMyEnterprises();
         getAllEnterprises();
 
         toast.addToast({
           type: 'success',
-          title: 'Agora é só esperar!',
-          description:
-            'Você enviou um convite para acessar os horários desta empresa',
+          title: 'Convite enviado',
+          description: 'Agora a empresa precisa aprovar seu acesso.',
         });
       } catch (err) {
-        if (err.response) {
-          toast.addToast({
-            type: 'error',
-            title: 'Algo deu errado,',
-            description: err.response.data.message || 'Erro interno',
-          });
-        } else {
-          toast.addToast({
-            type: 'error',
-            title: 'Ocorreu um erro ao procurar empresas, tente novamente',
-          });
-        }
+        toast.addToast({
+          type: 'error',
+          title: err.response?.data.message || 'Nao foi possivel enviar convite',
+        });
       }
     },
-    [toast, user.id, getInviteEnterprise, getAllEnterprises, getMyEnterprises],
+    [getAllEnterprises, getInviteEnterprise, getMyEnterprises, toast, user.id],
   );
 
   const getAllRequests = useCallback(async () => {
@@ -253,223 +196,221 @@ const Enterprises: React.FC = () => {
     } finally {
       stop();
     }
-  }, []);
+  }, [getAllEnterprises, getInviteEnterprise, getMyEnterprises, start, stop]);
 
   useEffect(() => {
     getAllRequests();
-  }, []);
+  }, [getAllRequests]);
 
   useEffect(() => {
     if (searchValue.length >= 3) {
       searchAllEnterprisesByName(searchValue);
+      return;
     }
-  }, [searchValue]);
+    setSearchEnterprises([]);
+  }, [searchAllEnterprisesByName, searchValue]);
 
   useEffect(() => {
-    socket.on('userAcceptSolicitation', (enterprise: MyEnterprise) => {
+    socket.on('userAcceptSolicitation', () => {
       getAllEnterprises();
       getInviteEnterprise();
     });
 
-    socket.on('declineSolicitation', (enterprise: MyEnterprise) => {
+    socket.on('declineSolicitation', () => {
       getAllEnterprises();
     });
   }, [socket, getAllEnterprises, getInviteEnterprise]);
 
+  const visibleEnterprises = useMemo(() => {
+    if (searchValue.length >= 3) {
+      return searchEnterprises;
+    }
+    return allEnterprises;
+  }, [allEnterprises, searchEnterprises, searchValue]);
+
   return (
-    <Container>
-      <HeaderMenu />
-      <Content>
-        <SearchContent>
-          <span>Procurar Empresas</span>
+    <AdminShell
+      eyebrow="Ecossistema"
+      title="Empresas e relacoes de acesso"
+      description="Descubra novas operacoes, acompanhe convites e entre rapidamente no painel da empresa certa."
+    >
+      <SummaryGrid>
+        <SummaryCard>
+          <strong>{allEnterprises.length}</strong>
+          <span>Empresas disponiveis</span>
+        </SummaryCard>
+        <SummaryCard>
+          <strong>{enterprises.length}</strong>
+          <span>Empresas seguidas</span>
+        </SummaryCard>
+        <SummaryCard>
+          <strong>{myEnterprise ? '1' : '0'}</strong>
+          <span>Empresa propria</span>
+        </SummaryCard>
+      </SummaryGrid>
 
-          <InputDefault
-            icon={FiSearch}
-            name="search"
-            type="text"
-            value={searchValue}
-            placeholder="Filtrar empresas"
-            onChange={(e) => {
-              setSearchValue(e.target.value);
-            }}
-          />
+      <Grid>
+        <Column>
+          <Surface>
+            <SurfaceHeader>
+              <div>
+                <SectionTitle>Explorar empresas</SectionTitle>
+                <SectionText>
+                  Busque por nome e solicite acesso para acompanhar horarios e
+                  operacao.
+                </SectionText>
+              </div>
+            </SurfaceHeader>
 
-          {searchEnterprises && searchEnterprises.length > 0 && searchValue && (
-            <>
-              {searchEnterprises.map((enterprise) => {
-                return (
-                  <Card key={enterprise.id}>
+            <SearchRow>
+              <InputDefault
+                icon={FiSearch}
+                name="search"
+                type="text"
+                value={searchValue}
+                placeholder="Pesquisar empresa"
+                onChange={(e) => setSearchValue(e.target.value)}
+              />
+            </SearchRow>
+
+            <EnterpriseList>
+              {visibleEnterprises.map((enterprise) => (
+                <EnterpriseCard key={enterprise.id}>
+                  <img src={enterprise.logo_url || EnterpriseImg} alt={enterprise.name} />
+                  <EnterpriseCardBody>
                     <div>
-                      <img src={enterprise.logo_url || EnterpriseImg} alt="" />
-                      <div>
-                        <Title>{enterprise.name}</Title>
-                        <SubTitle>
-                          {enterprise.isPrivate ? (
-                            <>
-                              <FiLock color="#ff9000" /> Perfil Fechado
-                            </>
-                          ) : (
-                            <>
-                              <FiUnlock color="#ff9000" /> Perfil Aberto
-                            </>
-                          )}
-                        </SubTitle>
-                        <Text>{enterprise.address}</Text>
-                        <Text>{enterprise.area}</Text>
-                      </div>
+                      <h3>{enterprise.name}</h3>
+                      <StatusPill privateProfile={!!enterprise.isPrivate}>
+                        {enterprise.isPrivate ? <FiLock /> : <FiUnlock />}
+                        {enterprise.isPrivate ? 'Perfil fechado' : 'Perfil aberto'}
+                      </StatusPill>
                     </div>
-                    <CadastraButton
-                      disabled={enterprise.aceito == 0}
+
+                    <EnterpriseMeta>
+                      <span>{enterprise.area}</span>
+                      <span>{enterprise.address}</span>
+                      <span>
+                        <FiClock />
+                        {enterprise.open_hour} ate {enterprise.close_hour}
+                      </span>
+                    </EnterpriseMeta>
+
+                    <ActionButton
+                      disabled={enterprise.aceito === 0}
                       onClick={() => inviteEnterprise(enterprise.id)}
                     >
-                      {enterprise.aceito == 0 ? 'Aguardando' : 'Seguir'}
-                    </CadastraButton>
-                  </Card>
-                );
-              })}
-              <hr />
-            </>
-          )}
+                      {enterprise.aceito === 0 ? 'Aguardando aprovacao' : 'Solicitar acesso'}
+                      {enterprise.aceito !== 0 && <FiArrowRight />}
+                    </ActionButton>
+                  </EnterpriseCardBody>
+                </EnterpriseCard>
+              ))}
 
-          <br />
-          {loading && (
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '100%',
-              }}
-            >
-              <Loader type="Watch" color="#ff9000" height={40} width={40} />
-            </div>
-          )}
-
-          {allEnterprises && allEnterprises.length > 0 ? (
-            allEnterprises.map((enterprise) => {
-              return (
-                <Card key={enterprise.id}>
-                  <div>
-                    <img src={enterprise.logo_url || EnterpriseImg} alt="" />
-                    <div>
-                      <Title>{enterprise.name}</Title>
-                      <SubTitle>
-                        {enterprise.isPrivate ? (
-                          <>
-                            <FiLock color="#ff9000" /> Perfil Fechado
-                          </>
-                        ) : (
-                          <>
-                            <FiUnlock color="#ff9000" /> Perfil Aberto
-                          </>
-                        )}
-                      </SubTitle>
-                      <Text>{enterprise.address}</Text>
-                      <Text>{enterprise.area}</Text>
-                    </div>
-                  </div>
-                  <CadastraButton
-                    disabled={enterprise.aceito == 0}
-                    onClick={() => inviteEnterprise(enterprise.id)}
-                  >
-                    {enterprise.aceito == 0 ? 'Aguardando' : 'Seguir'}
-                  </CadastraButton>
-                </Card>
-              );
-            })
-          ) : (
-            <>
-              <br />
-              {loading ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    width: '100%',
-                  }}
-                >
-                  <Loader type="Watch" color="#ff9000" height={40} width={40} />
-                </div>
-              ) : (
-                'Nenhuma empresa que você ainda não tenha seguido encontrada.'
+              {!loading && visibleEnterprises.length === 0 && (
+                <EmptyState>
+                  Nenhuma empresa encontrada para esse filtro.
+                </EmptyState>
               )}
-            </>
-          )}
-        </SearchContent>
-        <hr />
-        <MyEnterprises>
+            </EnterpriseList>
+          </Surface>
+        </Column>
+
+        <Column>
           {myEnterprise && (
-            <>
-              <span>Minha Empresa</span>
-              <CardMine
-                onClick={() => checkEnterprisePayment(myEnterprise)}
-                key={myEnterprise.id}
-              >
+            <Surface>
+              <SurfaceHeader>
                 <div>
-                  <img src={myEnterprise.logo_url || EnterpriseImg} alt="" />
-                  <div>
-                    <Title>{myEnterprise.name}</Title>
-                    <SubTitle>
-                      {myEnterprise.isPrivate ? (
-                        <>
-                          <FiLock color="#ff9000" /> Perfil Fechado
-                        </>
-                      ) : (
-                        <>
-                          <FiUnlock color="#ff9000" /> Perfil Aberto
-                        </>
-                      )}
-                    </SubTitle>
-                    <Text>{myEnterprise.area}</Text>
-                    <Text>{myEnterprise.address}</Text>
-                  </div>
+                  <SectionTitle>Minha empresa</SectionTitle>
+                  <SectionText>
+                    Entre direto no painel operacional da sua base principal.
+                  </SectionText>
                 </div>
-              </CardMine>
-            </>
-          )}
-          <span>Seguindo</span>
-          {enterprises && enterprises.length > 0 ? (
-            enterprises.map((enterprise) => {
-              return (
-                <CardMine
-                  onClick={() => checkPermission(enterprise.enterprise)}
-                  key={enterprise.id}
-                >
+              </SurfaceHeader>
+
+              <EnterpriseCard featured onClick={() => checkEnterprisePayment(myEnterprise)}>
+                <img src={myEnterprise.logo_url || EnterpriseImg} alt={myEnterprise.name} />
+                <EnterpriseCardBody>
                   <div>
-                    <img
-                      src={enterprise.enterprise.logo_url || EnterpriseImg}
-                      alt=""
-                    />
-                    <div>
-                      <Title>{enterprise.enterprise.name}</Title>
-                      <SubTitle>
-                        {enterprise.enterprise.isPrivate ? (
-                          <>
-                            <FiLock color="#ff9000" /> Perfil Fechado
-                          </>
-                        ) : (
-                          <>
-                            <FiUnlock color="#ff9000" /> Perfil Aberto
-                          </>
-                        )}
-                      </SubTitle>
-                      <Text>{enterprise.enterprise.area}</Text>
-                      <Text>{enterprise.enterprise.address}</Text>
-                    </div>
+                    <h3>{myEnterprise.name}</h3>
+                    <StatusPill privateProfile={!!myEnterprise.isPrivate}>
+                      {myEnterprise.isPrivate ? <FiLock /> : <FiUnlock />}
+                      {myEnterprise.isPrivate ? 'Perfil fechado' : 'Perfil aberto'}
+                    </StatusPill>
                   </div>
-                </CardMine>
-              );
-            })
-          ) : (
-            <>
-              <br />
-              Você ainda não convidou nenhuma empresa, ou elas ainda não te
-              aceitaram.
-              <br />
-            </>
+
+                  <EnterpriseMeta>
+                    <span>{myEnterprise.area}</span>
+                    <span>{myEnterprise.address}</span>
+                  </EnterpriseMeta>
+
+                  <ActionButton as="div">
+                    Acessar dashboard
+                    <FiArrowRight />
+                  </ActionButton>
+                </EnterpriseCardBody>
+              </EnterpriseCard>
+            </Surface>
           )}
-        </MyEnterprises>
-      </Content>
-    </Container>
+
+          <Surface>
+            <SurfaceHeader>
+              <div>
+                <SectionTitle>Empresas que voce segue</SectionTitle>
+                <SectionText>
+                  Operacoes aprovadas para navegar agenda, clientes e contexto.
+                </SectionText>
+              </div>
+            </SurfaceHeader>
+
+            <EnterpriseList>
+              {enterprises.map((enterprise) => (
+                <EnterpriseCard
+                  key={enterprise.id}
+                  featured
+                  onClick={() => checkPermission(enterprise.enterprise)}
+                >
+                  <img
+                    src={enterprise.enterprise.logo_url || EnterpriseImg}
+                    alt={enterprise.enterprise.name}
+                  />
+                  <EnterpriseCardBody>
+                    <div>
+                      <h3>{enterprise.enterprise.name}</h3>
+                      <StatusPill privateProfile={!!enterprise.enterprise.isPrivate}>
+                        {enterprise.enterprise.isPrivate ? <FiLock /> : <FiUnlock />}
+                        {enterprise.enterprise.isPrivate
+                          ? 'Perfil fechado'
+                          : 'Perfil aberto'}
+                      </StatusPill>
+                    </div>
+
+                    <EnterpriseMeta>
+                      <span>{enterprise.enterprise.area}</span>
+                      <span>{enterprise.enterprise.address}</span>
+                      <span>
+                        <FiCheckCircle />
+                        Convite aprovado
+                      </span>
+                    </EnterpriseMeta>
+
+                    <ActionButton as="div">
+                      Abrir empresa
+                      <FiArrowRight />
+                    </ActionButton>
+                  </EnterpriseCardBody>
+                </EnterpriseCard>
+              ))}
+
+              {enterprises.length === 0 && (
+                <EmptyState>
+                  Voce ainda nao tem empresas aprovadas. Comece enviando convites.
+                </EmptyState>
+              )}
+            </EnterpriseList>
+          </Surface>
+        </Column>
+      </Grid>
+    </AdminShell>
   );
 };
 

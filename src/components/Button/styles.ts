@@ -15,12 +15,11 @@ export const Container = styled.button<PageColor>`
       : props.secondaryColor
       ? props.secondaryColor
       : '#ff9000'};
-
-  height: 56px;
-  border-radius: 10px;
+  min-height: 56px;
+  border-radius: 18px;
   border: ${(props) =>
     props.transparent ? `1px solid ${props.secondaryColor}` : 0};
-  padding: 0 16px;
+  padding: 14px 22px;
   width: 100%;
   color: ${(props) =>
     props.transparent
@@ -28,16 +27,25 @@ export const Container = styled.button<PageColor>`
       : TinyColor(props.secondaryColor).isLight()
       ? '#000'
       : '#fff'};
-  font-weight: 500px;
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin-top: 16px;
-  transition: background-color 0.2s;
+  transition:
+    background-color 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 8px;
   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  box-shadow: ${(props) =>
+    props.transparent ? 'none' : '0 18px 35px rgba(255, 159, 67, 0.24)'};
 
   svg {
-    margin-right: 8px;
+    margin-right: 0;
   }
 
   &:hover {
@@ -50,5 +58,6 @@ export const Container = styled.button<PageColor>`
         : TinyColor(props.secondaryColor).isLight()
         ? '#000'
         : '#fff'};
+    transform: ${(props) => !props.disabled && 'translateY(-1px)'};
   }
 `;

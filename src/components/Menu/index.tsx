@@ -1,23 +1,45 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { FiMenu } from 'react-icons/fi';
-
+import React, { useState, useCallback, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+import {
+  FiMenu,
+  FiArrowRight,
+  FiCreditCard,
+  FiCalendar,
+  FiBell,
+  FiUser,
+  FiLogOut,
+  FiGrid,
+  FiBriefcase,
+  FiLayers,
+} from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
 import { Badge } from '@material-ui/core';
 import { loadStripe } from '@stripe/stripe-js';
-import { Container, Span } from './styles';
+import {
+  Container,
+  TriggerButton,
+  TriggerText,
+  Panel,
+  PanelHeader,
+  PanelBody,
+  MenuSection,
+  MenuItem,
+  MenuItemText,
+  MenuOverlay,
+  CloseButton,
+} from './styles';
 import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
-
 import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
 import { useSocket } from '../../hooks/socket';
-// Make sure to call `loadStripe` outside of a component’s render to avoid
-// recreating the `Stripe` object on every render.
+
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY as string);
 
 interface Solicitation {
   id: string;
 }
+
 interface Enterprise {
   isPrivate: boolean;
 }
@@ -31,24 +53,25 @@ const Menu: React.FC = () => {
   const { socket } = useSocket();
   const history = useHistory();
   const { addToast } = useToast();
-
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
   const [checkout, setCheckoutPage] = useState(false);
 
   const handleCheckout = async () => {
     setCheckoutPage(true);
-    // Call your backend to create the Checkout session.
     const response = await api.get('/enterprises/sessionPayment');
 
     localStorage.setItem('session_id', response.data.id);
-    // When the customer clicks on the button, redirect them to Checkout.
+
     if (response.data.enterprise === 'create') {
-      return history.push(`${routes.signupEnterprise}?session_id=redirected`);
+      history.push(`${routes.signupEnterprise}?session_id=redirected`);
+      return;
     }
 
     if (response.data.url) {
-      return (window.location.href = response.data.url);
+      window.location.href = response.data.url;
+      return;
     }
+
     const stripe: any = await stripePromise;
     const { error } = await stripe.redirectToCheckout({
       sessionId: response.data.id,
@@ -58,10 +81,6 @@ const Menu: React.FC = () => {
       type: 'error',
       title: error,
     });
-
-    // If `redirectToCheckout` fails due to a browser or network
-    // error, display the localized error message to your customer
-    // using `error.message`.
   };
 
   const getSolicitations = useCallback(async () => {
@@ -73,163 +92,210 @@ const Menu: React.FC = () => {
 
   useEffect(() => {
     socket.on('solicitation', (solicitation: Solicitation) => {
-      setSolicitations([...solicitations, solicitation]);
+      setSolicitations((currentState) => [...currentState, solicitation]);
     });
 
     socket.on('acceptSolicitation', (solicitation: Solicitation) => {
-      const oldSolicitations = [...solicitations];
-
-      const newSolicitations = oldSolicitations.filter(
-        (currentSolicitation) => currentSolicitation.id !== solicitation.id,
+      setSolicitations((currentState) =>
+        currentState.filter((item) => item.id !== solicitation.id),
       );
-
-      setSolicitations(newSolicitations);
     });
 
     socket.on('declineSolicitation', (solicitation: Solicitation) => {
-      const oldSolicitations = [...solicitations];
-
-      const newSolicitations = oldSolicitations.filter(
-        (currentSolicitation) => currentSolicitation.id !== solicitation.id,
+      setSolicitations((currentState) =>
+        currentState.filter((item) => item.id !== solicitation.id),
       );
-
-      setSolicitations(newSolicitations);
     });
-  }, [socket, solicitations]);
+  }, [socket]);
 
   useEffect(() => {
     getSolicitations();
-  }, []);
+  }, [getSolicitations]);
+
+  const menuContent =
+    openMenu && typeof document !== 'undefined' ? (
+      <>
+        <MenuOverlay onClick={() => setOpenMenu(false)} />
+        <Panel>
+          <PanelHeader>
+            <div>
+              <span>Navegacao</span>
+              <strong>Atalhos do painel</strong>
+            </div>
+            <CloseButton type="button" onClick={() => setOpenMenu(false)}>
+              <FiArrowRight />
+            </CloseButton>
+          </PanelHeader>
+
+          <PanelBody>
+            <MenuSection>
+              <span>Principal</span>
+              <MenuItem
+                currentPage={history.location.pathname === routes.enterprise}
+                onClick={() => history.push(routes.enterprise)}
+              >
+                <FiBriefcase />
+                <MenuItemText>
+                  <strong>Empresas</strong>
+                  <span>Explore acessos e entre nas operacoes.</span>
+                </MenuItemText>
+              </MenuItem>
+              <MenuItem
+                currentPage={history.location.pathname === routes.dashboard}
+                onClick={() => history.push(routes.dashboard)}
+              >
+                <FiGrid />
+                <MenuItemText>
+                  <strong>Dashboard</strong>
+                  <span>Leitura executiva do dia e ocupacao.</span>
+                </MenuItemText>
+              </MenuItem>
+              <MenuItem
+                currentPage={history.location.pathname === routes.schedule}
+                onClick={() => history.push(routes.schedule)}
+              >
+                <FiCalendar />
+                <MenuItemText>
+                  <strong>Agendamentos</strong>
+                  <span>Veja futuros, historico e cancelamentos.</span>
+                </MenuItemText>
+              </MenuItem>
+              <MenuItem
+                currentPage={history.location.pathname === routes.profile}
+                onClick={() => history.push(routes.profile)}
+              >
+                <FiUser />
+                <MenuItemText>
+                  <strong>Perfil do usuario</strong>
+                  <span>Dados pessoais e configuracoes da conta.</span>
+                </MenuItemText>
+              </MenuItem>
+            </MenuSection>
+
+            {myEnterprise && (
+              <MenuSection>
+                <span>Operacao da empresa</span>
+                <MenuItem
+                  currentPage={history.location.pathname === routes.financial}
+                  onClick={() => history.push(routes.financial)}
+                >
+                  <FiCreditCard />
+                  <MenuItemText>
+                    <strong>Gestao financeira</strong>
+                    <span>Receita, repasses e visao monetaria.</span>
+                  </MenuItemText>
+                </MenuItem>
+                <MenuItem
+                  currentPage={
+                    history.location.pathname === routes.enterpriseSchedule
+                  }
+                  onClick={() => history.push(routes.enterpriseSchedule)}
+                >
+                  <FiCalendar />
+                  <MenuItemText>
+                    <strong>Gestao de horarios</strong>
+                    <span>Monte agenda, turnos e vagas.</span>
+                  </MenuItemText>
+                </MenuItem>
+                <MenuItem
+                  currentPage={history.location.pathname === routes.alert}
+                  onClick={() => history.push(routes.alert)}
+                >
+                  <FiBell />
+                  <MenuItemText>
+                    <strong>Alertas</strong>
+                    <span>Comunicados ativos para a operacao.</span>
+                  </MenuItemText>
+                </MenuItem>
+                <MenuItem
+                  currentPage={
+                    history.location.pathname === routes.enterpriseProfile
+                  }
+                  onClick={() => history.push(routes.enterpriseProfile)}
+                >
+                  <FiUser />
+                  <MenuItemText>
+                    <strong>Perfil da empresa</strong>
+                    <span>Marca, dados publicos e configuracoes.</span>
+                  </MenuItemText>
+                </MenuItem>
+                {myEnterprise.isPrivate && (
+                  <>
+                    <MenuItem
+                      currentPage={history.location.pathname === routes.customers}
+                      onClick={() => history.push(routes.customers)}
+                    >
+                      <Badge badgeContent={solicitations.length} color="secondary">
+                        <FiGrid />
+                      </Badge>
+                      <MenuItemText>
+                        <strong>Gestao de clientes</strong>
+                        <span>Convites, aprovacoes e relacionamento da base.</span>
+                      </MenuItemText>
+                    </MenuItem>
+                    <MenuItem
+                      currentPage={history.location.pathname === routes.plan}
+                      onClick={() => history.push(routes.plan)}
+                    >
+                      <FiLayers />
+                      <MenuItemText>
+                        <strong>Gestao de planos</strong>
+                        <span>Catalogo, restricoes e cobertura da carteira.</span>
+                      </MenuItemText>
+                    </MenuItem>
+                  </>
+                )}
+                <MenuItem currentPage={checkout} onClick={handleCheckout}>
+                  <FiCreditCard />
+                  <MenuItemText>
+                    <strong>Minha assinatura</strong>
+                    <span>Plano atual e fluxo de cobranca.</span>
+                  </MenuItemText>
+                </MenuItem>
+              </MenuSection>
+            )}
+
+            {!myEnterprise && (
+              <MenuSection>
+                <span>Crescimento</span>
+                <MenuItem currentPage={checkout} onClick={handleCheckout}>
+                  <FiCreditCard />
+                  <MenuItemText>
+                    <strong>Cadastrar empresa</strong>
+                    <span>Ative uma nova operacao na plataforma.</span>
+                  </MenuItemText>
+                </MenuItem>
+              </MenuSection>
+            )}
+
+            <MenuSection>
+              <span>Sessao</span>
+              <MenuItem currentPage={false} onClick={() => signOut()}>
+                <FiLogOut />
+                <MenuItemText>
+                  <strong>Sair</strong>
+                  <span>Encerrar a sessao atual com seguranca.</span>
+                </MenuItemText>
+              </MenuItem>
+            </MenuSection>
+          </PanelBody>
+        </Panel>
+      </>
+    ) : null;
 
   return (
-    <>
+    <Container>
       <Badge badgeContent={solicitations.length} color="secondary">
-        <FiMenu
-          cursor="pointer"
-          onClick={() => setOpenMenu(!openMenu)}
-          color="#FF9D3B"
-        />
+        <TriggerButton type="button" onClick={() => setOpenMenu(true)}>
+          <FiMenu color="#F8FBFF" size={22} />
+          <TriggerText>
+            <span>Menu</span>
+            <strong>Abrir atalhos</strong>
+          </TriggerText>
+        </TriggerButton>
       </Badge>
-      {openMenu && (
-        <Container>
-          <div>
-            <FiMenu
-              onClick={() => setOpenMenu(!openMenu)}
-              color="#FF9D3B"
-              size={55}
-            />
-            <span onClick={() => setOpenMenu(false)}>Fechar</span>
-          </div>
-          <h2>Menu</h2>
-          {myEnterprise ? (
-            <>
-              <Span
-                currentPage={history.location.pathname === routes.enterprise}
-                onClick={() => history.push(routes.enterprise)}
-              >
-                Empresas
-              </Span>
-
-              {/* <Span>Dashboard</Span> */}
-              <Span
-                currentPage={history.location.pathname === routes.financial}
-                onClick={() => history.push(routes.financial)}
-              >
-                Gestão de Financeira
-              </Span>
-              <Span
-                currentPage={
-                  history.location.pathname === routes.enterpriseSchedule
-                }
-                onClick={() => history.push(routes.enterpriseSchedule)}
-              >
-                Gestão de horários
-              </Span>
-              <Span
-                currentPage={history.location.pathname === routes.alert}
-                onClick={() => history.push(routes.alert)}
-              >
-                Gestão de Alertas
-              </Span>
-              <Span
-                currentPage={
-                  history.location.pathname === routes.enterpriseProfile
-                }
-                onClick={() => history.push(routes.enterpriseProfile)}
-              >
-                Perfil da empresa
-              </Span>
-              {myEnterprise.isPrivate ? (
-                <Badge
-                  style={{
-                    margin: '17px 0',
-                  }}
-                  badgeContent={solicitations.length}
-                  color="secondary"
-                >
-                  <Span
-                    style={{ margin: 0 }}
-                    currentPage={history.location.pathname === routes.plan}
-                    onClick={() => history.push(routes.plan)}
-                  >
-                    Gestão de clientes
-                  </Span>
-                </Badge>
-              ) : (
-                ''
-              )}
-              <Span currentPage={checkout} onClick={handleCheckout}>
-                Minha Assinatura
-              </Span>
-              <hr />
-              <Span
-                currentPage={history.location.pathname === routes.schedule}
-                onClick={() => history.push(routes.schedule)}
-              >
-                Agendamentos
-              </Span>
-              <Span
-                currentPage={history.location.pathname === routes.profile}
-                onClick={() => history.push(routes.profile)}
-              >
-                Perfil do usuário
-              </Span>
-              <Span currentPage={false} onClick={() => signOut()}>
-                Sair
-              </Span>
-            </>
-          ) : (
-            <>
-              <Span
-                currentPage={history.location.pathname === routes.enterprise}
-                onClick={() => history.push(routes.enterprise)}
-              >
-                Empresas
-              </Span>
-              <Span
-                currentPage={history.location.pathname === routes.schedule}
-                onClick={() => history.push(routes.schedule)}
-              >
-                Agendamentos
-              </Span>
-              <hr />
-              <Span
-                currentPage={history.location.pathname === routes.profile}
-                onClick={() => history.push(routes.profile)}
-              >
-                Perfil do usuário
-              </Span>
-              <Span currentPage={checkout} onClick={handleCheckout}>
-                Cadastrar empresa
-              </Span>
-              <Span currentPage={false} onClick={() => signOut()}>
-                Sair
-              </Span>
-            </>
-          )}
-        </Container>
-      )}
-    </>
+      {menuContent ? ReactDOM.createPortal(menuContent, document.body) : null}
+    </Container>
   );
 };
 

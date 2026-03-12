@@ -48,8 +48,12 @@ interface Appointment {
   service: Service;
 }
 
+interface ClientParams {
+  client_id: string;
+}
+
 const ClientDetail: React.FC = () => {
-  const { client_id } = useParams();
+  const { client_id } = useParams<ClientParams>();
   const history = useHistory();
   const toast = useToast();
 
@@ -159,7 +163,7 @@ const ClientDetail: React.FC = () => {
     <Container>
       <header>
         <div>
-          <Link to={routes.plan}>
+          <Link to={routes.customers}>
             <FiArrowLeft />
           </Link>
           <span>{myEnterprise && myEnterprise.name}</span>

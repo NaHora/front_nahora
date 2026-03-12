@@ -1,6 +1,6 @@
 import React, { InputHTMLAttributes, useState, useCallback } from 'react';
 
-import { IconBaseProps } from 'react-icons/lib/cjs';
+import { IconBaseProps } from 'react-icons';
 import { FiAlertCircle } from 'react-icons/fi';
 
 import { Container, Error } from './styles';

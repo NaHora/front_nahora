@@ -10,12 +10,13 @@ interface ContainerProps {
 }
 
 export const Container = styled.div<ContainerProps>`
-  background: #232129;
-  border-radius: 10px;
-  border: 2px solid #232129;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(12, 23, 41, 0.08);
   padding: 16px;
   width: ${(props) => (props.maxWidth ? props.maxWidth : '100%')};
-  color: #666360;
+  color: #7c91af;
+  box-shadow: 0 18px 40px rgba(7, 17, 31, 0.08);
 
   display: flex;
   align-items: center;
@@ -24,22 +25,22 @@ export const Container = styled.div<ContainerProps>`
     width: 100%;
     border: 0;
     background: transparent;
-    color: #f4ede8;
+    color: #0c1729;
 
     ::-webkit-calendar-picker-indicator {
       filter: invert(100%);
     }
 
     :-webkit-autofill {
-      -webkit-box-shadow: 0 0 0 30px #232129 inset;
+      -webkit-box-shadow: 0 0 0 30px #ffffff inset;
     }
 
     /* Cor do texto do autocomplete */
     :-webkit-autofill {
-      -webkit-text-fill-color: white !important;
+      -webkit-text-fill-color: #0c1729 !important;
     }
     ::placeholder {
-      color: #666360;
+      color: #7c91af;
     }
   }
 
@@ -60,14 +61,15 @@ export const Container = styled.div<ContainerProps>`
   ${(props) =>
     props.isFocused &&
     css`
-      color: #ff9000;
-      border-color: #ff9000;
+      color: #ff9f43;
+      border-color: #ff9f43;
+      box-shadow: 0 0 0 4px rgba(255, 159, 67, 0.12);
     `}
 
   ${(props) =>
     props.isFilled &&
     css`
-      color: #ff9000;
+      color: #ff9f43;
     `}
 
 

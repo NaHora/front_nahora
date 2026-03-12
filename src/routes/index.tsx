@@ -13,6 +13,7 @@ import Schedule from '../pages/Schedule';
 import SignUpEnterprise from '../pages/EnterprisePages/SignUp';
 import EnterpriseProfile from '../pages/EnterprisePages/EnterpriseProfile';
 import Plans from '../pages/EnterprisePages/Plans';
+import PlanManagement from '../pages/EnterprisePages/PlanManagement';
 import EnterpriseSchedule from '../pages/EnterprisePages/EnterpriseSchedule';
 import SuccessPage from '../pages/EnterprisePages/SuccessPage';
 import Financial from '../pages/EnterprisePages/Financial';
@@ -46,6 +47,7 @@ export const routes = {
   enterpriseProfile: '/perfil-empresa',
   enterpriseSchedule: '/gestão-de-horários',
   financial: '/gestão-financeira',
+  customers: '/gestão-de-clientes',
   plan: '/gestão-de-planos',
   success: '/success',
   sorteador: '/sorteador',
@@ -70,7 +72,8 @@ const Routes: React.FC = () => {
       <Route path={routes.pr} component={Benchmark} isPrivate />
       <Route path={routes.ranking} component={Ranking} isPrivate />
       <Route path={routes.profile} component={Profile} isPrivate />
-      <Route path={routes.plan} component={Plans} isPrivate />
+      <Route path={routes.customers} component={Plans} isPrivate />
+      <Route path={routes.plan} component={PlanManagement} isPrivate />
       <Route path={routes.success} component={SuccessPage} isPrivate />
       <Route path={routes.financial} component={Financial} isPrivate />
       <Route
