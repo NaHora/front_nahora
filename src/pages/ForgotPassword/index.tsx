@@ -41,7 +41,9 @@ const ForgotPassword: React.FC = () => {
           abortEarly: false,
         });
 
-        await api.post('/password/forgot', { email: data.email });
+        await api.post('/password/forgot', {
+          email: data.email?.trim().toLowerCase(),
+        });
         // history.push(routes.dashboard);
 
         toast.addToast({
@@ -81,6 +83,10 @@ const ForgotPassword: React.FC = () => {
               name="email"
               type="email"
               placeholder="E-mail"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="email"
             />
             <div
               style={{

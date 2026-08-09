@@ -29,10 +29,10 @@ export const Metrics = styled.section`
 
 export const MetricCard = styled.article`
   padding: 22px 24px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #f8fbff;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid rgba(11, 11, 11, 0.06);
+  color: #0b0b0b;
 
   strong {
     display: block;
@@ -43,7 +43,7 @@ export const MetricCard = styled.article`
   span {
     display: block;
     margin-top: 8px;
-    color: #b8c7db;
+    color: #62748d;
   }
 `;
 

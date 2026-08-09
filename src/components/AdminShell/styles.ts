@@ -2,14 +2,16 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(255, 159, 67, 0.2), transparent 32%),
-    radial-gradient(circle at top right, rgba(48, 86, 211, 0.18), transparent 28%),
-    linear-gradient(180deg, #07111f 0%, #0b1628 42%, #f4f7fb 42%, #eef3f9 100%);
+  background: #f6f6fa;
+  overflow-x: hidden;
 `;
 
 export const Hero = styled.section`
   padding: 32px 24px 12px;
+
+  @media (max-width: 620px) {
+    padding: 20px 16px 8px;
+  }
 `;
 
 export const HeroContent = styled.div`
@@ -27,7 +29,8 @@ export const HeroContent = styled.div`
 
   @media (max-width: 900px) {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 16px;
   }
 `;
 
@@ -35,10 +38,10 @@ export const Eyebrow = styled.span`
   display: inline-flex;
   align-items: center;
   padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #9eb3d1;
+  border-radius: 10px;
+  background: rgba(255, 144, 0, 0.12);
+  border: 1px solid rgba(255, 144, 0, 0.2);
+  color: #ff9000;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -46,21 +49,25 @@ export const Eyebrow = styled.span`
 `;
 
 export const Title = styled.h1`
-  margin-top: 18px;
-  color: #f8fbff;
-  font-size: clamp(2rem, 4vw, 3.6rem);
-  line-height: 0.96;
+  margin-top: 14px;
+  color: #0b0b0b;
+  font-size: clamp(1.6rem, 4vw, 3.2rem);
+  line-height: 1.05;
   letter-spacing: -0.04em;
-  max-width: 16ch;
+  max-width: 22ch;
   overflow-wrap: anywhere;
 `;
 
 export const Description = styled.p`
   max-width: 680px;
-  margin-top: 16px;
-  color: #b8c7db;
-  font-size: 1.02rem;
-  line-height: 1.7;
+  margin-top: 12px;
+  color: #62748d;
+  font-size: 1rem;
+  line-height: 1.55;
+
+  @media (max-width: 620px) {
+    font-size: 0.92rem;
+  }
 `;
 
 export const Actions = styled.div`
@@ -72,49 +79,61 @@ export const Actions = styled.div`
   @media (max-width: 900px) {
     width: 100%;
   }
+
+  @media (max-width: 620px) {
+    > button,
+    > a {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 `;
 
 export const WorkspaceNav = styled.nav`
   max-width: 1180px;
   margin: 20px auto 0;
   display: flex;
-  gap: 12px;
+  gap: 8px;
   overflow-x: auto;
   padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 
-  @media (min-width: 761px) {
-    &::-webkit-scrollbar {
-      height: 6px;
-    }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
-    &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.18);
-      border-radius: 999px;
-    }
+  @media (max-width: 620px) {
+    margin-top: 14px;
   }
 `;
 
 export const WorkspaceTab = styled.button<{ active?: boolean }>`
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   white-space: nowrap;
   border: 1px solid
-    ${(props) =>
-      props.active ? 'rgba(255, 159, 67, 0.3)' : 'rgba(255, 255, 255, 0.12)'};
-  border-radius: 18px;
-  padding: 12px 16px;
-  background: ${(props) =>
-    props.active
-      ? 'linear-gradient(135deg, rgba(255, 159, 67, 0.22), rgba(255, 122, 24, 0.18))'
-      : 'rgba(255, 255, 255, 0.06)'};
-  color: ${(props) => (props.active ? '#ffffff' : '#b8c7db')};
-  font-weight: 700;
+    ${(props) => (props.active ? '#ff9000' : 'rgba(11, 11, 11, 0.08)')};
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-height: 42px;
+  background: ${(props) => (props.active ? '#ff9000' : '#ffffff')};
+  color: ${(props) => (props.active ? '#0b0b0b' : '#62748d')};
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
   transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
 
   &:hover {
     transform: translateY(-1px);
-    border-color: rgba(255, 159, 67, 0.28);
+    border-color: #ff9000;
+  }
+
+  @media (max-width: 620px) {
+    padding: 10px 12px;
+    font-size: 0.85rem;
   }
 `;
 
@@ -123,4 +142,8 @@ export const Main = styled.main`
   margin: 0 auto;
   padding: 20px 24px 48px;
   min-width: 0;
+
+  @media (max-width: 620px) {
+    padding: 16px 12px 40px;
+  }
 `;

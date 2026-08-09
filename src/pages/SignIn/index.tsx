@@ -21,6 +21,7 @@ import getValidationErrors from '../../utils';
 import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 import { routes } from '../../routes';
+import api from '../../services/api';
 
 interface SignInForm {
   email: string;
@@ -51,17 +52,36 @@ const SignIn: React.FC = () => {
           abortEarly: false,
         });
 
+        const normalizedEmail = data.email?.trim().toLowerCase();
+
         await auth.signIn({
-          email: data.email,
+          email: normalizedEmail,
           password: data.password,
         });
 
-        history.push(routes.enterprise);
+        let hasEnterprise = false;
+        try {
+          const { data: myEnterprise } = await api.get('/enterprises/mine');
+          if (myEnterprise?.id) {
+            localStorage.setItem(
+              '@NaHora:myEnterprise',
+              JSON.stringify(myEnterprise),
+            );
+            localStorage.setItem('enterprise', JSON.stringify(myEnterprise));
+            hasEnterprise = true;
+          }
+        } catch {}
+
+        history.push(
+          hasEnterprise ? routes.adminDashboard : routes.signupEnterprise,
+        );
 
         toast.addToast({
           type: 'success',
           title: 'Bem-vindo',
-          description: 'Autenticado com sucesso',
+          description: hasEnterprise
+            ? 'Você já pode gerenciar sua empresa.'
+            : 'Cadastre sua empresa para começar.',
         });
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -147,6 +167,10 @@ const SignIn: React.FC = () => {
                 name="email"
                 type="email"
                 placeholder="E-mail"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                inputMode="email"
               />
               <Input
                 icon={FiLock}

@@ -25,9 +25,13 @@ import Training from '../pages/Training';
 import Ranking from '../pages/Ranking';
 import Benchmark from '../pages/Benchmark';
 import Sorteador from '../pages/Sorteador';
+import AdminDashboard from '../pages/AdminDashboard';
+import AdminClients from '../pages/AdminClients';
 
 export const routes = {
   dashboard: '/dashboard',
+  adminDashboard: '/painel-admin',
+  adminClients: '/painel-clientes',
   profile: '/profile',
   training: '/training',
   pr: '/pr',
@@ -57,6 +61,12 @@ export const routes = {
 const Routes: React.FC = () => {
   return (
     <Switch>
+      <Route
+        path={routes.adminDashboard}
+        component={AdminDashboard}
+        isPrivate
+      />
+      <Route path={routes.adminClients} component={AdminClients} isPrivate />
       <Route path={routes.dashboard} component={Dashboard} isPrivate />
       <Route path={routes.enterprise} component={Enterprises} isPrivate />
       <Route path={routes.alert} component={Alert} isPrivate />

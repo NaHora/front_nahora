@@ -17,7 +17,7 @@ const SuccessPage: React.FC = () => {
       try {
         const response = await api.get('enterprises/hasEnterprise');
         if (response.data === true) {
-          history.push(routes.enterprise);
+          history.push(routes.adminDashboard);
         } else if (response.data === false) {
           history.push(
             `${routes.signupEnterprise}?session_id=${queryParams.get(

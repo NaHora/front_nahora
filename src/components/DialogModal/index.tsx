@@ -10,17 +10,31 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 16,
   },
   paper: {
-    backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-    color: 'black',
+    backgroundColor: '#ffffff',
+    border: '1px solid rgba(11, 11, 11, 0.08)',
+    borderRadius: 12,
+    boxShadow: '0 30px 60px rgba(7, 17, 31, 0.28)',
+    padding: 24,
+    color: '#0b0b0b',
+    width: 'min(420px, calc(100vw - 32px))',
+    outline: 'none',
   },
   divButton: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'stretch',
+    gap: 10,
+    flexWrap: 'wrap',
+    marginTop: 20,
+  },
+  buttonWrap: {
+    flex: '1 1 140px',
+    minWidth: 0,
+    '& > button': {
+      marginTop: 0,
+    },
   },
 }));
 
@@ -61,25 +75,28 @@ function DialogModal({
             {text || 'Ao continuar o item será excluído.'}
           </p>
           <div className={classes.divButton}>
-            <Button
-              primaryColor="#ff9000"
-              secondaryColor="#28262e"
-              onClick={() => setOpenModal(false)}
-              transparent
-            >
-              Cancelar
-            </Button>
-            <Button
-              primaryColor="#ff9000"
-              secondaryColor="#28262e"
-              onClick={() => {
-                onSubmit();
-                setOpenModal(false);
-              }}
-              // loading={loading}
-            >
-              Excluir
-            </Button>
+            <div className={classes.buttonWrap}>
+              <Button
+                primaryColor="#ff9000"
+                secondaryColor="#28262e"
+                onClick={() => setOpenModal(false)}
+                transparent
+              >
+                Cancelar
+              </Button>
+            </div>
+            <div className={classes.buttonWrap}>
+              <Button
+                primaryColor="#ff9000"
+                secondaryColor="#d54c46"
+                onClick={() => {
+                  onSubmit();
+                  setOpenModal(false);
+                }}
+              >
+                Excluir
+              </Button>
+            </div>
           </div>
         </div>
       </Fade>

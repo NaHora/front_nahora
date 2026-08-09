@@ -1,171 +1,219 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FiBell, FiEye, FiSave, FiTrash2 } from 'react-icons/fi';
+import {
+  FiBell,
+  FiCheckCircle,
+  FiEye,
+  FiMessageSquare,
+  FiSave,
+  FiTrash2,
+  FiType,
+} from 'react-icons/fi';
 import AdminShell from '../../../components/AdminShell';
-import Button from '../../../components/Button';
-import InputDefault from '../../../components/InputDefault';
-import AlertToast from '../../../components/AlertToast';
 import EnterpriseImg from '../../../assets/empresa.png';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
 import {
-  Metrics,
-  MetricCard,
-  Grid,
+  ActionRow,
+  ActiveCard,
+  CharCount,
   Column,
+  DangerButton,
+  EmptyState,
+  Field,
+  FormPanel,
+  Grid,
+  Input,
+  MetricCard,
+  MetricEyebrow,
+  Metrics,
   Panel,
   PanelHeader,
   PanelTitleWrap,
-  FormPanel,
-  EmptyState,
+  PreviewBody,
+  PreviewHeader,
   PreviewPhone,
   PreviewScreen,
-  PreviewHeader,
-  PreviewBody,
-  PreviewBadge,
+  PreviewToast,
+  PrimaryButton,
   StatusPill,
-  ActionRow,
-} from '../shared';
+  Textarea,
+} from './styles';
 
-interface AlertData {
-  id: string;
-  title?: string;
-  description?: string;
-  enterprise_id: string;
+interface Enterprise {
+  id?: string;
+  logo_url?: string;
+  primary_color?: string;
+  secondary_color?: string;
 }
 
+interface Communication {
+  id?: string;
+  title?: string;
+  description?: string;
+}
+
+const TITLE_LIMIT = 60;
+const DESCRIPTION_LIMIT = 240;
+
 const Alert: React.FC = () => {
-  const [enterpriseData, setEnterpriseData] = useState<any>({});
-  const [currentAlert, setCurrentAlert] = useState<AlertData | any>({});
   const { addToast } = useToast();
+  const [enterprise, setEnterprise] = useState<Enterprise>({});
+  const [current, setCurrent] = useState<Communication>({});
+  const [draft, setDraft] = useState<Communication>({
+    title: '',
+    description: '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const myEnterprise = JSON.parse(
     localStorage.getItem('@NaHora:myEnterprise') || '{}',
   );
 
-  const getMyEnterprises = useCallback(async () => {
+  const loadEnterprise = useCallback(async () => {
     try {
       const response = await api.get('/enterprises/mine');
-
+      setEnterprise(response.data || {});
       localStorage.setItem(
         '@NaHora:myEnterprise',
         JSON.stringify(response.data),
       );
-
-      setEnterpriseData((current) => ({
-        ...response.data,
-        title: current.title || '',
-        description: current.description || '',
-      }));
     } catch {}
   }, []);
 
-  const getMyAlerts = useCallback(async () => {
+  const loadCurrent = useCallback(async () => {
+    if (!myEnterprise?.id) return;
     try {
       const response = await api.get(`/alert/${myEnterprise.id}`);
-      setCurrentAlert(response.data);
+      const data = response.data || {};
+      setCurrent(data);
+      setDraft({
+        title: data.title || '',
+        description: data.description || '',
+      });
     } catch {
-      setCurrentAlert({});
+      setCurrent({});
     }
-  }, [myEnterprise.id]);
+  }, [myEnterprise?.id]);
 
-  const updateEnterpriseAlert = useCallback(async () => {
+  useEffect(() => {
+    loadEnterprise();
+    loadCurrent();
+  }, [loadEnterprise, loadCurrent]);
+
+  const publish = useCallback(async () => {
+    if (!draft.title?.trim() && !draft.description?.trim()) {
+      addToast({
+        type: 'error',
+        title: 'Escreva um título ou descrição para publicar o comunicado.',
+      });
+      return;
+    }
+    setSaving(true);
     try {
       await api.post('/alert', {
-        title: enterpriseData.title,
-        description: enterpriseData.description,
+        title: draft.title,
+        description: draft.description,
       });
-      getMyAlerts();
-      setEnterpriseData({
-        ...enterpriseData,
-        title: '',
-        description: '',
-      });
-      addToast({
-        type: 'success',
-        title: 'Alerta criado para seus clientes!',
-      });
-    } catch (err) {
+      addToast({ type: 'success', title: 'Comunicado publicado.' });
+      loadCurrent();
+    } catch (err: any) {
       addToast({
         type: 'error',
         title:
-          err.response?.data.message ||
-          'Ocorreu um erro ao criar o alerta, tente novamente',
+          err?.response?.data?.message || 'Erro ao publicar o comunicado.',
       });
+    } finally {
+      setSaving(false);
     }
-  }, [addToast, enterpriseData, getMyAlerts]);
+  }, [draft.title, draft.description, addToast, loadCurrent]);
 
-  const deleteAlert = useCallback(async () => {
+  const removeCurrent = useCallback(async () => {
+    if (!current?.id) return;
+    setDeleting(true);
     try {
-      await api.delete(`/alert/${currentAlert.id}`);
-      setCurrentAlert({});
-      setEnterpriseData({
-        ...enterpriseData,
-        title: '',
-        description: '',
-      });
-
-      addToast({
-        type: 'success',
-        title: 'Alerta desativado para seus clientes!',
-      });
-    } catch (err) {
+      await api.delete(`/alert/${current.id}`);
+      addToast({ type: 'success', title: 'Comunicado desativado.' });
+      setCurrent({});
+      setDraft({ title: '', description: '' });
+    } catch (err: any) {
       addToast({
         type: 'error',
         title:
-          err.response?.data.message ||
-          'Ocorreu um erro ao desativar o alerta, tente novamente',
+          err?.response?.data?.message || 'Erro ao desativar o comunicado.',
       });
+    } finally {
+      setDeleting(false);
     }
-  }, [addToast, currentAlert.id, enterpriseData]);
+  }, [current?.id, addToast]);
 
-  useEffect(() => {
-    getMyEnterprises();
-  }, [getMyEnterprises]);
+  const hasDraftChanges = useMemo(() => {
+    return (
+      (draft.title || '') !== (current?.title || '') ||
+      (draft.description || '') !== (current?.description || '')
+    );
+  }, [draft.title, draft.description, current?.title, current?.description]);
 
-  useEffect(() => {
-    getMyAlerts();
-  }, [getMyAlerts]);
+  const status = useMemo(() => {
+    if (current?.id && !hasDraftChanges)
+      return { label: 'Publicado', tone: 'success' as const };
+    if (current?.id && hasDraftChanges)
+      return { label: 'Alterações não publicadas', tone: 'draft' as const };
+    if (draft.title || draft.description)
+      return { label: 'Rascunho', tone: 'draft' as const };
+    return { label: 'Sem comunicado', tone: 'muted' as const };
+  }, [current?.id, draft.title, draft.description, hasDraftChanges]);
 
-  const previewTitle = enterpriseData?.title || currentAlert?.title;
-  const previewDescription =
-    enterpriseData?.description || currentAlert?.description;
+  const titleLength = (draft.title || '').length;
+  const descLength = (draft.description || '').length;
 
-  const alertStatus = useMemo(() => {
-    if (currentAlert?.id) return 'Ativo';
-    if (enterpriseData?.title || enterpriseData?.description) return 'Rascunho';
-    return 'Sem alerta';
-  }, [currentAlert?.id, enterpriseData?.description, enterpriseData?.title]);
+  const previewTitle = draft.title || current?.title;
+  const previewDescription = draft.description || current?.description;
+  const hasPreview = Boolean(previewTitle || previewDescription);
 
   return (
     <AdminShell
-      eyebrow="Comunicação com clientes"
-      title="Alertas da operação"
-      description="Crie comunicados rápidos para aparecer no app dos clientes sem poluir outras telas de gestão."
+      eyebrow="Comunicação"
+      title="Comunicado da empresa"
+      description="Publique um aviso rápido que aparece no app dos clientes. Ideal para feriado, manutenção, promoção ou mudança de horário."
       actions={
-        <Button onClick={updateEnterpriseAlert}>
-          <FiSave />
-          Publicar alerta
-        </Button>
+        <PrimaryButton type="button" onClick={publish} disabled={saving}>
+          <FiSave /> {saving ? 'Publicando...' : 'Publicar comunicado'}
+        </PrimaryButton>
       }
     >
       <Metrics>
         <MetricCard>
-          <strong>{currentAlert?.id ? 1 : 0}</strong>
-          <span>Alerta ativo no app</span>
+          <MetricEyebrow>
+            <FiBell /> Estado
+          </MetricEyebrow>
+          <strong>{current?.id ? 'Ativo' : 'Inativo'}</strong>
+          <span>{status.label}</span>
         </MetricCard>
         <MetricCard>
-          <strong>{enterpriseData?.title ? enterpriseData.title.length : 0}</strong>
-          <span>Caracteres no título</span>
+          <MetricEyebrow>
+            <FiType /> Título
+          </MetricEyebrow>
+          <strong>{titleLength}</strong>
+          <span>de {TITLE_LIMIT} caracteres</span>
         </MetricCard>
         <MetricCard>
-          <strong>
-            {enterpriseData?.description ? enterpriseData.description.length : 0}
-          </strong>
-          <span>Caracteres na descrição</span>
+          <MetricEyebrow>
+            <FiMessageSquare /> Descrição
+          </MetricEyebrow>
+          <strong>{descLength}</strong>
+          <span>de {DESCRIPTION_LIMIT} caracteres</span>
         </MetricCard>
         <MetricCard>
-          <strong>{alertStatus}</strong>
-          <span>Status atual do comunicado</span>
+          <MetricEyebrow>
+            <FiCheckCircle /> Publicado desde
+          </MetricEyebrow>
+          <strong>{current?.id ? 'Sim' : '—'}</strong>
+          <span>
+            {current?.id
+              ? 'Visível no app dos clientes agora.'
+              : 'Nenhuma mensagem publicada.'}
+          </span>
         </MetricCard>
       </Metrics>
 
@@ -174,64 +222,65 @@ const Alert: React.FC = () => {
           <Panel>
             <PanelHeader>
               <PanelTitleWrap>
-                <h2>Editor do alerta</h2>
+                <h2>Editor do comunicado</h2>
                 <p>
-                  Escreva o comunicado que será exibido para os clientes no app.
+                  Escreva a mensagem que os clientes verão no topo do app.
+                  Somente um comunicado pode estar ativo por vez.
                 </p>
               </PanelTitleWrap>
+              <StatusPill tone={status.tone}>{status.label}</StatusPill>
             </PanelHeader>
 
             <FormPanel>
-              <InputDefault
-                onChange={(e) =>
-                  setEnterpriseData({
-                    ...enterpriseData,
-                    [e.target.name]: e.target.value,
-                  })
-                }
-                value={enterpriseData?.title}
-                type="text"
-                name="title"
-                placeholder="Título do alerta"
-              />
+              <Field>
+                <span>Título</span>
+                <Input
+                  name="title"
+                  value={draft.title || ''}
+                  maxLength={TITLE_LIMIT}
+                  onChange={(e) =>
+                    setDraft({ ...draft, title: e.target.value })
+                  }
+                  placeholder="Ex.: Fechado no feriado"
+                />
+                <CharCount danger={titleLength >= TITLE_LIMIT}>
+                  {titleLength}/{TITLE_LIMIT}
+                </CharCount>
+              </Field>
 
-              <textarea
-                value={enterpriseData?.description || ''}
-                onChange={(e) =>
-                  setEnterpriseData({
-                    ...enterpriseData,
-                    [e.target.name]: e.target.value,
-                  })
-                }
-                name="description"
-                rows={8}
-                style={{
-                  color: '#0c1729',
-                  border: '1px solid rgba(12, 23, 41, 0.08)',
-                  background: '#ffffff',
-                  borderRadius: 18,
-                  padding: 16,
-                  resize: 'vertical',
-                  boxShadow: '0 18px 40px rgba(7, 17, 31, 0.08)',
-                }}
-                placeholder="Escreva a descrição do alerta"
-              />
+              <Field>
+                <span>Descrição</span>
+                <Textarea
+                  name="description"
+                  value={draft.description || ''}
+                  maxLength={DESCRIPTION_LIMIT}
+                  onChange={(e) =>
+                    setDraft({ ...draft, description: e.target.value })
+                  }
+                  placeholder="Explique o comunicado com detalhes. Pode usar quebras de linha."
+                />
+                <CharCount danger={descLength >= DESCRIPTION_LIMIT}>
+                  {descLength}/{DESCRIPTION_LIMIT}
+                </CharCount>
+              </Field>
 
               <ActionRow>
-                <Button onClick={updateEnterpriseAlert}>
-                  <FiBell />
-                  Salvar alerta
-                </Button>
-                {currentAlert?.id && (
-                  <Button
-                    primaryColor="#ffffff"
-                    secondaryColor="#d5384b"
-                    transparent
-                    onClick={deleteAlert}
+                <PrimaryButton
+                  type="button"
+                  onClick={publish}
+                  disabled={saving}
+                >
+                  <FiSave /> {saving ? 'Publicando...' : 'Publicar'}
+                </PrimaryButton>
+                {current?.id && (
+                  <DangerButton
+                    type="button"
+                    onClick={removeCurrent}
+                    disabled={deleting}
                   >
                     <FiTrash2 />
-                    Desativar atual
-                  </Button>
+                    {deleting ? 'Desativando...' : 'Desativar atual'}
+                  </DangerButton>
                 )}
               </ActionRow>
             </FormPanel>
@@ -240,23 +289,24 @@ const Alert: React.FC = () => {
           <Panel>
             <PanelHeader>
               <PanelTitleWrap>
-                <h2>Estado atual</h2>
-                <p>Resumo rápido da comunicação ativa e do que está em rascunho.</p>
+                <h2>Comunicado ativo</h2>
+                <p>Mensagem visível para o cliente neste momento.</p>
               </PanelTitleWrap>
             </PanelHeader>
 
-            {currentAlert?.id ? (
-              <FormPanel>
-                <StatusPill tone="success">Alerta ativo</StatusPill>
-                <strong style={{ color: '#0c1729' }}>
-                  {currentAlert.title || 'Sem título'}
-                </strong>
-                <p style={{ color: '#62748d', lineHeight: 1.7 }}>
-                  {currentAlert.description || 'Sem descrição.'}
-                </p>
-              </FormPanel>
+            {current?.id ? (
+              <ActiveCard>
+                <StatusPill tone="success">
+                  <FiCheckCircle /> Publicado
+                </StatusPill>
+                <strong>{current.title || 'Sem título'}</strong>
+                <p>{current.description || 'Sem descrição.'}</p>
+              </ActiveCard>
             ) : (
-              <EmptyState>Nenhum alerta ativo no momento.</EmptyState>
+              <EmptyState>
+                Nenhum comunicado publicado. Escreva um aviso acima e clique em
+                Publicar.
+              </EmptyState>
             )}
           </Panel>
         </Column>
@@ -266,44 +316,54 @@ const Alert: React.FC = () => {
             <PanelHeader>
               <PanelTitleWrap>
                 <h2>Prévia no app</h2>
-                <p>Visualize como o cliente enxerga o comunicado dentro da interface.</p>
+                <p>
+                  Como o comunicado aparece dentro do app assim que o cliente
+                  abre.
+                </p>
               </PanelTitleWrap>
             </PanelHeader>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
-              <PreviewPhone>
-                <PreviewScreen
-                  primary={enterpriseData?.primary_color || '#28262e'}
-                  secondary={enterpriseData?.secondary_color || '#ff9000'}
+            <PreviewPhone>
+              <PreviewScreen
+                primary={enterprise.primary_color || '#28262e'}
+                secondary={enterprise.secondary_color || '#ff9000'}
+              >
+                <PreviewHeader
+                  secondary={enterprise.secondary_color || '#ff9000'}
                 >
-                  <PreviewHeader secondary={enterpriseData?.secondary_color || '#ff9000'}>
-                    <FiEye />
-                    <img
-                      src={enterpriseData?.logo_url || EnterpriseImg}
-                      alt="NaHora"
-                    />
-                  </PreviewHeader>
-                  <PreviewBody primary={enterpriseData?.primary_color || '#28262e'}>
-                    <PreviewBadge>Prévia em tempo real</PreviewBadge>
-                    {(previewTitle || previewDescription || currentAlert?.id) && (
-                      <AlertToast
-                        mobile
-                        title={previewTitle}
-                        description={previewDescription}
-                      />
-                    )}
-                    <Button
-                      primaryColor={enterpriseData?.primary_color || '#28262e'}
-                      secondaryColor={
-                        enterpriseData?.secondary_color || '#ff9000'
-                      }
+                  <FiEye color="#fff" />
+                  <img
+                    src={enterprise.logo_url || EnterpriseImg}
+                    alt="Empresa"
+                  />
+                </PreviewHeader>
+                <PreviewBody>
+                  <div style={{ color: '#fff', fontWeight: 700 }}>
+                    Home do cliente
+                  </div>
+                  {hasPreview ? (
+                    <PreviewToast
+                      secondary={enterprise.secondary_color || '#ff9000'}
                     >
-                      Modelo de botão
-                    </Button>
-                  </PreviewBody>
-                </PreviewScreen>
-              </PreviewPhone>
-            </div>
+                      <strong>{previewTitle || 'Título do comunicado'}</strong>
+                      <p>
+                        {previewDescription ||
+                          'A mensagem completa aparece aqui.'}
+                      </p>
+                    </PreviewToast>
+                  ) : (
+                    <div
+                      style={{
+                        color: 'rgba(255,255,255,0.6)',
+                        fontSize: '0.85rem',
+                      }}
+                    >
+                      Nenhum comunicado no app.
+                    </div>
+                  )}
+                </PreviewBody>
+              </PreviewScreen>
+            </PreviewPhone>
           </Panel>
         </Column>
       </Grid>

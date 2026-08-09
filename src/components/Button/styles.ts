@@ -16,7 +16,7 @@ export const Container = styled.button<PageColor>`
       ? props.secondaryColor
       : '#ff9000'};
   min-height: 56px;
-  border-radius: 18px;
+  border-radius: 10px;
   border: ${(props) =>
     props.transparent ? `1px solid ${props.secondaryColor}` : 0};
   padding: 14px 22px;
@@ -41,8 +41,7 @@ export const Container = styled.button<PageColor>`
   align-items: center;
   gap: 8px;
   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
-  box-shadow: ${(props) =>
-    props.transparent ? 'none' : '0 18px 35px rgba(255, 159, 67, 0.24)'};
+  box-shadow: none;
 
   svg {
     margin-right: 0;

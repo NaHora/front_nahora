@@ -5,6 +5,7 @@ import {
   FiBriefcase,
   FiCalendar,
   FiCreditCard,
+  FiEdit3,
   FiGrid,
   FiUsers,
 } from 'react-icons/fi';
@@ -45,8 +46,18 @@ const AdminShell: React.FC<AdminShellProps> = ({
   );
 
   const workspaceTabs = [
-    { key: 'dashboard', label: 'Dashboard', route: routes.dashboard, icon: FiGrid },
-    { key: 'customers', label: 'Clientes', route: routes.customers, icon: FiUsers },
+    {
+      key: 'admin-dashboard',
+      label: 'Painel',
+      route: routes.adminDashboard,
+      icon: FiGrid,
+    },
+    {
+      key: 'admin-clients',
+      label: 'Clientes',
+      route: routes.adminClients,
+      icon: FiUsers,
+    },
     { key: 'plans', label: 'Planos', route: routes.plan, icon: FiCreditCard },
     {
       key: 'schedule',
@@ -55,12 +66,18 @@ const AdminShell: React.FC<AdminShellProps> = ({
       icon: FiCalendar,
     },
     {
+      key: 'training',
+      label: 'Treino do dia',
+      route: routes.training,
+      icon: FiEdit3,
+    },
+    {
       key: 'financial',
       label: 'Financeiro',
       route: routes.financial,
       icon: FiActivity,
     },
-    { key: 'alert', label: 'Alertas', route: routes.alert, icon: FiBell },
+    { key: 'alert', label: 'Comunicados', route: routes.alert, icon: FiBell },
     {
       key: 'profile',
       label: 'Perfil da empresa',
@@ -69,10 +86,17 @@ const AdminShell: React.FC<AdminShellProps> = ({
     },
   ];
 
+  const legacyRoutes = [
+    routes.dashboard,
+    routes.customers,
+    routes.enterprise,
+    routes.clientDetailNoParams,
+  ];
+
   const showWorkspaceTabs =
     !!currentEnterprise?.id &&
     (workspaceTabs.some((tab) => currentPath.startsWith(tab.route)) ||
-      currentPath.startsWith(routes.clientDetailNoParams));
+      legacyRoutes.some((route) => currentPath.startsWith(route)));
 
   return (
     <Container>
@@ -92,7 +116,7 @@ const AdminShell: React.FC<AdminShellProps> = ({
               const Icon = tab.icon;
               const isActive =
                 currentPath.startsWith(tab.route) ||
-                (tab.route === routes.customers &&
+                (tab.route === routes.adminClients &&
                   currentPath.startsWith(routes.clientDetailNoParams));
 
               return (

@@ -77,7 +77,7 @@ const SignUp: React.FC = () => {
 
         await api.post('enterprises', data);
 
-        history.push(routes.enterprise);
+        history.push(routes.adminDashboard);
 
         addToast({
           type: 'success',

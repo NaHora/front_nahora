@@ -36,8 +36,8 @@ export default createGlobalStyle`
   }
 
   body {
-    background: linear-gradient(180deg, #07111f 0%, #0d1930 100%);
-    color: var(--color-text-inverse);
+    background: #f6f6fa;
+    color: #0b0b0b;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }

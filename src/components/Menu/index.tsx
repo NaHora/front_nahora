@@ -2,15 +2,16 @@ import React, { useState, useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import {
   FiMenu,
-  FiArrowRight,
+  FiX,
   FiCreditCard,
   FiCalendar,
   FiBell,
   FiUser,
   FiLogOut,
   FiGrid,
-  FiBriefcase,
   FiLayers,
+  FiUsers,
+  FiEdit3,
 } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
 import { Badge } from '@material-ui/core';
@@ -123,7 +124,7 @@ const Menu: React.FC = () => {
               <strong>Atalhos do painel</strong>
             </div>
             <CloseButton type="button" onClick={() => setOpenMenu(false)}>
-              <FiArrowRight />
+              <FiX />
             </CloseButton>
           </PanelHeader>
 
@@ -131,33 +132,15 @@ const Menu: React.FC = () => {
             <MenuSection>
               <span>Principal</span>
               <MenuItem
-                currentPage={history.location.pathname === routes.enterprise}
-                onClick={() => history.push(routes.enterprise)}
-              >
-                <FiBriefcase />
-                <MenuItemText>
-                  <strong>Empresas</strong>
-                  <span>Explore acessos e entre nas operacoes.</span>
-                </MenuItemText>
-              </MenuItem>
-              <MenuItem
-                currentPage={history.location.pathname === routes.dashboard}
-                onClick={() => history.push(routes.dashboard)}
+                currentPage={
+                  history.location.pathname === routes.adminDashboard
+                }
+                onClick={() => history.push(routes.adminDashboard)}
               >
                 <FiGrid />
                 <MenuItemText>
-                  <strong>Dashboard</strong>
-                  <span>Leitura executiva do dia e ocupacao.</span>
-                </MenuItemText>
-              </MenuItem>
-              <MenuItem
-                currentPage={history.location.pathname === routes.schedule}
-                onClick={() => history.push(routes.schedule)}
-              >
-                <FiCalendar />
-                <MenuItemText>
-                  <strong>Agendamentos</strong>
-                  <span>Veja futuros, historico e cancelamentos.</span>
+                  <strong>Painel</strong>
+                  <span>Visão geral do negócio.</span>
                 </MenuItemText>
               </MenuItem>
               <MenuItem
@@ -198,13 +181,23 @@ const Menu: React.FC = () => {
                   </MenuItemText>
                 </MenuItem>
                 <MenuItem
+                  currentPage={history.location.pathname === routes.training}
+                  onClick={() => history.push(routes.training)}
+                >
+                  <FiEdit3 />
+                  <MenuItemText>
+                    <strong>Treino do dia</strong>
+                    <span>Descreva o wod e as instrucoes para a turma.</span>
+                  </MenuItemText>
+                </MenuItem>
+                <MenuItem
                   currentPage={history.location.pathname === routes.alert}
                   onClick={() => history.push(routes.alert)}
                 >
                   <FiBell />
                   <MenuItemText>
-                    <strong>Alertas</strong>
-                    <span>Comunicados ativos para a operacao.</span>
+                    <strong>Comunicados</strong>
+                    <span>Aviso rapido publicado no app dos clientes.</span>
                   </MenuItemText>
                 </MenuItem>
                 <MenuItem
@@ -222,14 +215,19 @@ const Menu: React.FC = () => {
                 {myEnterprise.isPrivate && (
                   <>
                     <MenuItem
-                      currentPage={history.location.pathname === routes.customers}
-                      onClick={() => history.push(routes.customers)}
+                      currentPage={
+                        history.location.pathname === routes.adminClients
+                      }
+                      onClick={() => history.push(routes.adminClients)}
                     >
-                      <Badge badgeContent={solicitations.length} color="secondary">
-                        <FiGrid />
+                      <Badge
+                        badgeContent={solicitations.length}
+                        color="secondary"
+                      >
+                        <FiUsers />
                       </Badge>
                       <MenuItemText>
-                        <strong>Gestao de clientes</strong>
+                        <strong>Clientes</strong>
                         <span>Convites, aprovacoes e relacionamento da base.</span>
                       </MenuItemText>
                     </MenuItem>
@@ -239,7 +237,7 @@ const Menu: React.FC = () => {
                     >
                       <FiLayers />
                       <MenuItemText>
-                        <strong>Gestao de planos</strong>
+                        <strong>Planos</strong>
                         <span>Catalogo, restricoes e cobertura da carteira.</span>
                       </MenuItemText>
                     </MenuItem>
@@ -287,7 +285,7 @@ const Menu: React.FC = () => {
     <Container>
       <Badge badgeContent={solicitations.length} color="secondary">
         <TriggerButton type="button" onClick={() => setOpenMenu(true)}>
-          <FiMenu color="#F8FBFF" size={22} />
+          <FiMenu />
           <TriggerText>
             <span>Menu</span>
             <strong>Abrir atalhos</strong>

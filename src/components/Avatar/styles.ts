@@ -39,10 +39,13 @@ export const Container = styled.main<AvatarProps>`
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    height: 100%;
     margin: 0;
-    font-size: ${(props) => Number(props.height) / 2}px;
-    padding: 20px;
+    padding: 0;
+    font-size: ${(props) => Math.max(Number(props.height) / 2.4, 12)}px;
     color: ${(props) => props.secondaryColor};
     font-weight: 700;
+    line-height: 1;
   }
 `;

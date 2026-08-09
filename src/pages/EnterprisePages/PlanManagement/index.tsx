@@ -1,104 +1,77 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  FiAlertTriangle,
   FiArrowRight,
-  FiCheck,
+  FiCalendar,
   FiClock,
+  FiCreditCard,
   FiLayers,
   FiPlus,
-  FiSearch,
+  FiRotateCw,
   FiTrash2,
   FiUsers,
-  FiX,
+  FiXCircle,
 } from 'react-icons/fi';
-import { Tooltip } from '@material-ui/core';
-import { differenceInDays, format, formatDistance, isAfter } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { differenceInDays, isAfter } from 'date-fns';
 import { useHistory } from 'react-router-dom';
 import AdminShell from '../../../components/AdminShell';
-import InputDefault from '../../../components/InputDefault';
-import Button from '../../../components/Button';
-import {
-  HeroAction,
-  Metrics,
-  MetricCard,
-  Grid,
-  Column,
-  FullWidth,
-  SectionCard,
-  SectionHeader,
-  SectionTitleWrap,
-  HeaderAction,
-  FiltersRow,
-  FormPanel,
-  InlineGrid,
-  Label,
-  NativeSelect,
-  NativeInput,
-  CustomersList,
-  CustomerCard,
-  CustomerTop,
-  CustomerIdentity,
-  CustomerActions,
-  ActionIconButton,
-  CustomerMeta,
-  MetaBox,
-  PlanControls,
-  DetailLink,
-  SmallMeta,
-  SmallMetaPill,
-  TableWrap,
-  PlansTable,
-  RestrictList,
-  RestrictCard,
-  RestrictInfo,
-  EmptyState,
-  StatusBadge,
-} from '../Plans/styles';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
 import { routes } from '../../../routes';
-import Select from '../../../components/Select';
-import Avatar from '../../../components/Avatar';
-import { MdEdit } from 'react-icons/md';
-
-interface User {
-  id: string;
-  avatar_url: string;
-  name: string;
-  celphone: string;
-}
+import {
+  Column,
+  EmptyState,
+  FormPanel,
+  HeaderAction,
+  HeroAction,
+  IconButton,
+  InlineGrid,
+  InlineGridThree,
+  Label,
+  Layout,
+  MetricCard,
+  MetricEyebrow,
+  Metrics,
+  NativeInput,
+  NativeSelect,
+  Panel,
+  PanelHeader,
+  PanelTitleWrap,
+  PlanCard,
+  PlanIdentity,
+  PlanList,
+  PlanPill,
+  PlanPills,
+  PrimaryButton,
+  RestrictCard,
+  RestrictInfo,
+  RestrictList,
+} from './styles';
 
 interface Category {
   id: string;
   name: string;
 }
 
-interface SelectSolicitation {
-  [key: string]: string;
-}
-
 interface Plan {
   id: string;
   name: string;
-  price: number;
-  schedule_limit: number;
-  week_limit: number;
-  delete_limit: number;
-  days_to_expire: number;
+  price: number | string;
+  schedule_limit: number | string;
+  week_limit: number | string;
+  delete_limit: number | string;
+  days_to_expire: number | string;
   type_expiration: string;
 }
 
 interface UserPlan {
   id: string;
-  user: User;
   expiration_at: Date | string;
   plan_id: string;
 }
 
 interface Invite {
   id: string;
-  user: User;
-  accepted: number;
   currentPlan?: UserPlan;
 }
 
@@ -108,653 +81,524 @@ interface Restrict {
   category: Category;
 }
 
+const emptyPlan = () => ({
+  name: '',
+  price: '',
+  schedule_limit: '',
+  week_limit: '',
+  delete_limit: '',
+  days_to_expire: '',
+  type_expiration: 'month',
+});
+
 const PlanManagement: React.FC = () => {
   const history = useHistory();
+  const toast = useToast();
   const myEnterprise = JSON.parse(
     localStorage.getItem('@NaHora:myEnterprise') || '{}',
   );
-  const toast = useToast();
-  const [searchValue, setSearchValue] = useState('');
-  const [editPlan, setEditPlan] = useState<UserPlan>({} as UserPlan);
-  const [selectValue, setSelectValue] = useState('0');
-  const [editMode, setEditMode] = useState(false);
-  const [openRestrict, setOpenRestrict] = useState(true);
+
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [restricts, setRestricts] = useState<Restrict[]>([]);
+  const [invites, setInvites] = useState<Invite[]>([]);
+  const [creatingPlan, setCreatingPlan] = useState(false);
+  const [openNewPlan, setOpenNewPlan] = useState(false);
+  const [planData, setPlanData] = useState<any>(emptyPlan());
   const [restrictData, setRestrictData] = useState({
     plan_id: '',
     category_id: '',
   });
-  const [planData, setPlanData] = useState<any>({
-    type_expiration: 'month',
-  });
-  const [selectedSolicitation, setSelectionSolicitation] = useState<
-    SelectSolicitation
-  >({});
-  const [allUsersEnterpriseAccepted, setAllUsersEnterpriseAccepted] = useState<
-    Invite[]
-  >([]);
-  const [enterprisePlans, setEnterprisePlans] = useState<Plan[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [restricts, setRestricts] = useState<Restrict[]>([]);
 
-  const getRestricts = useCallback(async () => {
-    api.get('/plans/restrict').then((response) => {
-      setRestricts(response.data);
-    });
-  }, []);
-
-  const getCategories = useCallback(async () => {
-    api.get(`/services/category/${myEnterprise.id}`).then((response) => {
-      setCategories(response.data);
-    });
-  }, [myEnterprise.id]);
-
-  const getEnterprisePlans = useCallback(async () => {
+  const loadPlans = useCallback(async () => {
     try {
       const response = await api.get('/plans');
-      setEnterprisePlans(response.data);
+      setPlans(response.data || []);
     } catch {}
   }, []);
 
-  const getAllEnterpriseAcceptedInvites = useCallback(async () => {
+  const loadCategories = useCallback(async () => {
+    if (!myEnterprise?.id) return;
+    try {
+      const response = await api.get(`/services/category/${myEnterprise.id}`);
+      setCategories(response.data || []);
+    } catch {}
+  }, [myEnterprise?.id]);
+
+  const loadRestricts = useCallback(async () => {
+    try {
+      const response = await api.get('/plans/restrict');
+      setRestricts(response.data || []);
+    } catch {}
+  }, []);
+
+  const loadInvites = useCallback(async () => {
     try {
       const response = await api.get('/invites/enterprise/accepted');
-
-      const planSelections = response.data.reduce(
-        (acc: SelectSolicitation, invite: Invite) => {
-          acc[invite.user.id] = invite.currentPlan ? invite.currentPlan.plan_id : '';
-          return acc;
-        },
-        {},
-      );
-
-      setSelectionSolicitation(planSelections);
-      setAllUsersEnterpriseAccepted(response.data);
+      setInvites(response.data || []);
     } catch {}
   }, []);
 
   useEffect(() => {
-    Promise.all([
-      getCategories(),
-      getRestricts(),
-      getEnterprisePlans(),
-      getAllEnterpriseAcceptedInvites(),
-    ]);
-  }, [
-    getAllEnterpriseAcceptedInvites,
-    getCategories,
-    getEnterprisePlans,
-    getRestricts,
-  ]);
+    loadPlans();
+    loadCategories();
+    loadRestricts();
+    loadInvites();
+  }, [loadPlans, loadCategories, loadRestricts, loadInvites]);
 
   const createPlan = useCallback(async () => {
+    if (!planData.name?.trim()) {
+      toast.addToast({ type: 'error', title: 'Informe um nome para o plano.' });
+      return;
+    }
+    setCreatingPlan(true);
     try {
       await api.post('/plans', planData);
-      toast.addToast({
-        type: 'success',
-        title: 'Plano criado com sucesso.',
-      });
-      setPlanData({
-        name: '',
-        price: '',
-        schedule_limit: '',
-        week_limit: '',
-        delete_limit: '',
-        days_to_expire: '',
-        type_expiration: 'month',
-      });
-      getEnterprisePlans();
-    } catch (err) {
+      toast.addToast({ type: 'success', title: 'Plano criado.' });
+      setPlanData(emptyPlan());
+      setOpenNewPlan(false);
+      loadPlans();
+    } catch (err: any) {
       toast.addToast({
         type: 'error',
         title:
-          err.response?.data.message ||
-          'Ocorreu um erro ao criar o plano, tente novamente',
+          err?.response?.data?.message || 'Erro ao criar o plano.',
       });
+    } finally {
+      setCreatingPlan(false);
     }
-  }, [toast, getEnterprisePlans, planData]);
-
-  const deleteRestrict = useCallback(
-    async (restrict_id) => {
-      try {
-        await api.delete(`/plans/restrict/${restrict_id}`);
-        toast.addToast({
-          type: 'success',
-          title: 'Restrição deletada com sucesso.',
-        });
-        getRestricts();
-      } catch (err) {
-        toast.addToast({
-          type: 'error',
-          title:
-            err.response?.data.message ||
-            'Ocorreu um erro ao deletar restrição, tente novamente',
-        });
-      }
-    },
-    [toast, getRestricts],
-  );
+  }, [planData, loadPlans, toast]);
 
   const deletePlan = useCallback(
-    async (plan_id) => {
+    async (planId: string) => {
       try {
-        await api.delete(`/plans/${plan_id}`);
-        toast.addToast({
-          type: 'success',
-          title: 'Plano deletado com sucesso.',
-        });
-        getEnterprisePlans();
-      } catch (err) {
+        await api.delete(`/plans/${planId}`);
+        toast.addToast({ type: 'success', title: 'Plano removido.' });
+        loadPlans();
+      } catch (err: any) {
         toast.addToast({
           type: 'error',
-          title:
-            err.response?.data.message ||
-            'Ocorreu um erro ao deletar o plano, tente novamente',
+          title: err?.response?.data?.message || 'Erro ao remover plano.',
         });
       }
     },
-    [toast, getEnterprisePlans],
-  );
-
-  const activeUserPlan = useCallback(
-    async (user_id, plan_id) => {
-      try {
-        await api.post('/plans/active', {
-          recipient_id: user_id,
-          plan_id,
-        });
-        getAllEnterpriseAcceptedInvites();
-        toast.addToast({
-          type: 'success',
-          title: 'Plano ativado com sucesso.',
-        });
-      } catch (err) {
-        toast.addToast({
-          type: 'error',
-          title:
-            err.response?.data.message ||
-            'Ocorreu um erro ao ativar o plano, tente novamente',
-        });
-      }
-    },
-    [toast, getAllEnterpriseAcceptedInvites],
+    [loadPlans, toast],
   );
 
   const createRestriction = useCallback(async () => {
+    if (!restrictData.plan_id || !restrictData.category_id) {
+      toast.addToast({
+        type: 'error',
+        title: 'Escolha o plano e a categoria antes de restringir.',
+      });
+      return;
+    }
     try {
       await api.post('/plans/restrict', restrictData);
-      getRestricts();
-      setRestrictData({
-        plan_id: '',
-        category_id: '',
-      });
-      toast.addToast({
-        type: 'success',
-        title: 'Plano restringido com sucesso.',
-      });
-    } catch (err) {
+      toast.addToast({ type: 'success', title: 'Restrição criada.' });
+      setRestrictData({ plan_id: '', category_id: '' });
+      loadRestricts();
+    } catch (err: any) {
       toast.addToast({
         type: 'error',
         title:
-          err.response?.data.message ||
-          'Ocorreu um erro ao restringir o plano, tente novamente',
+          err?.response?.data?.message || 'Erro ao criar restrição.',
       });
     }
-  }, [toast, restrictData, getRestricts]);
+  }, [restrictData, loadRestricts, toast]);
 
-  const changeExpirationDate = useCallback(async () => {
-    try {
-      await api.put('/plans/expiration', {
-        user_plan_id: editPlan.id,
-        expiration_at: editPlan.expiration_at,
-      });
-      getAllEnterpriseAcceptedInvites();
-      setEditPlan({} as UserPlan);
-      setEditMode(false);
-      toast.addToast({
-        type: 'success',
-        title: 'Expiração do plano atualizada com sucesso.',
-      });
-    } catch (err) {
-      toast.addToast({
-        type: 'error',
-        title:
-          err.response?.data.message ||
-          'Ocorreu um erro ao editar o tempo de expiração do plano',
-      });
-    }
-  }, [toast, getAllEnterpriseAcceptedInvites, editPlan]);
-
-  const cancelUserPlan = useCallback(
-    async (active_plan_id) => {
+  const deleteRestrict = useCallback(
+    async (restrictId: string) => {
       try {
-        await api.put(`/plans/${active_plan_id}/cancel`);
-        getAllEnterpriseAcceptedInvites();
-        toast.addToast({
-          type: 'success',
-          title: 'Plano cancelado com sucesso.',
-        });
-      } catch (err) {
+        await api.delete(`/plans/restrict/${restrictId}`);
+        toast.addToast({ type: 'success', title: 'Restrição removida.' });
+        loadRestricts();
+      } catch (err: any) {
         toast.addToast({
           type: 'error',
           title:
-            err.response?.data.message ||
-            'Ocorreu um erro ao cancelar o plano',
+            err?.response?.data?.message || 'Erro ao remover restrição.',
         });
       }
     },
-    [toast, getAllEnterpriseAcceptedInvites],
+    [loadRestricts, toast],
   );
 
-  const handleSelectSolicitation = useCallback(
-    (user_id, plan_id, current_plan_id) => {
-      if (selectedSolicitation[user_id] === 'cancelActivatedPlanNow') {
-        cancelUserPlan(current_plan_id);
-      } else if (plan_id) {
-        activeUserPlan(user_id, plan_id);
-      }
-    },
-    [cancelUserPlan, activeUserPlan, selectedSolicitation],
-  );
-
-  const filteredCustomers = useMemo(() => {
-    return allUsersEnterpriseAccepted
-      .filter((invite) => {
-        const days = differenceInDays(
+  const activeCoverage = useMemo(
+    () =>
+      invites.filter((invite) =>
+        isAfter(
           new Date(invite?.currentPlan?.expiration_at || 2000),
           new Date(),
+        ),
+      ).length,
+    [invites],
+  );
+
+  const expiringSoon = useMemo(
+    () =>
+      invites.filter((invite) => {
+        if (!invite.currentPlan) return false;
+        const days = differenceInDays(
+          new Date(invite.currentPlan.expiration_at),
+          new Date(),
         );
+        return days >= 0 && days < 7;
+      }).length,
+    [invites],
+  );
 
-        if (selectValue === '1') return !invite.currentPlan;
-        if (selectValue === '2') return days < 0;
-        if (selectValue === '3') return days < 7 && days >= 0;
-        if (selectValue === '4') return days >= 7;
-        return true;
-      })
-      .filter((invite) =>
-        invite.user.name.toLowerCase().includes(searchValue.toLowerCase()),
-      );
-  }, [allUsersEnterpriseAccepted, searchValue, selectValue]);
-
-  const activeCustomersCount = useMemo(() => {
-    return allUsersEnterpriseAccepted.filter((invite) =>
-      isAfter(new Date(invite?.currentPlan?.expiration_at || 2000), new Date()),
-    ).length;
-  }, [allUsersEnterpriseAccepted]);
-
-  const expiringSoonCount = useMemo(() => {
-    return allUsersEnterpriseAccepted.filter((invite) => {
-      if (!invite.currentPlan) return false;
-      const days = differenceInDays(
-        new Date(invite.currentPlan.expiration_at),
-        new Date(),
-      );
-      return days >= 0 && days < 7;
-    }).length;
-  }, [allUsersEnterpriseAccepted]);
-
-  const getStatusTone = (
-    invite: Invite,
-  ): 'expired' | 'warning' | 'active' | 'none' => {
-    if (!invite.currentPlan) return 'none';
-
-    const days = differenceInDays(
-      new Date(invite.currentPlan.expiration_at),
-      new Date(),
-    );
-
-    if (days < 0) return 'expired';
-    if (days < 7) return 'warning';
-    return 'active';
-  };
-
-  const getStatusLabel = (invite: Invite): string => {
-    if (!invite.currentPlan) return 'Sem plano ativo';
-
-    const days = differenceInDays(
-      new Date(invite.currentPlan.expiration_at),
-      new Date(),
-    );
-
-    if (days < 0) return 'Plano expirado';
-    if (days < 7) return 'Expira em breve';
-    return 'Plano ativo';
+  const expirationLabel = (plan: Plan) => {
+    const value = Number(plan.days_to_expire) || 0;
+    const type = plan.type_expiration;
+    const label =
+      type === 'day'
+        ? value === 1
+          ? 'dia'
+          : 'dias'
+        : type === 'month'
+        ? value === 1
+          ? 'mês'
+          : 'meses'
+        : value === 1
+        ? 'ano'
+        : 'anos';
+    return `${value} ${label}`;
   };
 
   return (
     <AdminShell
-      eyebrow="Oferta privada"
+      eyebrow="Catálogo"
       title="Gestão de planos"
-      description="Concentre catálogo e restrições da oferta em uma área própria. A ativação dos planos agora acontece na gestão de clientes."
+      description="Crie e mantenha a oferta comercial do seu box. A ativação por cliente acontece em Clientes."
       actions={
-        <HeroAction type="button" onClick={() => setOpenRestrict(true)}>
-          <FiPlus />
-          Nova restrição
+        <HeroAction type="button" onClick={() => setOpenNewPlan(true)}>
+          <FiPlus /> Novo plano
         </HeroAction>
       }
     >
       <Metrics>
         <MetricCard>
-          <strong>{enterprisePlans.length}</strong>
-          <span>Planos cadastrados</span>
+          <MetricEyebrow>
+            <FiLayers /> Planos cadastrados
+          </MetricEyebrow>
+          <strong>{plans.length}</strong>
+          <span>Ofertas disponíveis no seu catálogo.</span>
         </MetricCard>
         <MetricCard>
+          <MetricEyebrow>
+            <FiXCircle /> Restrições ativas
+          </MetricEyebrow>
           <strong>{restricts.length}</strong>
-          <span>Restrições ativas</span>
+          <span>Categorias bloqueadas por plano.</span>
         </MetricCard>
         <MetricCard>
-          <strong>{activeCustomersCount}</strong>
-          <span>Clientes com cobertura ativa</span>
+          <MetricEyebrow>
+            <FiUsers /> Clientes com cobertura
+          </MetricEyebrow>
+          <strong>{activeCoverage}</strong>
+          <span>Clientes com plano vigente hoje.</span>
         </MetricCard>
         <MetricCard>
-          <strong>{expiringSoonCount}</strong>
-          <span>Planos vencendo em 7 dias</span>
+          <MetricEyebrow>
+            <FiAlertTriangle /> Vencendo em 7 dias
+          </MetricEyebrow>
+          <strong>{expiringSoon}</strong>
+          <span>Renovações que precisam de atenção.</span>
         </MetricCard>
       </Metrics>
 
-      <FullWidth>
-        <SectionCard>
-          <SectionHeader>
-            <SectionTitleWrap>
-              <h2>Catálogo de planos</h2>
-              <p>
-                Cadastre, compare e remova ofertas em um bloco único, com leitura
-                direta e edição rápida.
-              </p>
-            </SectionTitleWrap>
-          </SectionHeader>
-
-          <TableWrap>
-            <PlansTable>
-              <thead>
-                <tr>
-                  <th>Plano</th>
-                  <th>Valor</th>
-                  <th>Expiração</th>
-                  <th>Agendamentos</th>
-                  <th>Semanal</th>
-                  <th>Cancelamentos</th>
-                  <th />
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr>
-                  <td>
-                    <NativeInput
-                      name="name"
-                      value={planData?.name || ''}
-                      onChange={(e) =>
-                        setPlanData({
-                          ...planData,
-                          [e.target.name]: e.target.value,
-                        })
-                      }
-                      placeholder="Nome"
-                      type="text"
-                    />
-                  </td>
-                  <td>
-                    <NativeInput
-                      name="price"
-                      value={planData.price || ''}
-                      onChange={(e) =>
-                        setPlanData({
-                          ...planData,
-                          [e.target.name]: e.target.value,
-                        })
-                      }
-                      placeholder="Valor"
-                      type="text"
-                    />
-                  </td>
-                  <td>
-                    <InlineGrid>
-                      <NativeInput
-                        value={planData.days_to_expire || ''}
-                        onChange={(e) =>
-                          setPlanData({
-                            ...planData,
-                            [e.target.name]: e.target.value,
-                          })
-                        }
-                        name="days_to_expire"
-                        placeholder="Expiração"
-                        type="number"
-                      />
-                      <NativeSelect
-                        value={planData.type_expiration}
-                        onChange={(e) =>
-                          setPlanData({
-                            ...planData,
-                            [e.target.name]: e.target.value,
-                          })
-                        }
-                        name="type_expiration"
-                      >
-                        <option value="day">Dia</option>
-                        <option value="month">Mês</option>
-                        <option value="year">Ano</option>
-                      </NativeSelect>
-                    </InlineGrid>
-                  </td>
-                  <td>
-                    <NativeInput
-                      name="schedule_limit"
-                      value={planData.schedule_limit || ''}
-                      onChange={(e) =>
-                        setPlanData({
-                          ...planData,
-                          [e.target.name]: e.target.value,
-                        })
-                      }
-                      placeholder="Agendamentos"
-                      type="number"
-                    />
-                  </td>
-                  <td>
-                    <NativeInput
-                      name="week_limit"
-                      value={planData.week_limit || ''}
-                      onChange={(e) =>
-                        setPlanData({
-                          ...planData,
-                          [e.target.name]: e.target.value,
-                        })
-                      }
-                      placeholder="Semanal"
-                      type="number"
-                    />
-                  </td>
-                  <td>
-                    <NativeInput
-                      name="delete_limit"
-                      value={planData.delete_limit || ''}
-                      onChange={(e) =>
-                        setPlanData({
-                          ...planData,
-                          [e.target.name]: e.target.value,
-                        })
-                      }
-                      placeholder="Cancelamentos"
-                      type="number"
-                    />
-                  </td>
-                  <td>
-                    <ActionIconButton type="button" variant="success" onClick={createPlan}>
-                      <FiCheck />
-                    </ActionIconButton>
-                  </td>
-                </tr>
-
-                {enterprisePlans.map((plan) => (
-                  <tr key={plan.id}>
-                    <td>{plan.name}</td>
-                    <td>{plan.price}</td>
-                    <td>
-                      {plan.days_to_expire} {plan.type_expiration}
-                    </td>
-                    <td>{plan.schedule_limit}</td>
-                    <td>{plan.week_limit}</td>
-                    <td>{plan.delete_limit}</td>
-                    <td>
-                      <ActionIconButton
-                        type="button"
-                        variant="danger"
-                        onClick={() => deletePlan(plan.id)}
-                      >
-                        <FiTrash2 />
-                      </ActionIconButton>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </PlansTable>
-          </TableWrap>
-        </SectionCard>
-      </FullWidth>
-
-      <Grid>
+      <Layout>
         <Column>
-          <SectionCard>
-            <SectionHeader>
-              <SectionTitleWrap>
-                <h2>Operação dos clientes</h2>
+          <Panel>
+            <PanelHeader>
+              <PanelTitleWrap>
+                <h2>Catálogo de planos</h2>
                 <p>
-                  A ativação, cancelamento e leitura de vigência agora ficam na
-                  gestão de clientes, junto do contexto de cada pessoa.
+                  Cada plano define preço, tempo de vigência e limites de
+                  agendamento.
                 </p>
-              </SectionTitleWrap>
+              </PanelTitleWrap>
               <HeaderAction
                 type="button"
-                onClick={() => history.push(routes.customers)}
-              >
-                <FiUsers />
-                Gestão de clientes
-              </HeaderAction>
-            </SectionHeader>
-
-            <FormPanel>
-              <Button onClick={() => history.push(routes.customers)}>
-                Abrir gestão de clientes
-              </Button>
-            </FormPanel>
-          </SectionCard>
-        </Column>
-
-        <Column>
-          <SectionCard>
-            <SectionHeader>
-              <SectionTitleWrap>
-                <h2>Restrições por categoria</h2>
-                <p>Controle quais serviços ficam bloqueados conforme o plano.</p>
-              </SectionTitleWrap>
-              <HeaderAction
-                type="button"
-                onClick={() => setOpenRestrict(!openRestrict)}
+                variant={openNewPlan ? 'muted' : 'primary'}
+                onClick={() => setOpenNewPlan(!openNewPlan)}
               >
                 <FiPlus />
-                {openRestrict ? 'Recolher' : 'Nova restrição'}
+                {openNewPlan ? 'Recolher' : 'Novo plano'}
               </HeaderAction>
-            </SectionHeader>
+            </PanelHeader>
 
-            {openRestrict && (
+            {openNewPlan && (
               <FormPanel>
                 <InlineGrid>
                   <Label>
-                    Plano
-                    <NativeSelect
-                      value={restrictData.plan_id}
+                    <span>Nome</span>
+                    <NativeInput
+                      name="name"
+                      value={planData.name || ''}
                       onChange={(e) =>
-                        setRestrictData({
-                          ...restrictData,
-                          [e.target.name]: e.target.value,
-                        })
+                        setPlanData({ ...planData, name: e.target.value })
                       }
-                      name="plan_id"
-                    >
-                      <option value="">Selecione</option>
-                      {enterprisePlans.map((plan) => (
-                        <option key={plan.id} value={plan.id}>
-                          {plan.name}
-                        </option>
-                      ))}
-                    </NativeSelect>
+                      placeholder="Ex.: Mensal ilimitado"
+                    />
                   </Label>
-
                   <Label>
-                    Serviço
-                    <NativeSelect
-                      value={restrictData.category_id}
+                    <span>Valor (R$)</span>
+                    <NativeInput
+                      name="price"
+                      type="number"
+                      value={planData.price || ''}
                       onChange={(e) =>
-                        setRestrictData({
-                          ...restrictData,
-                          [e.target.name]: e.target.value,
+                        setPlanData({ ...planData, price: e.target.value })
+                      }
+                      placeholder="0,00"
+                    />
+                  </Label>
+                </InlineGrid>
+
+                <InlineGrid>
+                  <Label>
+                    <span>Duração</span>
+                    <NativeInput
+                      name="days_to_expire"
+                      type="number"
+                      value={planData.days_to_expire || ''}
+                      onChange={(e) =>
+                        setPlanData({
+                          ...planData,
+                          days_to_expire: e.target.value,
                         })
                       }
-                      name="category_id"
+                      placeholder="Ex.: 30"
+                    />
+                  </Label>
+                  <Label>
+                    <span>Unidade</span>
+                    <NativeSelect
+                      name="type_expiration"
+                      value={planData.type_expiration}
+                      onChange={(e) =>
+                        setPlanData({
+                          ...planData,
+                          type_expiration: e.target.value,
+                        })
+                      }
                     >
-                      <option value="">Selecione</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
+                      <option value="day">Dias</option>
+                      <option value="month">Meses</option>
+                      <option value="year">Anos</option>
                     </NativeSelect>
                   </Label>
                 </InlineGrid>
 
-                <Button onClick={createRestriction}>Salvar restrição</Button>
+                <InlineGridThree>
+                  <Label>
+                    <span>Agendamentos totais</span>
+                    <NativeInput
+                      name="schedule_limit"
+                      type="number"
+                      value={planData.schedule_limit || ''}
+                      onChange={(e) =>
+                        setPlanData({
+                          ...planData,
+                          schedule_limit: e.target.value,
+                        })
+                      }
+                      placeholder="Ex.: 20"
+                    />
+                  </Label>
+                  <Label>
+                    <span>Limite semanal</span>
+                    <NativeInput
+                      name="week_limit"
+                      type="number"
+                      value={planData.week_limit || ''}
+                      onChange={(e) =>
+                        setPlanData({
+                          ...planData,
+                          week_limit: e.target.value,
+                        })
+                      }
+                      placeholder="Ex.: 5"
+                    />
+                  </Label>
+                  <Label>
+                    <span>Cancelamentos</span>
+                    <NativeInput
+                      name="delete_limit"
+                      type="number"
+                      value={planData.delete_limit || ''}
+                      onChange={(e) =>
+                        setPlanData({
+                          ...planData,
+                          delete_limit: e.target.value,
+                        })
+                      }
+                      placeholder="Ex.: 3"
+                    />
+                  </Label>
+                </InlineGridThree>
+
+                <PrimaryButton
+                  type="button"
+                  onClick={createPlan}
+                  disabled={creatingPlan}
+                >
+                  {creatingPlan ? 'Salvando...' : 'Salvar plano'}
+                </PrimaryButton>
               </FormPanel>
             )}
 
-            {restricts.length > 0 ? (
+            {plans.length === 0 ? (
+              <EmptyState>Nenhum plano cadastrado ainda.</EmptyState>
+            ) : (
+              <PlanList>
+                {plans.map((plan) => (
+                  <PlanCard key={plan.id}>
+                    <PlanIdentity>
+                      <h3>{plan.name}</h3>
+                      <PlanPills>
+                        <PlanPill tone="accent">
+                          R$ {Number(plan.price || 0).toFixed(2)}
+                        </PlanPill>
+                        <PlanPill>
+                          <FiCalendar /> {expirationLabel(plan)}
+                        </PlanPill>
+                        {plan.schedule_limit ? (
+                          <PlanPill>
+                            <FiClock /> {plan.schedule_limit} agend.
+                          </PlanPill>
+                        ) : null}
+                        {plan.week_limit ? (
+                          <PlanPill>
+                            <FiClock /> {plan.week_limit} / semana
+                          </PlanPill>
+                        ) : null}
+                        {plan.delete_limit ? (
+                          <PlanPill>
+                            <FiRotateCw /> {plan.delete_limit} cancel.
+                          </PlanPill>
+                        ) : null}
+                      </PlanPills>
+                    </PlanIdentity>
+                    <IconButton
+                      type="button"
+                      variant="danger"
+                      title="Remover plano"
+                      onClick={() => deletePlan(plan.id)}
+                    >
+                      <FiTrash2 />
+                    </IconButton>
+                  </PlanCard>
+                ))}
+              </PlanList>
+            )}
+          </Panel>
+        </Column>
+
+        <Column>
+          <Panel>
+            <PanelHeader>
+              <PanelTitleWrap>
+                <h2>Restrições por categoria</h2>
+                <p>Escolha quais serviços cada plano NÃO libera.</p>
+              </PanelTitleWrap>
+            </PanelHeader>
+
+            <FormPanel>
+              <Label>
+                <span>Plano</span>
+                <NativeSelect
+                  name="plan_id"
+                  value={restrictData.plan_id}
+                  onChange={(e) =>
+                    setRestrictData({
+                      ...restrictData,
+                      plan_id: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Selecione um plano</option>
+                  {plans.map((plan) => (
+                    <option key={plan.id} value={plan.id}>
+                      {plan.name}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Label>
+
+              <Label>
+                <span>Categoria bloqueada</span>
+                <NativeSelect
+                  name="category_id"
+                  value={restrictData.category_id}
+                  onChange={(e) =>
+                    setRestrictData({
+                      ...restrictData,
+                      category_id: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Label>
+
+              <PrimaryButton type="button" onClick={createRestriction}>
+                Salvar restrição
+              </PrimaryButton>
+            </FormPanel>
+
+            {restricts.length === 0 ? (
+              <EmptyState>Nenhuma restrição ativa no momento.</EmptyState>
+            ) : (
               <RestrictList>
                 {restricts.map((restrict) => (
                   <RestrictCard key={restrict.id}>
                     <RestrictInfo>
-                      <Tooltip title="Relação entre plano e serviço restrito">
-                        <span>
-                          {restrict.plan.name}
-                          <FiArrowRight />
-                          {restrict.category.name}
-                        </span>
-                      </Tooltip>
+                      <span>{restrict.plan.name}</span>
+                      <FiArrowRight />
+                      <span>{restrict.category.name}</span>
                     </RestrictInfo>
-
-                    <ActionIconButton
+                    <IconButton
                       type="button"
                       variant="danger"
+                      title="Remover restrição"
                       onClick={() => deleteRestrict(restrict.id)}
                     >
-                      <FiX />
-                    </ActionIconButton>
+                      <FiTrash2 />
+                    </IconButton>
                   </RestrictCard>
                 ))}
               </RestrictList>
-            ) : (
-              <EmptyState>Nenhum plano com restrição.</EmptyState>
             )}
-          </SectionCard>
+          </Panel>
 
-          <SectionCard>
-            <SectionHeader>
-              <SectionTitleWrap>
-                <h2>Estratégia da oferta</h2>
+          <Panel>
+            <PanelHeader>
+              <PanelTitleWrap>
+                <h2>Ativação por cliente</h2>
                 <p>
-                  Use esta área para manter a arquitetura comercial limpa e a base
-                  bem coberta.
+                  Ativação, cancelamento e prorrogação de planos por cliente
+                  acontecem em Clientes.
                 </p>
-              </SectionTitleWrap>
-            </SectionHeader>
-
-            <FormPanel>
-              <Button onClick={() => history.push(routes.customers)}>
-                Voltar para gestão de clientes
-              </Button>
-            </FormPanel>
-          </SectionCard>
+              </PanelTitleWrap>
+              <HeaderAction
+                type="button"
+                variant="primary"
+                onClick={() => history.push(routes.adminClients)}
+              >
+                <FiUsers /> Ir para Clientes
+              </HeaderAction>
+            </PanelHeader>
+          </Panel>
         </Column>
-      </Grid>
+      </Layout>
     </AdminShell>
   );
 };

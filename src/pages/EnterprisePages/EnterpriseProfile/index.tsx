@@ -1,161 +1,206 @@
-import React, { ChangeEvent, useCallback, useState, useEffect } from 'react';
-import { FiArrowLeft, FiCamera, FiEye, FiSave } from 'react-icons/fi';
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import {
+  FiArrowLeft,
+  FiCamera,
+  FiClock,
+  FiCompass,
+  FiDroplet,
+  FiEye,
+  FiImage,
+  FiLock,
+  FiMapPin,
+  FiPhone,
+  FiSave,
+  FiUnlock,
+} from 'react-icons/fi';
 import { Switch } from '@material-ui/core';
+import NumberFormat from 'react-number-format';
 import Loader from 'react-loader-spinner';
 import AdminShell from '../../../components/AdminShell';
-import Button from '../../../components/Button';
-import InputDefault from '../../../components/InputDefault';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
 import EnterpriseImg from '../../../assets/empresa.png';
 import resize from '../../../components/Resize';
 import {
-  Metrics,
-  MetricCard,
-  Grid,
   Column,
+  ColorRow,
+  ColorSwatch,
+  Divider,
+  Field,
+  FormPanel,
+  Grid,
+  InlineGrid,
+  InlineGridThree,
+  Input,
+  LogoBadge,
+  LogoBox,
+  LogoRow,
+  LogoText,
+  MetricCard,
+  MetricEyebrow,
+  Metrics,
   Panel,
   PanelHeader,
   PanelTitleWrap,
-  FormPanel,
-  InlineGrid,
-  ToggleRow,
+  PreviewBody,
+  PreviewButton,
+  PreviewHeader,
   PreviewPhone,
   PreviewScreen,
-  PreviewHeader,
-  PreviewBody,
-  PreviewBadge,
+  SaveButton,
+  SectionLabel,
   StatusPill,
-} from '../shared';
+  ToggleContent,
+  ToggleRow,
+} from './styles';
 
 interface Enterprise {
   id?: string;
   name?: string;
-  address?: string;
   area?: string;
+  address?: string;
+  phone?: string;
+  open_hour?: string;
+  close_hour?: string;
+  lat?: string;
+  long?: string;
   logo_url?: string;
   primary_color?: string;
   secondary_color?: string;
-  isPrivate?: boolean;
+  isPrivate?: boolean | number;
 }
 
 const EnterpriseProfile: React.FC = () => {
-  const [enterpriseData, setEnterpriseData] = useState<Enterprise | any>({});
-  const [loading, setLoading] = useState(false);
   const { addToast } = useToast();
+  const [enterprise, setEnterprise] = useState<Enterprise>({});
+  const [loadingLogo, setLoadingLogo] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const myEnterprise = JSON.parse(
-    localStorage.getItem('@NaHora:myEnterprise') || '{}',
-  );
+  const persist = useCallback((data: Enterprise) => {
+    localStorage.setItem('@NaHora:myEnterprise', JSON.stringify(data));
+    localStorage.setItem('enterprise', JSON.stringify(data));
+  }, []);
 
-  const getMyEnterprises = useCallback(async () => {
+  const loadEnterprise = useCallback(async () => {
     try {
       const response = await api.get('/enterprises/mine');
-
-      localStorage.setItem(
-        '@NaHora:myEnterprise',
-        JSON.stringify(response.data),
-      );
-
-      setEnterpriseData(response.data);
+      setEnterprise(response.data || {});
+      persist(response.data);
     } catch {}
-  }, []);
-
-  const updateEnterprise = useCallback(async () => {
-    try {
-      const response = await api.put('/enterprises', {
-        name: enterpriseData.name,
-        address: enterpriseData.address,
-        area: enterpriseData.area,
-        primary_color: enterpriseData.primary_color,
-        secondary_color: enterpriseData.secondary_color,
-        isPrivate: !!enterpriseData.isPrivate,
-      });
-
-      localStorage.setItem(
-        '@NaHora:myEnterprise',
-        JSON.stringify(response.data),
-      );
-
-      setEnterpriseData(response.data);
-
-      addToast({
-        type: 'success',
-        title: 'Dados da empresa atualizados!',
-      });
-    } catch {}
-  }, [addToast, enterpriseData]);
+  }, [persist]);
 
   useEffect(() => {
-    getMyEnterprises();
-  }, [getMyEnterprises]);
+    loadEnterprise();
+  }, [loadEnterprise]);
 
-  const callback = (image: any) => {
-    setLoading(true);
-    const data = new FormData();
-    data.append('logo', image);
-
-    api
-      .patch('/enterprises/logo', data)
-      .then((response) => {
-        setEnterpriseData(response.data);
-
-        addToast({
-          type: 'success',
-          title: 'Logo atualizada!',
-        });
-      })
-      .catch(() => {
-        addToast({
-          type: 'error',
-          title: 'Algo de errado ocorreu ao trocar a imagem, tente novamente.',
-        });
-      })
-      .finally(() => {
-        setLoading(false);
+  const updateEnterprise = useCallback(async () => {
+    setSaving(true);
+    try {
+      const response = await api.put('/enterprises', {
+        name: enterprise.name,
+        address: enterprise.address,
+        area: enterprise.area,
+        phone: enterprise.phone,
+        open_hour: enterprise.open_hour,
+        close_hour: enterprise.close_hour,
+        lat: enterprise.lat,
+        long: enterprise.long,
+        primary_color: enterprise.primary_color,
+        secondary_color: enterprise.secondary_color,
+        isPrivate: !!enterprise.isPrivate,
       });
-  };
-
-  const handleAvatarChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const { files } = e.target;
-
-      if (files.length === 0) {
-        return;
-      }
-
-      resize(files[0], callback);
+      setEnterprise(response.data);
+      persist(response.data);
+      addToast({ type: 'success', title: 'Dados da empresa atualizados.' });
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title:
+          err?.response?.data?.message || 'Erro ao atualizar dados da empresa.',
+      });
+    } finally {
+      setSaving(false);
     }
-  }, []);
+  }, [addToast, enterprise, persist]);
+
+  const uploadLogoCallback = useCallback(
+    (image: any) => {
+      setLoadingLogo(true);
+      const data = new FormData();
+      data.append('logo', image);
+      api
+        .patch('/enterprises/logo', data)
+        .then((response) => {
+          setEnterprise(response.data);
+          persist(response.data);
+          addToast({ type: 'success', title: 'Logo atualizada.' });
+        })
+        .catch(() => {
+          addToast({
+            type: 'error',
+            title: 'Não foi possível trocar a imagem, tente novamente.',
+          });
+        })
+        .finally(() => setLoadingLogo(false));
+    },
+    [addToast, persist],
+  );
+
+  const handleLogoChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      resize(file, uploadLogoCallback);
+    },
+    [uploadLogoCallback],
+  );
+
+  const setField = (name: keyof Enterprise, value: string | boolean) =>
+    setEnterprise((prev) => ({ ...prev, [name]: value }));
 
   return (
     <AdminShell
-      eyebrow="Identidade da marca"
+      eyebrow="Identidade da empresa"
       title="Perfil da empresa"
-      description="Edite posicionamento visual, dados públicos e comportamento do perfil em um fluxo mais claro, com prévia da experiência final."
+      description="Dados públicos, contato, funcionamento, localização e identidade visual."
       actions={
-        <Button onClick={updateEnterprise}>
-          <FiSave />
-          Salvar alterações
-        </Button>
+        <SaveButton type="button" onClick={updateEnterprise} disabled={saving}>
+          <FiSave /> {saving ? 'Salvando...' : 'Salvar alterações'}
+        </SaveButton>
       }
     >
       <Metrics>
         <MetricCard>
-          <strong>{enterpriseData?.name ? 1 : 0}</strong>
-          <span>Empresa configurada</span>
+          <MetricEyebrow>
+            <FiImage /> Identidade
+          </MetricEyebrow>
+          <strong>{enterprise.logo_url ? '100%' : '0%'}</strong>
+          <span>Logo aplicada ao perfil.</span>
         </MetricCard>
         <MetricCard>
-          <strong>{enterpriseData?.logo_url ? '100%' : '0%'}</strong>
-          <span>Marca aplicada</span>
+          <MetricEyebrow>
+            <FiPhone /> Contato
+          </MetricEyebrow>
+          <strong>{enterprise.phone ? 'OK' : '—'}</strong>
+          <span>Telefone público disponível.</span>
         </MetricCard>
         <MetricCard>
-          <strong>{enterpriseData?.isPrivate ? 'Privado' : 'Aberto'}</strong>
-          <span>Modo de agendamento</span>
+          <MetricEyebrow>
+            <FiClock /> Funcionamento
+          </MetricEyebrow>
+          <strong>
+            {enterprise.open_hour && enterprise.close_hour
+              ? `${enterprise.open_hour} → ${enterprise.close_hour}`
+              : '—'}
+          </strong>
+          <span>Horários exibidos ao cliente.</span>
         </MetricCard>
         <MetricCard>
-          <strong>{enterpriseData?.area || '-'}</strong>
-          <span>Área principal</span>
+          <MetricEyebrow>
+            {enterprise.isPrivate ? <FiLock /> : <FiUnlock />} Acesso
+          </MetricEyebrow>
+          <strong>{enterprise.isPrivate ? 'Fechado' : 'Aberto'}</strong>
+          <span>Modo atual de agendamento.</span>
         </MetricCard>
       </Metrics>
 
@@ -164,136 +209,275 @@ const EnterpriseProfile: React.FC = () => {
           <Panel>
             <PanelHeader>
               <PanelTitleWrap>
-                <h2>Dados públicos e marca</h2>
+                <h2>Dados básicos</h2>
                 <p>
-                  Ajuste o que o cliente enxerga primeiro: nome, área, endereço e
-                  identidade visual.
+                  Como sua empresa aparece pro cliente: nome, área, contato e
+                  endereço.
                 </p>
               </PanelTitleWrap>
             </PanelHeader>
 
             <FormPanel>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <label
-                  htmlFor="avatar"
-                  style={{
-                    position: 'relative',
-                    width: 156,
-                    height: 156,
-                    display: 'block',
-                    cursor: 'pointer',
-                  }}
-                >
+              <LogoRow>
+                <LogoBox htmlFor="avatar">
                   <img
-                    src={enterpriseData?.logo_url || EnterpriseImg}
-                    alt={myEnterprise.name}
-                    style={{
-                      width: 156,
-                      height: 156,
-                      borderRadius: 36,
-                      objectFit: 'cover',
-                      boxShadow: '0 20px 40px rgba(7, 17, 31, 0.15)',
-                    }}
+                    src={enterprise.logo_url || EnterpriseImg}
+                    alt={enterprise.name || 'Logo da empresa'}
                   />
-                  <span
-                    style={{
-                      position: 'absolute',
-                      right: 12,
-                      bottom: 12,
-                      width: 42,
-                      height: 42,
-                      borderRadius: 14,
-                      background: '#ff8e28',
-                      color: '#fff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {loading ? <Loader /> : <FiCamera />}
+                  <LogoBadge>
+                    {loadingLogo ? (
+                      <Loader type="Watch" color="#0b0b0b" height={16} width={16} />
+                    ) : (
+                      <FiCamera />
+                    )}
+                  </LogoBadge>
+                  <input
+                    type="file"
+                    id="avatar"
+                    accept="image/*"
+                    onChange={handleLogoChange}
+                  />
+                </LogoBox>
+                <LogoText>
+                  <strong>Logo da empresa</strong>
+                  Use um arquivo quadrado (mínimo 512×512) para melhor
+                  apresentação no app e no site público.
+                </LogoText>
+              </LogoRow>
+
+              <Divider />
+
+              <InlineGrid>
+                <Field>
+                  <span>Nome da empresa</span>
+                  <Input
+                    name="name"
+                    value={enterprise.name || ''}
+                    onChange={(e) => setField('name', e.target.value)}
+                    placeholder="Ex.: Box NaHora"
+                  />
+                </Field>
+                <Field>
+                  <span>Área de atuação</span>
+                  <Input
+                    name="area"
+                    value={enterprise.area || ''}
+                    onChange={(e) => setField('area', e.target.value)}
+                    placeholder="Ex.: Crossfit"
+                  />
+                </Field>
+              </InlineGrid>
+
+              <Field>
+                <span>Endereço</span>
+                <Input
+                  name="address"
+                  value={enterprise.address || ''}
+                  onChange={(e) => setField('address', e.target.value)}
+                  placeholder="Rua, número, bairro, cidade"
+                />
+              </Field>
+
+              <Field>
+                <span>Telefone / WhatsApp</span>
+                <NumberFormat
+                  customInput={Input}
+                  format="(##) #####-####"
+                  mask="_"
+                  name="phone"
+                  value={enterprise.phone || ''}
+                  placeholder="(00) 00000-0000"
+                  onValueChange={(v: { value: string }) =>
+                    setField('phone', v.value)
+                  }
+                />
+              </Field>
+            </FormPanel>
+          </Panel>
+
+          <Panel>
+            <PanelHeader>
+              <PanelTitleWrap>
+                <h2>Funcionamento</h2>
+                <p>
+                  Horários que a base pode agendar. Fora desse intervalo o app
+                  bloqueia novos horários.
+                </p>
+              </PanelTitleWrap>
+            </PanelHeader>
+
+            <FormPanel>
+              <InlineGrid>
+                <Field>
+                  <span>Abre às</span>
+                  <Input
+                    type="time"
+                    name="open_hour"
+                    value={enterprise.open_hour || ''}
+                    onChange={(e) => setField('open_hour', e.target.value)}
+                  />
+                </Field>
+                <Field>
+                  <span>Fecha às</span>
+                  <Input
+                    type="time"
+                    name="close_hour"
+                    value={enterprise.close_hour || ''}
+                    onChange={(e) => setField('close_hour', e.target.value)}
+                  />
+                </Field>
+              </InlineGrid>
+            </FormPanel>
+          </Panel>
+
+          <Panel>
+            <PanelHeader>
+              <PanelTitleWrap>
+                <h2>Localização</h2>
+                <p>
+                  Coordenadas usadas para mapa e cálculo de distância no app.
+                  Você pode copiar do Google Maps.
+                </p>
+              </PanelTitleWrap>
+            </PanelHeader>
+
+            <FormPanel>
+              <InlineGrid>
+                <Field>
+                  <span>
+                    <FiMapPin
+                      style={{
+                        display: 'inline',
+                        marginRight: 4,
+                        verticalAlign: '-2px',
+                      }}
+                    />
+                    Latitude
                   </span>
-                  <input type="file" onChange={handleAvatarChange} id="avatar" hidden />
-                </label>
-              </div>
-
-              <InlineGrid>
-                <InputDefault
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  value={enterpriseData?.name}
-                  type="text"
-                  name="name"
-                  placeholder="Nome da empresa"
-                />
-
-                <InputDefault
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  value={enterpriseData.area}
-                  type="text"
-                  name="area"
-                  placeholder="Área de atuação"
-                />
+                  <Input
+                    name="lat"
+                    value={enterprise.lat || ''}
+                    onChange={(e) => setField('lat', e.target.value)}
+                    placeholder="-23.5505"
+                  />
+                </Field>
+                <Field>
+                  <span>
+                    <FiCompass
+                      style={{
+                        display: 'inline',
+                        marginRight: 4,
+                        verticalAlign: '-2px',
+                      }}
+                    />
+                    Longitude
+                  </span>
+                  <Input
+                    name="long"
+                    value={enterprise.long || ''}
+                    onChange={(e) => setField('long', e.target.value)}
+                    placeholder="-46.6333"
+                  />
+                </Field>
               </InlineGrid>
+            </FormPanel>
+          </Panel>
 
-              <InputDefault
-                onChange={(e) =>
-                  setEnterpriseData({
-                    ...enterpriseData,
-                    [e.target.name]: e.target.value,
-                  })
-                }
-                value={enterpriseData.address}
-                type="text"
-                name="address"
-                placeholder="Endereço"
-              />
+          <Panel>
+            <PanelHeader>
+              <PanelTitleWrap>
+                <h2>Identidade visual</h2>
+                <p>
+                  Cores usadas no app e no site público. A primária é o fundo
+                  principal, a secundária destaca botões e badges.
+                </p>
+              </PanelTitleWrap>
+            </PanelHeader>
 
+            <FormPanel>
               <InlineGrid>
-                <InputDefault
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  value={enterpriseData.primary_color}
-                  type="color"
-                  name="primary_color"
-                />
-
-                <InputDefault
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  value={enterpriseData.secondary_color}
-                  type="color"
-                  name="secondary_color"
-                />
+                <Field>
+                  <span>
+                    <FiDroplet
+                      style={{
+                        display: 'inline',
+                        marginRight: 4,
+                        verticalAlign: '-2px',
+                      }}
+                    />
+                    Cor primária
+                  </span>
+                  <ColorRow>
+                    <ColorSwatch
+                      type="color"
+                      value={enterprise.primary_color || '#28262e'}
+                      onChange={(e) =>
+                        setField('primary_color', e.target.value)
+                      }
+                    />
+                    <Input
+                      name="primary_color"
+                      value={enterprise.primary_color || ''}
+                      onChange={(e) =>
+                        setField('primary_color', e.target.value)
+                      }
+                      placeholder="#28262e"
+                    />
+                  </ColorRow>
+                </Field>
+                <Field>
+                  <span>
+                    <FiDroplet
+                      style={{
+                        display: 'inline',
+                        marginRight: 4,
+                        verticalAlign: '-2px',
+                      }}
+                    />
+                    Cor secundária
+                  </span>
+                  <ColorRow>
+                    <ColorSwatch
+                      type="color"
+                      value={enterprise.secondary_color || '#ff9000'}
+                      onChange={(e) =>
+                        setField('secondary_color', e.target.value)
+                      }
+                    />
+                    <Input
+                      name="secondary_color"
+                      value={enterprise.secondary_color || ''}
+                      onChange={(e) =>
+                        setField('secondary_color', e.target.value)
+                      }
+                      placeholder="#ff9000"
+                    />
+                  </ColorRow>
+                </Field>
               </InlineGrid>
+            </FormPanel>
+          </Panel>
 
+          <Panel>
+            <PanelHeader>
+              <PanelTitleWrap>
+                <h2>Acesso</h2>
+                <p>Controle se qualquer usuário pode seguir/agendar direto.</p>
+              </PanelTitleWrap>
+            </PanelHeader>
+
+            <FormPanel>
               <ToggleRow>
-                Perfil fechado: você controla quem pode se agendar
+                <ToggleContent>
+                  <strong>Perfil fechado</strong>
+                  <span>
+                    Novos clientes precisam da sua aprovação antes de agendar.
+                  </span>
+                </ToggleContent>
                 <Switch
-                  onChange={(e) =>
-                    setEnterpriseData({
-                      ...enterpriseData,
-                      [e.target.name]: e.target.checked,
-                    })
-                  }
                   name="isPrivate"
-                  checked={!!enterpriseData.isPrivate}
+                  checked={!!enterprise.isPrivate}
+                  onChange={(e) => setField('isPrivate', e.target.checked)}
                 />
               </ToggleRow>
             </FormPanel>
@@ -304,49 +488,89 @@ const EnterpriseProfile: React.FC = () => {
           <Panel>
             <PanelHeader>
               <PanelTitleWrap>
-                <h2>Prévia da experiência</h2>
+                <h2>Prévia no app</h2>
                 <p>
-                  Veja como a identidade da empresa aparece no app do cliente.
+                  Como o cliente enxerga a identidade da sua empresa hoje.
                 </p>
               </PanelTitleWrap>
             </PanelHeader>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+            <div style={{ marginTop: 22 }}>
               <PreviewPhone>
                 <PreviewScreen
-                  primary={enterpriseData?.primary_color || '#28262e'}
-                  secondary={enterpriseData?.secondary_color || '#ff9000'}
+                  primary={enterprise.primary_color || '#28262e'}
+                  secondary={enterprise.secondary_color || '#ff9000'}
                 >
-                  <PreviewHeader secondary={enterpriseData?.secondary_color || '#ff9000'}>
-                    <FiArrowLeft />
+                  <PreviewHeader
+                    secondary={enterprise.secondary_color || '#ff9000'}
+                  >
+                    <FiArrowLeft color="#fff" />
                     <img
-                      src={enterpriseData?.logo_url || EnterpriseImg}
-                      alt="NaHora"
+                      src={enterprise.logo_url || EnterpriseImg}
+                      alt="Logo"
                     />
                   </PreviewHeader>
-                  <PreviewBody primary={enterpriseData?.primary_color || '#28262e'}>
-                    <PreviewBadge>
-                      <FiEye style={{ marginRight: 8 }} />
+                  <PreviewBody>
+                    <SectionLabel style={{ color: '#fff' }}>
+                      <FiEye
+                        style={{
+                          display: 'inline',
+                          marginRight: 6,
+                          verticalAlign: '-2px',
+                        }}
+                      />
                       Prévia em tempo real
-                    </PreviewBadge>
-                    <h3 style={{ color: '#fff', fontSize: '1.6rem' }}>
-                      {enterpriseData?.name || 'Sua empresa'}
+                    </SectionLabel>
+                    <h3 style={{ color: '#fff', fontSize: '1.4rem' }}>
+                      {enterprise.name || 'Sua empresa'}
                     </h3>
-                    <p style={{ color: 'rgba(255,255,255,0.78)', lineHeight: 1.7 }}>
-                      {enterpriseData?.area || 'Área de atuação'}
-                    </p>
-                    <Button
-                      primaryColor={enterpriseData?.primary_color || '#28262e'}
-                      secondaryColor={enterpriseData?.secondary_color || '#ff9000'}
+                    <div style={{ color: 'rgba(255,255,255,0.72)' }}>
+                      {enterprise.area || 'Área de atuação'}
+                    </div>
+                    {enterprise.address && (
+                      <div
+                        style={{
+                          color: 'rgba(255,255,255,0.6)',
+                          fontSize: '0.86rem',
+                        }}
+                      >
+                        <FiMapPin
+                          style={{
+                            display: 'inline',
+                            marginRight: 6,
+                            verticalAlign: '-2px',
+                          }}
+                        />
+                        {enterprise.address}
+                      </div>
+                    )}
+                    {(enterprise.open_hour || enterprise.close_hour) && (
+                      <div
+                        style={{
+                          color: 'rgba(255,255,255,0.6)',
+                          fontSize: '0.86rem',
+                        }}
+                      >
+                        <FiClock
+                          style={{
+                            display: 'inline',
+                            marginRight: 6,
+                            verticalAlign: '-2px',
+                          }}
+                        />
+                        {enterprise.open_hour || '--:--'} —{' '}
+                        {enterprise.close_hour || '--:--'}
+                      </div>
+                    )}
+                    <PreviewButton
+                      secondary={enterprise.secondary_color || '#ff9000'}
                     >
                       Reservar horário
-                    </Button>
+                    </PreviewButton>
                     <StatusPill
-                      tone={enterpriseData?.isPrivate ? 'warning' : 'success'}
+                      tone={enterprise.isPrivate ? 'warning' : 'success'}
                     >
-                      {enterpriseData?.isPrivate
-                        ? 'Acesso controlado'
-                        : 'Acesso aberto'}
+                      {enterprise.isPrivate ? 'Acesso controlado' : 'Acesso aberto'}
                     </StatusPill>
                   </PreviewBody>
                 </PreviewScreen>

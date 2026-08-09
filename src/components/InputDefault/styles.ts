@@ -11,12 +11,12 @@ interface ContainerProps {
 
 export const Container = styled.div<ContainerProps>`
   background: #ffffff;
-  border-radius: 18px;
-  border: 1px solid rgba(12, 23, 41, 0.08);
+  border-radius: 10px;
+  border: 1px solid ${(props) => (props.isFocused ? '#ff9000' : 'rgba(11, 11, 11, 0.15)')};
   padding: 16px;
   width: ${(props) => (props.maxWidth ? props.maxWidth : '100%')};
-  color: #7c91af;
-  box-shadow: 0 18px 40px rgba(7, 17, 31, 0.08);
+  color: #62748d;
+  transition: border-color 120ms ease;
 
   display: flex;
   align-items: center;

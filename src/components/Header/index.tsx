@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { FiCompass } from 'react-icons/fi';
+import { FiBriefcase } from 'react-icons/fi';
 import { Header, HeaderContent, Brand, Profile, ProfileText } from './styles';
 import logoImg from '../../assets/nahora.png';
 import { useAuth } from '../../hooks/auth';
@@ -11,25 +11,30 @@ import Avatar from '../Avatar';
 function HeaderMenu() {
   const { user } = useAuth();
   const history = useHistory();
+  const currentEnterprise = JSON.parse(
+    localStorage.getItem('@NaHora:myEnterprise') || '{}',
+  );
 
   return (
     <Header>
       <HeaderContent>
-        <Brand onClick={() => history.push(routes.enterprise)}>
+        <Brand onClick={() => history.push(routes.adminDashboard)}>
           <img src={logoImg} alt="NaHora" />
           <div>
             <span>NaHora Admin</span>
-            <strong>Operacao, agenda e crescimento</strong>
+            <strong>Painel da sua empresa</strong>
           </div>
         </Brand>
 
-        <Profile>
-          <FiCompass />
-          <ProfileText>
-            <span>Area ativa</span>
-            <Link to={routes.enterprise}>Empresas</Link>
-          </ProfileText>
-        </Profile>
+        {currentEnterprise?.name && (
+          <Profile className="header-enterprise">
+            <FiBriefcase />
+            <ProfileText>
+              <span>Empresa</span>
+              <Link to={routes.enterpriseProfile}>{currentEnterprise.name}</Link>
+            </ProfileText>
+          </Profile>
+        )}
 
         <Profile>
           <Avatar

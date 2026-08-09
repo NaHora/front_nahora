@@ -76,7 +76,7 @@ const SignUp: React.FC = () => {
         });
 
         await signInSocial({
-          email: data.email,
+          email: data.email?.trim().toLowerCase(),
           password: data.password,
           name: data.name,
           celphone: data.celphone,
@@ -117,7 +117,7 @@ const SignUp: React.FC = () => {
 
   const loginFacebook = useCallback((facebook: any) => {
     setValues({
-      email: facebook?.email,
+      email: facebook?.email?.trim().toLowerCase(),
       password: '',
       name: facebook?.name,
       photoUrl: facebook?.picture?.data?.url,
@@ -126,7 +126,7 @@ const SignUp: React.FC = () => {
 
   const responseGoogle = useCallback((response: any) => {
     setValues({
-      email: response?.profileObj?.email,
+      email: response?.profileObj?.email?.trim().toLowerCase(),
       password: '',
       name: response?.profileObj?.name,
       photoUrl: response?.profileObj?.imageUrl,
@@ -159,6 +159,10 @@ const SignUp: React.FC = () => {
               name="email"
               type="email"
               placeholder="E-mail"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="email"
             />
             <Input
               icon={FiLock}
