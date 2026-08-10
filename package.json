@@ -106,11 +106,16 @@
     "react-test-renderer": "^17.0.2"
   },
   "overrides": {
-    "terser-webpack-plugin": {
-      "ajv": "^8.17.1",
-      "ajv-keywords": "^5.1.0"
-    },
+    "ajv": "^8.17.1",
     "fork-ts-checker-webpack-plugin": {
+      "ajv": "^6.12.6",
+      "ajv-keywords": "^3.5.2"
+    },
+    "babel-loader": {
+      "ajv": "^6.12.6",
+      "ajv-keywords": "^3.5.2"
+    },
+    "file-loader": {
       "ajv": "^6.12.6",
       "ajv-keywords": "^3.5.2"
     }
