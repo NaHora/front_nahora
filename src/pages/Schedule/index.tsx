@@ -1,5 +1,11 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { FiCalendar, FiClock, FiMapPin, FiTrash2, FiUsers } from 'react-icons/fi';
+import {
+  FiCalendar,
+  FiClock,
+  FiMapPin,
+  FiTrash2,
+  FiUsers,
+} from 'react-icons/fi';
 import { format, isFuture } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { useHistory } from 'react-router-dom';
@@ -156,7 +162,12 @@ const Schedule: React.FC = () => {
           <span>Ultimos atendimentos</span>
         </SummaryCard>
         <SummaryCard>
-          <strong>{allAppointments.filter((item) => isFuture(new Date(item.date))).length}</strong>
+          <strong>
+            {
+              allAppointments.filter((item) => isFuture(new Date(item.date)))
+                .length
+            }
+          </strong>
           <span>Compromissos ainda ativos</span>
         </SummaryCard>
       </SummaryGrid>
@@ -223,26 +234,28 @@ const Schedule: React.FC = () => {
                 </InlineAction>
 
                 <ParticipantList>
-                  {appointment.service.appointments.map((currentAppointment) => (
-                    <li key={currentAppointment.id}>
-                      <Avatar
-                        width={38}
-                        height={38}
-                        name={currentAppointment.user.name}
-                        isPrivate={
-                          showRealNames
-                            ? false
-                            : currentAppointment.user.isPrivate
-                        }
-                        avatarUrl={currentAppointment.user.avatar_url}
-                      />
-                      <span>
-                        {!showRealNames && currentAppointment.user.isPrivate
-                          ? 'Anonimo'
-                          : currentAppointment.user.name}
-                      </span>
-                    </li>
-                  ))}
+                  {appointment.service.appointments.map(
+                    (currentAppointment) => (
+                      <li key={currentAppointment.id}>
+                        <Avatar
+                          width={38}
+                          height={38}
+                          name={currentAppointment.user.name}
+                          isPrivate={
+                            showRealNames
+                              ? false
+                              : currentAppointment.user.isPrivate
+                          }
+                          avatarUrl={currentAppointment.user.avatar_url}
+                        />
+                        <span>
+                          {!showRealNames && currentAppointment.user.isPrivate
+                            ? 'Anonimo'
+                            : currentAppointment.user.name}
+                        </span>
+                      </li>
+                    ),
+                  )}
                 </ParticipantList>
               </ScheduleCard>
             ))}
@@ -295,22 +308,24 @@ const Schedule: React.FC = () => {
                 </div>
 
                 <ParticipantList>
-                  {appointment.service.appointments.map((currentAppointment) => (
-                    <li key={currentAppointment.id}>
-                      <Avatar
-                        width={34}
-                        height={34}
-                        name={currentAppointment.user.name}
-                        isPrivate={currentAppointment.user.isPrivate}
-                        avatarUrl={currentAppointment.user.avatar_url}
-                      />
-                      <span>
-                        {currentAppointment.user.isPrivate
-                          ? 'Anonimo'
-                          : currentAppointment.user.name}
-                      </span>
-                    </li>
-                  ))}
+                  {appointment.service.appointments.map(
+                    (currentAppointment) => (
+                      <li key={currentAppointment.id}>
+                        <Avatar
+                          width={34}
+                          height={34}
+                          name={currentAppointment.user.name}
+                          isPrivate={currentAppointment.user.isPrivate}
+                          avatarUrl={currentAppointment.user.avatar_url}
+                        />
+                        <span>
+                          {currentAppointment.user.isPrivate
+                            ? 'Anonimo'
+                            : currentAppointment.user.name}
+                        </span>
+                      </li>
+                    ),
+                  )}
                 </ParticipantList>
               </ScheduleCard>
             ))}

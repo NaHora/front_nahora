@@ -136,9 +136,7 @@ const AdminDashboard: React.FC = () => {
         start_date: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
         finish_date: format(endOfMonth(new Date()), 'yyyy-MM-dd'),
       });
-      setBalance(
-        response.data?.balance || { income: 0, outcome: 0, total: 0 },
-      );
+      setBalance(response.data?.balance || { income: 0, outcome: 0, total: 0 });
     } catch {}
   }, []);
 
