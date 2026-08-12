@@ -718,11 +718,13 @@ const Dashboard: React.FC = () => {
                         width={38}
                         height={38}
                         name={appointment.user.name}
-                        isPrivate={appointment.user.isPrivate}
+                        isPrivate={
+                          ownerEnterprise ? false : appointment.user.isPrivate
+                        }
                         avatarUrl={appointment.user.avatar_url}
                       />
                       <span>
-                        {appointment.user.isPrivate
+                        {!ownerEnterprise && appointment.user.isPrivate
                           ? 'Anonimo'
                           : appointment.user.name}
                       </span>

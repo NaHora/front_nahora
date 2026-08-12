@@ -2,7 +2,14 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import NumberFormat from 'react-number-format';
 import { Switch } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
-import { FiCalendar, FiClock, FiPlus, FiTrash2 } from 'react-icons/fi';
+import {
+  FiCalendar,
+  FiClock,
+  FiPlus,
+  FiRefreshCw,
+  FiTrash2,
+  FiUsers,
+} from 'react-icons/fi';
 import AdminShell from '../../../components/AdminShell';
 import Button from '../../../components/Button';
 import InputDefault from '../../../components/InputDefault';
@@ -15,6 +22,7 @@ import {
   MetricCard,
   Grid,
   Column,
+  FullWidth,
   Panel,
   PanelHeader,
   PanelTitleWrap,
@@ -33,6 +41,7 @@ import {
   ActionRow,
   ToggleRow,
   StatusPill,
+  IconButton,
 } from '../shared';
 
 interface Category {
@@ -41,11 +50,12 @@ interface Category {
 }
 
 interface Service {
+  id?: string;
   start_hour: string;
   category_id: string;
   capacity: number;
   day_week: number;
-  pending_scheduling?: boolean;
+  pending_scheduling?: boolean | number;
   hour_to_schedule: number;
 }
 
@@ -75,6 +85,14 @@ const EnterpriseSchedule: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectectedCategory, setSelectectedCategory] = useState<string[]>([]);
   const [selectectedDays, setSelectectedDays] = useState<number[]>([]);
+
+  // Visualização da grade atual (pesquisa isolada)
+  const [gridCategory, setGridCategory] = useState<string>('');
+  const [gridDay, setGridDay] = useState<number>(1);
+  const [gridServices, setGridServices] = useState<Service[]>([]);
+  const [gridLoading, setGridLoading] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
+  const [openDeleteService, setOpenDeleteService] = useState(false);
 
   const getCategories = useCallback(async () => {
     api
@@ -236,6 +254,61 @@ const EnterpriseSchedule: React.FC = () => {
     addToast,
   ]);
 
+  const loadGridServices = useCallback(async () => {
+    if (!gridCategory) {
+      setGridServices([]);
+      return;
+    }
+    setGridLoading(true);
+    try {
+      const response = await api.get(
+        `/services/category/${gridCategory}/day/${gridDay}`,
+      );
+      const list: Service[] = response.data || [];
+      // ordena por horário
+      list.sort((a, b) =>
+        (a.start_hour || '').localeCompare(b.start_hour || ''),
+      );
+      setGridServices(list);
+    } catch {
+      setGridServices([]);
+    } finally {
+      setGridLoading(false);
+    }
+  }, [gridCategory, gridDay]);
+
+  useEffect(() => {
+    // seleciona primeira categoria automaticamente quando carregar
+    if (!gridCategory && categories.length > 0) {
+      setGridCategory(categories[0].id);
+    }
+  }, [categories, gridCategory]);
+
+  useEffect(() => {
+    loadGridServices();
+  }, [loadGridServices]);
+
+  const confirmDeleteService = useCallback(async () => {
+    if (!serviceToDelete?.id) {
+      setOpenDeleteService(false);
+      return;
+    }
+    try {
+      await api.delete(`/services/${serviceToDelete.id}`);
+      addToast({ type: 'success', title: 'Horário removido.' });
+      setOpenDeleteService(false);
+      setServiceToDelete(null);
+      loadGridServices();
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title:
+          err?.response?.data?.message ||
+          'Erro ao remover horário. Se houver agendamentos vinculados, cancele-os primeiro.',
+      });
+    }
+  }, [addToast, loadGridServices, serviceToDelete]);
+
   const scheduleBatchSize = useMemo(
     () => selectectedCategory.length * selectectedDays.length,
     [selectectedCategory.length, selectectedDays.length],
@@ -259,6 +332,18 @@ const EnterpriseSchedule: React.FC = () => {
         onSubmit={deleteCategory}
         setOpenModal={setOpenDeleteCategory}
         openModal={openDeleteCategory}
+      />
+
+      <DialogModal
+        title="Remover este horário?"
+        text={
+          serviceToDelete
+            ? `Horário ${serviceToDelete.start_hour} será removido da grade. Todos os agendamentos vinculados a ele também serão cancelados.`
+            : 'Confirmar remoção do horário.'
+        }
+        onSubmit={confirmDeleteService}
+        setOpenModal={setOpenDeleteService}
+        openModal={openDeleteService}
       />
 
       <Metrics>
@@ -525,6 +610,125 @@ const EnterpriseSchedule: React.FC = () => {
           </Panel>
         </Column>
       </Grid>
+
+      <FullWidth>
+        <Panel>
+          <PanelHeader>
+            <PanelTitleWrap>
+              <h2>Grade atual</h2>
+              <p>
+                Horários já publicados. Escolha categoria + dia para inspecionar
+                e remover o que não é mais válido. Pra editar um horário,
+                remova e cadastre de novo no lote acima.
+              </p>
+            </PanelTitleWrap>
+            <SoftAction type="button" onClick={loadGridServices}>
+              <FiRefreshCw />
+              Atualizar
+            </SoftAction>
+          </PanelHeader>
+
+          <FormPanel>
+            <Field>
+              Categoria
+              <ChipRow>
+                {categories.length === 0 ? (
+                  <EmptyState style={{ marginTop: 0 }}>
+                    Cadastre uma categoria acima para visualizar sua grade.
+                  </EmptyState>
+                ) : (
+                  categories.map((category) => (
+                    <Chip
+                      key={category.id}
+                      active={gridCategory === category.id}
+                      onClick={() => setGridCategory(category.id)}
+                    >
+                      {category.name}
+                    </Chip>
+                  ))
+                )}
+              </ChipRow>
+            </Field>
+
+            <Field>
+              Dia da semana
+              <ChipRow>
+                {weekDays.map((day) => (
+                  <Chip
+                    key={day.id}
+                    active={gridDay === day.id}
+                    onClick={() => setGridDay(day.id)}
+                  >
+                    {day.label}
+                  </Chip>
+                ))}
+              </ChipRow>
+            </Field>
+          </FormPanel>
+
+          {gridLoading ? (
+            <EmptyState>Carregando grade...</EmptyState>
+          ) : gridServices.length === 0 ? (
+            <EmptyState>
+              Nenhum horário publicado para essa combinação. Use o painel acima
+              pra criar.
+            </EmptyState>
+          ) : (
+            <List>
+              {gridServices.map((service) => (
+                <ListCard key={service.id}>
+                  <ListTop>
+                    <div>
+                      <ListTitle>
+                        <FiClock
+                          style={{
+                            display: 'inline',
+                            marginRight: 6,
+                            verticalAlign: '-3px',
+                            color: '#ff9000',
+                          }}
+                        />
+                        {service.start_hour}
+                      </ListTitle>
+                      <ListText>
+                        <FiUsers
+                          style={{
+                            display: 'inline',
+                            marginRight: 6,
+                            verticalAlign: '-3px',
+                          }}
+                        />
+                        {service.capacity} vaga(s) &nbsp;·&nbsp;{' '}
+                        {service.hour_to_schedule} min de antecedência
+                        {service.pending_scheduling ? (
+                          <>
+                            {' '}
+                            &nbsp;·&nbsp;{' '}
+                            <StatusPill tone="warning">
+                              permite pendente
+                            </StatusPill>
+                          </>
+                        ) : null}
+                      </ListText>
+                    </div>
+                    <IconButton
+                      type="button"
+                      variant="danger"
+                      title="Remover horário"
+                      onClick={() => {
+                        setServiceToDelete(service);
+                        setOpenDeleteService(true);
+                      }}
+                    >
+                      <FiTrash2 />
+                    </IconButton>
+                  </ListTop>
+                </ListCard>
+              ))}
+            </List>
+          )}
+        </Panel>
+      </FullWidth>
     </AdminShell>
   );
 };

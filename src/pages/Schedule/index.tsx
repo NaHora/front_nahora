@@ -10,6 +10,7 @@ import Button from '../../components/Button';
 import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
 import { useLoad } from '../../hooks/load';
+import { useAuth } from '../../hooks/auth';
 import { routes } from '../../routes';
 import {
   EmptyState,
@@ -65,6 +66,9 @@ const Schedule: React.FC = () => {
   const toast = useToast();
   const history = useHistory();
   const { start, stop } = useLoad();
+  const { user } = useAuth();
+  const isOwner = thisEnterprise?.owner_id === user?.id;
+  const showRealNames = isOwner;
 
   const [loading, setLoading] = useState(false);
   const [myAppointments, setMyAppointments] = useState<ListAppointment>();
@@ -225,11 +229,15 @@ const Schedule: React.FC = () => {
                         width={38}
                         height={38}
                         name={currentAppointment.user.name}
-                        isPrivate={currentAppointment.user.isPrivate}
+                        isPrivate={
+                          showRealNames
+                            ? false
+                            : currentAppointment.user.isPrivate
+                        }
                         avatarUrl={currentAppointment.user.avatar_url}
                       />
                       <span>
-                        {currentAppointment.user.isPrivate
+                        {!showRealNames && currentAppointment.user.isPrivate
                           ? 'Anonimo'
                           : currentAppointment.user.name}
                       </span>

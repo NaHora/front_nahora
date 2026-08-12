@@ -2,9 +2,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FiAlertTriangle,
   FiArrowRight,
+  FiCalendar,
   FiCheck,
   FiClock,
   FiCreditCard,
+  FiEdit3,
   FiMail,
   FiPhone,
   FiPlus,
@@ -50,6 +52,11 @@ import {
   MetricCard,
   MetricEyebrow,
   Metrics,
+  ModalActions,
+  ModalButton,
+  ModalCard,
+  ModalDateInput,
+  ModalOverlay,
   NativeSelect,
   Panel,
   PanelHeader,
@@ -105,6 +112,11 @@ const AdminClients: React.FC = () => {
   const [invite, setInvite] = useState({ name: '', email: '', celphone: '' });
   const [openDialog, setOpenDialog] = useState(false);
   const [inviteToDelete, setInviteToDelete] = useState<string | null>(null);
+  const [expirationEdit, setExpirationEdit] = useState<{
+    invite: Invite | null;
+    date: string;
+  }>({ invite: null, date: '' });
+  const [savingExpiration, setSavingExpiration] = useState(false);
 
   const loadAccepted = useCallback(async () => {
     try {
@@ -232,6 +244,49 @@ const AdminClients: React.FC = () => {
     },
     [loadAccepted, toast],
   );
+
+  const openExpirationEdit = useCallback((invite: Invite) => {
+    if (!invite.currentPlan) return;
+    const raw = new Date(invite.currentPlan.expiration_at);
+    const iso = Number.isNaN(raw.getTime())
+      ? ''
+      : format(raw, 'yyyy-MM-dd');
+    setExpirationEdit({ invite, date: iso });
+  }, []);
+
+  const closeExpirationEdit = useCallback(() => {
+    if (savingExpiration) return;
+    setExpirationEdit({ invite: null, date: '' });
+  }, [savingExpiration]);
+
+  const saveExpiration = useCallback(async () => {
+    if (!expirationEdit.invite?.currentPlan?.id || !expirationEdit.date) {
+      toast.addToast({
+        type: 'error',
+        title: 'Escolha uma data válida.',
+      });
+      return;
+    }
+    setSavingExpiration(true);
+    try {
+      await api.put('/plans/expiration', {
+        user_plan_id: expirationEdit.invite.currentPlan.id,
+        expiration_at: expirationEdit.date,
+      });
+      toast.addToast({ type: 'success', title: 'Vigência atualizada.' });
+      setExpirationEdit({ invite: null, date: '' });
+      loadAccepted();
+    } catch (err: any) {
+      toast.addToast({
+        type: 'error',
+        title:
+          err?.response?.data?.message ||
+          'Erro ao atualizar a vigência do plano.',
+      });
+    } finally {
+      setSavingExpiration(false);
+    }
+  }, [expirationEdit, loadAccepted, toast]);
 
   const cancelPlan = useCallback(
     async (activePlanId: string) => {
@@ -524,17 +579,26 @@ const AdminClients: React.FC = () => {
                           <FiCheck />
                         </IconButton>
                         {item.currentPlan && (
-                          <IconButton
-                            type="button"
-                            variant="danger"
-                            title="Cancelar plano atual"
-                            onClick={() =>
-                              item.currentPlan &&
-                              cancelPlan(item.currentPlan.id)
-                            }
-                          >
-                            <FiX />
-                          </IconButton>
+                          <>
+                            <IconButton
+                              type="button"
+                              title="Editar data de vigência"
+                              onClick={() => openExpirationEdit(item)}
+                            >
+                              <FiCalendar />
+                            </IconButton>
+                            <IconButton
+                              type="button"
+                              variant="danger"
+                              title="Cancelar plano atual"
+                              onClick={() =>
+                                item.currentPlan &&
+                                cancelPlan(item.currentPlan.id)
+                              }
+                            >
+                              <FiX />
+                            </IconButton>
+                          </>
                         )}
                       </PlanControls>
                       <DetailLink
@@ -674,6 +738,60 @@ const AdminClients: React.FC = () => {
           </Panel>
         </Column>
       </Layout>
+
+      {expirationEdit.invite && (
+        <>
+          <ModalOverlay
+            type="button"
+            aria-label="Fechar"
+            onClick={closeExpirationEdit}
+          />
+          <ModalCard>
+            <h3>
+              <FiEdit3
+                style={{
+                  display: 'inline',
+                  marginRight: 8,
+                  verticalAlign: '-3px',
+                  color: '#ff9000',
+                }}
+              />
+              Editar vigência
+            </h3>
+            <p>
+              Cliente: <strong>{expirationEdit.invite.user.name}</strong>
+            </p>
+            <ModalDateInput
+              type="date"
+              value={expirationEdit.date}
+              onChange={(e) =>
+                setExpirationEdit({
+                  ...expirationEdit,
+                  date: e.target.value,
+                })
+              }
+            />
+            <ModalActions>
+              <ModalButton
+                type="button"
+                variant="ghost"
+                onClick={closeExpirationEdit}
+                disabled={savingExpiration}
+              >
+                Cancelar
+              </ModalButton>
+              <ModalButton
+                type="button"
+                variant="primary"
+                onClick={saveExpiration}
+                disabled={savingExpiration || !expirationEdit.date}
+              >
+                {savingExpiration ? 'Salvando...' : 'Salvar nova data'}
+              </ModalButton>
+            </ModalActions>
+          </ModalCard>
+        </>
+      )}
     </AdminShell>
   );
 };

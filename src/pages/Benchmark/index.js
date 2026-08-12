@@ -1,32 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
-
-import { format, getDate, getDay, getMonth, getYear } from 'date-fns';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
-
-import { Container, SelectDefault } from './styles';
+import NumberFormat from 'react-number-format';
+import { Container } from './styles';
 import 'react-day-picker/lib/style.css';
-
 import { useToast } from '../../hooks/toast';
-
 import { useAuth } from '../../hooks/auth';
-
 import { useLoad } from '../../hooks/load';
-
 import EnterpriseHeader from '../../components/EnterpriseHeader';
-
 import InputDefault from '../../components/InputDefault';
 import { routes } from '../../routes';
 import api from '../../services/api';
 import Button from '../../components/Button';
-import NumberFormat from 'react-number-format';
-import { Switch } from '@material-ui/core';
+import {
+  getPrMovements,
+  parseTimeInput,
+  centisecondsToInputDigits,
+} from '../../config/prMovements';
 
 const Benchmark = () => {
   const toast = useToast();
   const { user } = useAuth();
   const history = useHistory();
-  // const { socket } = useSocket();
   const { start, stop } = useLoad();
 
   useEffect(() => {
@@ -40,95 +34,66 @@ const Benchmark = () => {
   }, []);
 
   const thisEnterprise = JSON.parse(localStorage.getItem('enterprise') || '{}');
-  const owner_enterprise = thisEnterprise.owner_id === user.id;
 
   const [primaryColor, setPrimaryColor] = useState('#28262e');
-
   const [secondaryColor, setSecondaryColor] = useState('#ff9000');
   const [values, setValues] = useState({});
-  const [libras, setLibras] = useState(true);
+
+  const movements = useMemo(
+    () => getPrMovements(thisEnterprise?.area),
+    [thisEnterprise?.area],
+  );
+
+  const isSwimming = movements.length > 0 && movements[0].unit === 'time';
 
   const getBenchmark = useCallback(async () => {
     try {
       const response = await api.get(
         `/training/benchmark/enterprise/${thisEnterprise.id}`,
       );
-
-      // kgValues['backsquat'] = response.data['backsquat'] * 0.453592;
-      // kgValues['benchpress'] = response.data['benchpress'] * 0.453592;
-      // kgValues['deadlift'] = response.data['deadlift'] * 0.453592;
-      // kgValues['frontsquat'] = response.data['frontsquat'] * 0.453592;
-      // kgValues['overheadsquat'] = response.data['overheadsquat'] * 0.453592;
-      // kgValues['maxwallball'] = response.data['maxwallball'] * 0.453592;
-      // kgValues['pushpress'] = response.data['pushpress'] * 0.453592;
-      // kgValues['shoulderpress'] = response.data['shoulderpress'] * 0.453592;
-      // kgValues['thruster'] = response.data['thruster'] * 0.453592;
-      // kgValues['clean'] = response.data['clean'] * 0.453592;
-      // kgValues['cleanjerk'] = response.data['cleanjerk'] * 0.453592;
-      // kgValues['cluster'] = response.data['cluster'] * 0.453592;
-      // kgValues['hangpowerclean'] = response.data['hangpowerclean'] * 0.453592;
-      // kgValues['hangpowersnatch'] = response.data['hangpowersnatch'] * 0.453592;
-      // kgValues['handsquatsnatch'] = response.data['handsquatsnatch'] * 0.453592;
-      // kgValues['hangsquatclean'] = response.data['hangsquatclean'] * 0.453592;
-      // kgValues['powerclean'] = response.data['powerclean'] * 0.453592;
-      // kgValues['powersnatch'] = response.data['powersnatch'] * 0.453592;
-      // kgValues['pushjerk'] = response.data['pushjerk'] * 0.453592;
-      // kgValues['snatch'] = response.data['snatch'] * 0.453592;
-      // kgValues['snatchbalance'] = response.data['snatchbalance'] * 0.453592;
-      // kgValues['splitjerk'] = response.data['splitjerk'] * 0.453592;
-      // kgValues['squatclean'] = response.data['squatclean'] * 0.453592;
-      // kgValues['squatsnatch'] = response.data['squatsnatch'] * 0.453592;
-
-      setValues(response.data);
+      setValues(response.data || {});
     } catch {}
-  }, [thisEnterprise]);
+  }, [thisEnterprise.id]);
 
   useEffect(() => {
     getBenchmark();
-  }, []);
+  }, [getBenchmark]);
 
   useEffect(() => {
     setPrimaryColor(thisEnterprise.primary_color);
     setSecondaryColor(thisEnterprise.secondary_color);
-  }, []);
+  }, [thisEnterprise.primary_color, thisEnterprise.secondary_color]);
 
   const handleBenchmark = useCallback(async () => {
     start();
     try {
-      delete values.id;
-      delete values.updated_at;
-      delete values.created_at;
-      delete values.user_id;
+      const cleaned = { ...values };
+      delete cleaned.id;
+      delete cleaned.updated_at;
+      delete cleaned.created_at;
+      delete cleaned.user_id;
 
       const body = {
         enterprise_id: thisEnterprise.id,
-        ...values,
+        ...cleaned,
       };
       await api.post(`/training/benchmark`, body);
       getBenchmark();
       toast.addToast({ type: 'success', title: 'Pr adicionado!' });
     } catch (err) {
-      if (err.response) {
-        toast.addToast({
-          type: 'error',
-          title:
-            err.response.data.message ||
-            'Ocorreu um erro ao adicionar o pr, tente novamente',
-        });
-      } else {
-        toast.addToast({
-          type: 'error',
-          title: 'Ocorreu um erro ao adicionar o pr, tente novamente',
-        });
-      }
+      toast.addToast({
+        type: 'error',
+        title:
+          err?.response?.data?.message ||
+          'Ocorreu um erro ao adicionar o pr, tente novamente',
+      });
     } finally {
       stop();
     }
-  }, [thisEnterprise, values]);
+  }, [thisEnterprise.id, values, getBenchmark, toast, start, stop]);
 
-  // useEffect(()=>{
-
-  // },[libras])
+  const setField = (key, value) =>
+    setValues((prev) => ({ ...prev, [key]: value }));
 
   return (
     <Container
@@ -143,554 +108,65 @@ const Benchmark = () => {
         logo_url={thisEnterprise.logo_url}
       />
       <div>
-        <h2>Adicione seu pr:</h2>
-        {/* <div style={{ display: 'flex', alignItems: 'center' }}>
-          <h3>Kg</h3>
-          <Switch
-            onChange={(e) => setLibras(e.target.checked)}
-            name="libras"
-            inputProps={{ 'aria-label': 'secondary checkbox' }}
-            checked={!!libras}
-          />
-          <h3>Libras</h3>
-        </div> */}
+        <h2>{isSwimming ? 'Adicione seu tempo:' : 'Adicione seu pr:'}</h2>
         <main>
-          <label htmlFor="">
-            Back Squat
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="backsquat"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Back Squat"
-              thousandSeparator="."
-              type="text"
-              value={values.backsquat}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  backsquat: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Bench Press
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="benchpress"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Bench Press"
-              thousandSeparator="."
-              type="text"
-              value={values.benchpress}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  benchpress: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Deadlift
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="deadlift"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Deadlift"
-              thousandSeparator="."
-              type="text"
-              value={values.deadlift}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  deadlift: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Front Squat
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="frontsquat"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Front Squat"
-              thousandSeparator="."
-              type="text"
-              value={values.frontsquat}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  frontsquat: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Overhead Squat
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="overheadsquat"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Overhead Squat"
-              thousandSeparator="."
-              type="text"
-              value={values.overheadsquat}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  overheadsquat: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Push Press
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="pushpress"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Push Press"
-              thousandSeparator="."
-              type="text"
-              value={values.pushpress}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  pushpress: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Shouder Press
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="shoulderpress"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Shouder Press"
-              thousandSeparator="."
-              type="text"
-              value={values.shoulderpress}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  shoulderpress: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Thruster
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="thruster"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Thruster"
-              thousandSeparator="."
-              type="text"
-              value={values.thruster}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  thruster: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Clean
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="clean"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Clean"
-              thousandSeparator="."
-              type="text"
-              value={values.clean}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  clean: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Clean & Jerk
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="cleanjerk"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Clean & Jerk"
-              thousandSeparator="."
-              type="text"
-              value={values.cleanjerk}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  cleanjerk: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Cluster
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="cluster"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Cluster"
-              thousandSeparator="."
-              type="text"
-              value={values.cluster}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  cluster: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Hang Power Clean
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="hangpowerclean"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Hang Power Clean"
-              thousandSeparator="."
-              type="text"
-              value={values.hangpowerclean}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  hangpowerclean: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Hang Power Snatch
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="hangpowersnatch"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Hang Power Snatch"
-              thousandSeparator="."
-              type="text"
-              value={values.hangpowersnatch}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  hangpowersnatch: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Hang Squat Snatch
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="handsquatsnatch"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Hang Squat Snatch"
-              thousandSeparator="."
-              type="text"
-              value={values.handsquatsnatch}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  handsquatsnatch: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Hang Squat Clean
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="hangsquatclean"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Hang Squat Clean"
-              thousandSeparator="."
-              type="text"
-              value={values.hangsquatclean}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  hangsquatclean: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Power Clean
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="powerclean"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Power Clean"
-              thousandSeparator="."
-              type="text"
-              value={values.powerclean}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  powerclean: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Power Snatch
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="powersnatch"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Power Snatch"
-              thousandSeparator="."
-              type="text"
-              value={values.powersnatch}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  powersnatch: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Push Jerk
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="pushjerk"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Push Jerk"
-              thousandSeparator="."
-              type="text"
-              value={values.pushjerk}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  pushjerk: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Snatch
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="snatch"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Snatch"
-              thousandSeparator="."
-              type="text"
-              value={values.snatch}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  snatch: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Snatch Balance
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="snatchbalance"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Snatch Balance"
-              thousandSeparator="."
-              type="text"
-              value={values.snatchbalance}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  snatchbalance: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Split Jerk
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="splitjerk"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Split Jerk"
-              thousandSeparator="."
-              type="text"
-              value={values.splitjerk}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  splitjerk: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Squat Clean
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="squatclean"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Squat Clean"
-              thousandSeparator="."
-              type="text"
-              value={values.squatclean}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  squatclean: e.floatValue,
-                });
-              }}
-            />
-          </label>
-          <label htmlFor="">
-            Squat Snatch
-            <NumberFormat
-              isNumericString
-              customInput={InputDefault}
-              decimalScale={2}
-              decimalSeparator=","
-              name="squatsnatch"
-              margin={false}
-              maxWidth="180px"
-              suffix=" Lbs"
-              placeholder="Squat Snatch"
-              thousandSeparator="."
-              type="text"
-              value={values.squatsnatch}
-              onValueChange={(e) => {
-                setValues({
-                  ...values,
-                  squatsnatch: e.floatValue,
-                });
-              }}
-            />
-          </label>
+          {movements.map((movement) => {
+            const currentValue = values?.[movement.key];
+
+            if (movement.unit === 'time') {
+              return (
+                <label key={movement.key} htmlFor={movement.key}>
+                  {movement.label}
+                  <NumberFormat
+                    customInput={InputDefault}
+                    name={movement.key}
+                    format="##:##.##"
+                    mask="_"
+                    allowEmptyFormatting
+                    margin={false}
+                    maxWidth="180px"
+                    placeholder="mm:ss.cc"
+                    value={centisecondsToInputDigits(currentValue)}
+                    onValueChange={(v) => {
+                      setField(movement.key, parseTimeInput(v.formattedValue));
+                    }}
+                  />
+                </label>
+              );
+            }
+
+            return (
+              <label key={movement.key} htmlFor={movement.key}>
+                {movement.label}
+                <NumberFormat
+                  isNumericString
+                  customInput={InputDefault}
+                  decimalScale={0}
+                  name={movement.key}
+                  margin={false}
+                  maxWidth="180px"
+                  suffix=" Lbs"
+                  placeholder={movement.label}
+                  thousandSeparator="."
+                  type="text"
+                  value={currentValue || ''}
+                  onValueChange={(v) =>
+                    setField(
+                      movement.key,
+                      v.floatValue != null ? Math.round(v.floatValue) : 0,
+                    )
+                  }
+                />
+              </label>
+            );
+          })}
         </main>
         <Button
           primaryColor={primaryColor || '#28262e'}
           secondaryColor={secondaryColor || '#ff9000'}
           onClick={handleBenchmark}
         >
-          alterar
+          Salvar
         </Button>
       </div>
     </Container>

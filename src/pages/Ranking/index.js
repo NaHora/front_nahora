@@ -21,6 +21,11 @@ import api from '../../services/api';
 import Button from '../../components/Button';
 import NumberFormat from 'react-number-format';
 import Avatar from '../../components/Avatar';
+import {
+  getPrMovements,
+  formatPrValue,
+  sortRankByMovement,
+} from '../../config/prMovements';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -72,7 +77,16 @@ const Ranking = () => {
   const [training, setTraining] = useState({});
   const [ranking, setRanking] = useState([]);
   const [rankType, setRankType] = useState('wod');
-  const [benchmarkType, setBenchmarType] = useState('backsquat');
+
+  const prMovements = React.useMemo(
+    () => getPrMovements(thisEnterprise?.area),
+    [thisEnterprise?.area],
+  );
+  const [benchmarkType, setBenchmarType] = useState(
+    prMovements[0]?.key || 'backsquat',
+  );
+  const currentMovement =
+    prMovements.find((m) => m.key === benchmarkType) || prMovements[0];
 
   const getTraining = useCallback(async () => {
     try {
@@ -188,34 +202,18 @@ const Ranking = () => {
               <SelectDefault
                 name="benchmarkType"
                 value={benchmarkType}
-                placeholder="Movimento"
+                placeholder={
+                  currentMovement?.unit === 'time' ? 'Prova' : 'Movimento'
+                }
                 onChange={(e) => {
                   setBenchmarType(e.target.value);
                 }}
               >
-                <option value="backsquat">Back Squat</option>
-                <option value="benchpress">Bench Press</option>
-                <option value="deadlift">Deadlift</option>
-                <option value="frontsquat">Front Squat</option>
-                <option value="overheadsquat">Overhead Squat</option>
-                <option value="pushpress">Push Press</option>
-                <option value="shoulderpress">Shouder Press</option>
-                <option value="thruster">Thruster</option>
-                <option value="clean">Clean</option>
-                <option value="cleanjerk">Clean & Jerk</option>
-                <option value="cluster">Cluster</option>
-                <option value="hangpowerclean">Hang Power Clean</option>
-                <option value="hangpowersnatch">Hang Power Snatch</option>
-                <option value="handsquatsnatch">Hang Squat Snatch</option>
-                <option value="hangsquatclean">Hang Squat Clean</option>
-                <option value="powerclean">Power Clean</option>
-                <option value="powersnatch">Power Snatch</option>
-                <option value="pushjerk">Push Jerk</option>
-                <option value="snatch">Snatch</option>
-                <option value="snatchbalance">Snatch Balance</option>
-                <option value="splitjerk">Split Jerk</option>
-                <option value="squatclean">Squat Clean</option>
-                <option value="squatsnatch">Squat Snatch</option>
+                {prMovements.map((m) => (
+                  <option key={m.key} value={m.key}>
+                    {m.label}
+                  </option>
+                ))}
               </SelectDefault>
             </label>
           )}
@@ -226,26 +224,49 @@ const Ranking = () => {
               <tr>
                 <th>#</th>
                 <th>Nome</th>
-                <th>Score</th>
+                <th>{currentMovement?.unit === 'time' ? 'Tempo' : 'Score'}</th>
                 <th>Gênero</th>
               </tr>
             </thead>
             <tbody>
-              {ranking.length > 0 ? (
-                ranking.map((rank, index) => (
+              {(() => {
+                const sorted = currentMovement
+                  ? sortRankByMovement(
+                      ranking,
+                      currentMovement.key,
+                      currentMovement.dir,
+                    )
+                  : ranking;
+
+                if (sorted.length === 0) {
+                  return (
+                    <tr>
+                      <td colSpan="4">
+                        {currentMovement?.unit === 'time'
+                          ? 'Nenhum tempo registrado.'
+                          : 'Nenhum recorde pessoal registrado.'}
+                      </td>
+                    </tr>
+                  );
+                }
+
+                return sorted.map((rank, index) => (
                   <tr key={rank.id}>
                     <td>{index + 1}</td>
                     <td style={{ display: 'flex', alignItems: 'center' }}>
-                      {
-                        <Avatar
-                          isPrivate={rank.user.isPrivate}
-                          name={rank.user.name}
-                          avatarUrl={rank.user.avatar_url}
-                        />
-                      }
+                      <Avatar
+                        isPrivate={rank.user.isPrivate}
+                        name={rank.user.name}
+                        avatarUrl={rank.user.avatar_url}
+                      />
                       {rank.user.isPrivate ? 'Anônimo' : rank.user.name}
                     </td>
-                    <td>{rank[benchmarkType]}</td>
+                    <td>
+                      {formatPrValue(
+                        rank[benchmarkType],
+                        currentMovement?.unit || 'lbs',
+                      )}
+                    </td>
                     <td>
                       {rank.user.gender === 'm'
                         ? 'Masculino'
@@ -254,12 +275,8 @@ const Ranking = () => {
                         : 'Indefinido'}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4">Nenhum recorde pessoal registrado.</td>
-                </tr>
-              )}
+                ));
+              })()}
             </tbody>
           </table>
         )}

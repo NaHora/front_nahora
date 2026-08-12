@@ -506,3 +506,100 @@ export const AlertCard = styled.div`
     line-height: 1.4;
   }
 `;
+
+export const ModalOverlay = styled.button`
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: rgba(11, 11, 11, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 40;
+  cursor: pointer;
+`;
+
+export const ModalCard = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 32px));
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 30px 60px rgba(7, 17, 31, 0.28);
+  z-index: 41;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  h3 {
+    color: #0b0b0b;
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    color: #62748d;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin-top: -8px;
+  }
+`;
+
+export const ModalActions = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+
+  @media (max-width: 620px) {
+    flex-direction: column-reverse;
+  }
+`;
+
+export const ModalButton = styled.button<{ variant?: 'primary' | 'ghost' }>`
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 120ms ease, border-color 120ms ease;
+  min-height: 42px;
+
+  ${({ variant }) =>
+    variant === 'primary'
+      ? css`
+          background: #ff9000;
+          color: #0b0b0b;
+          border: 0;
+          &:hover:not(:disabled) {
+            filter: brightness(0.96);
+          }
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+        `
+      : css`
+          background: #ffffff;
+          color: #0b0b0b;
+          border: 1px solid rgba(11, 11, 11, 0.15);
+          &:hover {
+            border-color: #ff9000;
+          }
+        `}
+`;
+
+export const ModalDateInput = styled.input`
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(11, 11, 11, 0.15);
+  background: #ffffff;
+  color: #0b0b0b;
+  font-size: 0.95rem;
+  transition: border-color 120ms ease;
+
+  &:focus {
+    outline: none;
+    border-color: #ff9000;
+  }
+`;
