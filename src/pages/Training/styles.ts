@@ -77,6 +77,37 @@ export const EditorWrap = styled.div`
   min-height: 320px;
 `;
 
+export const PlanChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+`;
+
+export const PlanChip = styled.button<{ active?: boolean }>`
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid
+    ${(props) => (props.active ? '#ff9000' : 'rgba(11, 11, 11, 0.1)')};
+  background: ${(props) => (props.active ? '#ff9000' : '#ffffff')};
+  color: ${(props) => (props.active ? '#0b0b0b' : '#62748d')};
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+
+  &:hover {
+    border-color: #ff9000;
+  }
+`;
+
+export const Help = styled.span`
+  color: #62748d;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  line-height: 1.4;
+`;
+
 export const SelectDefault = styled.select`
   height: 48px;
   padding: 0 14px;

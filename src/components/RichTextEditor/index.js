@@ -107,6 +107,8 @@ function RichTextEditor({
   thisEnterprise,
   fullScreen,
   setFullScreen,
+  planIds,
+  onSaved,
 }) {
   const toast = useToast();
   const [values, setValues] = useState(null);
@@ -291,7 +293,15 @@ function RichTextEditor({
         type: type,
       };
 
+      if (Array.isArray(planIds)) {
+        body.plan_ids = planIds;
+      }
+
       const response = await api.post('/training', body);
+
+      if (typeof onSaved === 'function') {
+        onSaved(response?.data);
+      }
 
       toast.addToast({
         type: 'success',
