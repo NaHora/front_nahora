@@ -135,6 +135,33 @@ const Benchmark = () => {
               );
             }
 
+            if (movement.unit === 'distance') {
+              return (
+                <label key={movement.key} htmlFor={movement.key}>
+                  {movement.label}
+                  <NumberFormat
+                    isNumericString
+                    customInput={InputDefault}
+                    decimalScale={0}
+                    name={movement.key}
+                    margin={false}
+                    maxWidth="180px"
+                    suffix=" m"
+                    placeholder="Ex.: 1500"
+                    thousandSeparator="."
+                    type="text"
+                    value={currentValue || ''}
+                    onValueChange={(v) =>
+                      setField(
+                        movement.key,
+                        v.floatValue != null ? Math.round(v.floatValue) : 0,
+                      )
+                    }
+                  />
+                </label>
+              );
+            }
+
             return (
               <label key={movement.key} htmlFor={movement.key}>
                 {movement.label}

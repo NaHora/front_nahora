@@ -1,4 +1,4 @@
-export type PrUnit = 'lbs' | 'time';
+export type PrUnit = 'lbs' | 'time' | 'distance';
 export type PrDirection = 'desc' | 'asc';
 
 export interface PrMovement {
@@ -40,6 +40,7 @@ const crossfitMovements: PrMovement[] = [
  * O valor é armazenado em segundos (decimal); mostramos como mm:ss.cc.
  */
 const swimmingMovements: PrMovement[] = [
+  { key: 'snatch', label: '25m Livre', unit: 'time', dir: 'asc' },
   { key: 'backsquat', label: '50m Livre', unit: 'time', dir: 'asc' },
   { key: 'benchpress', label: '100m Livre', unit: 'time', dir: 'asc' },
   { key: 'deadlift', label: '200m Livre', unit: 'time', dir: 'asc' },
@@ -58,6 +59,9 @@ const swimmingMovements: PrMovement[] = [
   { key: 'powerclean', label: '100m Medley', unit: 'time', dir: 'asc' },
   { key: 'powersnatch', label: '200m Medley', unit: 'time', dir: 'asc' },
   { key: 'pushjerk', label: '400m Medley', unit: 'time', dir: 'asc' },
+  // Prova longa contínua: distância nadada e tempo total. Ranking pela distância (maior = melhor).
+  { key: 'snatchbalance', label: 'Distância contínua', unit: 'distance', dir: 'desc' },
+  { key: 'splitjerk', label: 'Tempo da distância contínua', unit: 'time', dir: 'asc' },
 ];
 
 const normalize = (value?: string) =>
@@ -84,6 +88,7 @@ export function getMovementByKey(
  * Formata valor pra exibição no ranking.
  * - lbs: `123 lbs`
  * - time (centésimos de segundo armazenados como integer): `mm:ss.cc`
+ * - distance (metros inteiros): `1.500 m`
  */
 export function formatPrValue(value: number | string | undefined, unit: PrUnit) {
   const num = Number(value || 0);
@@ -91,6 +96,10 @@ export function formatPrValue(value: number | string | undefined, unit: PrUnit) 
 
   if (unit === 'lbs') {
     return `${Math.round(num).toLocaleString('pt-BR')} lbs`;
+  }
+
+  if (unit === 'distance') {
+    return `${Math.round(num).toLocaleString('pt-BR')} m`;
   }
 
   // time armazenado em centésimos → mm:ss.cc
@@ -102,6 +111,20 @@ export function formatPrValue(value: number | string | undefined, unit: PrUnit) 
   const ss = String(seconds).padStart(2, '0');
   const cc = String(cs).padStart(2, '0');
   return `${mm}:${ss}.${cc}`;
+}
+
+/**
+ * Converte input livre de distância (ex.: "1500", "1.500", "1500m") em metros integer.
+ */
+export function parseDistanceInput(raw: string | undefined): number {
+  if (!raw) return 0;
+  const cleaned = String(raw)
+    .replace(/[^0-9,.]/g, '')
+    .replace(',', '.');
+  if (!cleaned) return 0;
+  const num = Number(cleaned);
+  if (!Number.isFinite(num) || num < 0) return 0;
+  return Math.round(num);
 }
 
 /**
